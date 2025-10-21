@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{ED034B3E-1DEB-44EB-9432-364E43628D24}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TransferPort</RootNamespace>
+    <AssemblyName>TransferPort</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\SteamLibrary\steamapps\common\OxygenNotIncluded\OxygenNotIncluded_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assets\BodyAsset.cs" />
+    <Compile Include="Assets\LineCenterAsset.cs" />
+    <Compile Include="Center\TransferPortCenter.cs" />
+    <Compile Include="Center\TransferPortCenterConfig.cs" />
+    <Compile Include="Common\IMyHighEnergyParticleDirection.cs" />
+    <Compile Include="Common\ISelectableChannel.cs" />
+    <Compile Include="Common\MyResource.cs" />
+    <Compile Include="Common\MyUtils.cs" />
+    <Compile Include="Common\MyUtilsExtend1.cs" />
+    <Compile Include="Common\PortalUtilityNetworkLinkContainer.cs" />
+    <Compile Include="Common\PortChannelKey.cs" />
+    <Compile Include="Common\PortManager.cs" />
+    <Compile Include="Common\PriorityChannelItemInfo.cs" />
+    <Compile Include="Common\PriorityChannelItemList.cs" />
+    <Compile Include="Common\SampleLazy.cs" />
+    <Compile Include="Common\SingleChannelController.cs" />
+    <Compile Include="Common\SingleManager.cs" />
+    <Compile Include="Common\Types.cs" />
+    <Compile Include="Components\LineArrow.cs" />
+    <Compile Include="Components\LineCenterImage.cs" />
+    <Compile Include="Components\MyCopyBuildingSettings.cs" />
+    <Compile Include="Components\PriorityImage.cs" />
+    <Compile Include="Components\ShowOverlaySelf.cs" />
+    <Compile Include="Components\TransferPortChannel.cs" />
+    <Compile Include="Components\UniqueUserNameable.cs" />
+    <Compile Include="Components\UVAnimate.cs" />
+    <Compile Include="Conduit\TransferConduit.cs" />
+    <Compile Include="Conduit\TransferConduitChannel.cs" />
+    <Compile Include="Conduit\TransferConduitConfig.cs" />
+    <Compile Include="Conduit\TransferConduitManager.cs" />
+    <Compile Include="HEP\RadiantParticlesTransferChannel.cs" />
+    <Compile Include="HEP\RadiantParticlesTransferConfig.cs" />
+    <Compile Include="HEP\RadiantParticlesTransferReceiver.cs" />
+    <Compile Include="HEP\RadiantParticlesTransferSender.cs" />
+    <Compile Include="Logic\WirelessLogicPort.cs" />
+    <Compile Include="Logic\WirelessLogicPortChannel.cs" />
+    <Compile Include="Logic\WirelessLogicPortConfig.cs" />
+    <Compile Include="Overlay\MyOverlayModes.cs" />
+    <Compile Include="Overlay\MyOverlayScreen.cs" />
+    <Compile Include="Overlay\PortChannelDiagram.cs" />
+    <Compile Include="Power\WirelessPowerPort.cs" />
+    <Compile Include="Power\WirelessPowerPortChannel.cs" />
+    <Compile Include="Power\WirelessPowerPortConfig.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RsLib\Adapter\KInputTextFieldAdapter.cs" />
+    <Compile Include="RsLib\Adapter\LocTextAdapter.cs" />
+    <Compile Include="RsLib\Adapter\MultiToggleAdapter.cs" />
+    <Compile Include="RsLib\Adapter\RsMultiToggleGroupAdapter.cs" />
+    <Compile Include="RsLib\Adapter\ToolTipAdapter.cs" />
+    <Compile Include="RsLib\Builder\BaseBuilder.cs" />
+    <Compile Include="RsLib\Builder\BuilderFn.cs" />
+    <Compile Include="RsLib\Builder\BuilderManager.cs" />
+    <Compile Include="RsLib\Builder\GameObjectBuilder.cs" />
+    <Compile Include="RsLib\Builder\IBuilder.cs" />
+    <Compile Include="RsLib\Builder\OtherBuilderInfo.cs" />
+    <Compile Include="RsLib\Builder\RsGameObjectBuilder.cs" />
+    <Compile Include="RsLib\Collections\ContrastSet.cs" />
+    <Compile Include="RsLib\Collections\LineList.cs" />
+    <Compile Include="RsLib\Collections\RsSortedList.cs" />
+    <Compile Include="RsLib\Components\RsElementReference.cs" />
+    <Compile Include="RsLib\Components\RsHierarchyReferences.cs" />
+    <Compile Include="RsLib\Components\RsMultiToggleGroupAdapter.cs" />
+    <Compile Include="RsLib\Debug\RsGameDebug.cs" />
+    <Compile Include="RsLib\Debug\RsGameObjectDebug.cs" />
+    <Compile Include="RsLib\Debug\RsObjectDebug.cs" />
+    <Compile Include="RsLib\Pool\RsCollectionPool.cs" />
+    <Compile Include="RsLib\Pool\RsHashGameObjectPool.cs" />
+    <Compile Include="RsLib\Pool\RsHashUIPool.cs" />
+    <Compile Include="RsLib\Pool\RsObjectPool.cs" />
+    <Compile Include="RsLib\RsAssetBundle.cs" />
+    <Compile Include="RsLib\RsAssets.cs" />
+    <Compile Include="RsLib\RsBuilding.cs" />
+    <Compile Include="RsLib\RsButtonMenu.cs" />
+    <Compile Include="RsLib\RsField.cs" />
+    <Compile Include="RsLib\RsGameType.cs" />
+    <Compile Include="RsLib\RsHarmonyExtension.cs" />
+    <Compile Include="RsLib\RsLocalization.cs" />
+    <Compile Include="RsLib\RsMethod.cs" />
+    <Compile Include="RsLib\RsModule.cs" />
+    <Compile Include="RsLib\RsOverlay.cs" />
+    <Compile Include="RsLib\RsReflection.cs" />
+    <Compile Include="RsLib\RsResources.cs" />
+    <Compile Include="RsLib\RsTypes.cs" />
+    <Compile Include="RsLib\SideScreen\RsSideScreen.cs" />
+    <Compile Include="RsLib\SideScreen\RsSideScreenContent.cs" />
+    <Compile Include="RsLib\Tools\RsInterval.cs" />
+    <Compile Include="RsLib\Tools\RsMultiToggleGroup.cs" />
+    <Compile Include="RsLib\Tools\RsSpriteTool.cs" />
+    <Compile Include="RsLib\Tools\RsUtil.cs" />
+    <Compile Include="RsLib\UI\RsTuning.cs" />
+    <Compile Include="RsLib\UI\RsUIBuilder.cs" />
+    <Compile Include="RsLib\UI\RsUITool.cs" />
+    <Compile Include="SideScreen\CandidateNameScreen.cs" />
+    <Compile Include="SideScreen\MyHighEnergyParticleDirectionSideScreen.cs" />
+    <Compile Include="SideScreen\PortChannelSideScreen.cs" />
+    <Compile Include="SideScreen\PriorityBar.cs" />
+    <Compile Include="SideScreen\WorldDiscoveredSideScreen.cs" />
+    <Compile Include="Strings.cs" />
+    <Compile Include="Tags.cs" />
+    <Compile Include="TransferPortMod.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
