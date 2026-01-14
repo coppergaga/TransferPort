@@ -83,8 +83,6 @@ namespace RsTransferPort
 
         public override void OnLoad(Harmony harmony)
         {
-            base.OnLoad(harmony);
-            
             BeforeRsInit();
             MyResource.InitAllTask();
             
@@ -118,12 +116,12 @@ namespace RsTransferPort
             RsOverlay.Initialize(mod, harmony)
                 .AddOverlayMode((screen) => new MyOverlayModes.PortChannel(screen.powerLabelParent))
                 .AddOverlayMenuToggleInfo(() => new RsOverlay.RsOverlayToggleInfo(
-                    (string) STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON,
+                    STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON.ToString(),
                     MyOverlayModes.PortChannel.Icon,
                     MyOverlayModes.PortChannel.ID, "",
                     Action.NumActions,
-                    (string) STRINGS.UI.TOOLTIPS.PORTCHANNELMODE_OVERLAY_STRING,
-                    (string) STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON
+                    STRINGS.UI.TOOLTIPS.PORTCHANNELMODE_OVERLAY_STRING.ToString(),
+                    STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON.ToString()
                 ))
                 .AddOverlayLegendInfo(() =>
                     new OverlayLegend.OverlayInfo()
@@ -163,13 +161,13 @@ namespace RsTransferPort
                 .AddBuilding(WirelessLogicReceiverConfig.ID)
                 .PlanAndTech(RsTypes.PlanType.Power, "rs_transfer_port", "PrettyGoodConductors")
                 .AddBuilding(WirelessPowerPortConfig.ID)
-                
                 .PlanAndTech(RsTypes.PlanType.HEP, "rs_transfer_port", "AdvancedNuclearResearch", true)
                 .AddBuilding(RadiantParticlesTransferSenderConfig.ID)
                 .AddBuilding(RadiantParticlesTransferReceiverConfig.ID)
-                
                 .OnlyPlan(RsTypes.PlanType.Base, "rs_transfer_port", true)
                 .AddBuilding(TransferPortCenterConfig.ID);
+
+            base.OnLoad(harmony);
         }
     }
 }

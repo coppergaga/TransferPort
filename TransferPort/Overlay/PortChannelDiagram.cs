@@ -6,20 +6,17 @@ using RsLib.Builder;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace RsTransferPort
-{
-    public class PortChannelDiagram : MonoBehaviour
-    {
+namespace RsTransferPort {
+    public class PortChannelDiagram : MonoBehaviour {
         public static void InitPrefab() {
-            RsResources.AddLoadPrefabTask("ui/port_overlay_diagram", (parent) =>
-            {
+            RsResources.AddLoadPrefabTask("ui/port_overlay_diagram", (parent) => {
                 GameObject root = RsUIBuilder.UIGameObject(nameof(PortChannelDiagram), parent, false);
                 root.name = nameof(PortChannelDiagram);
                 VerticalLayoutGroup layoutGroup = root.AddComponent<VerticalLayoutGroup>();
 
                 layoutGroup.childControlHeight = true;
                 layoutGroup.childControlWidth = true;
-                
+
                 RectTransform rectTransform = root.rectTransform();
                 rectTransform.anchorMin = new Vector2(0, 0.5f);
                 rectTransform.anchorMax = new Vector2(1, 0.5f);
@@ -37,13 +34,13 @@ namespace RsTransferPort
                 };
 
                 RsUIBuilder.BlockLine(root, 16);
-                
+
                 //禁止连线动画
                 MultiToggle disableLineAnim =
                     RsUIBuilder.ToggleEntry(STRINGS.UI.TOOLS.FILTERLAYERS.RS_DISABLE_LINE_ANIM,
                             ToolParameterMenu.ToggleState.Off, root)
                         .GetComponentInChildren<MultiToggle>();
-                
+
                 MultiToggle showPriorityInfo =
                     RsUIBuilder.ToggleEntry(STRINGS.UI.TOOLS.FILTERLAYERS.RS_SHOW_PRIORITY,
                             ToolParameterMenu.ToggleState.Off, root)
@@ -55,18 +52,17 @@ namespace RsTransferPort
 
                 moreDetailLayoutGroup.childControlHeight = true;
                 moreDetailLayoutGroup.childControlWidth = true;
-                moreDetailLayoutGroup.padding = new RectOffset(0,0,16,0);
-                
-             
+                moreDetailLayoutGroup.padding = new RectOffset(0, 0, 16, 0);
+
+
                 MultiToggle showOnlyNameToggle =
                     RsUIBuilder.ToggleEntry(STRINGS.UI.TOOLS.FILTERLAYERS.RS_ONLY_NULL_CHANNEL,
                             ToolParameterMenu.ToggleState.Off, moreDetail)
                         .GetComponentInChildren<MultiToggle>();
-                
+
                 // RsUIBuilder.BlockLine(moreDetail, 16);
 
-                if (DlcManager.IsExpansion1Active())
-                {
+                if (DlcManager.IsExpansion1Active()) {
                     MultiToggle showOnlyGlobalToggle =
                         RsUIBuilder.ToggleEntry(STRINGS.UI.TOOLS.FILTERLAYERS.RS_ONLY_GLOBAL_CHANNEL,
                                 ToolParameterMenu.ToggleState.Off, moreDetail)
@@ -74,7 +70,7 @@ namespace RsTransferPort
                     diagram.showOnlyGlobalToggle = showOnlyGlobalToggle;
 
                 }
-                
+
                 RsUIBuilder.BlockLine(moreDetail, 16);
 
                 RsMultiToggleGroupCom typeToggleGroup = root.AddComponent<RsMultiToggleGroupCom>();
@@ -88,8 +84,7 @@ namespace RsTransferPort
                     RsUIBuilder.ToggleEntryToMultiToggle(STRINGS.UI.TOOLS.FILTERLAYERS.RS_POWER_PORT, 0, moreDetail),
                     RsUIBuilder.ToggleEntryToMultiToggle(STRINGS.UI.TOOLS.FILTERLAYERS.RS_LOGIC_PORT, 0, moreDetail),
                 });
-                if (DlcManager.IsExpansion1Active())
-                {
+                if (DlcManager.IsExpansion1Active()) {
                     multiToggles.Add(RsUIBuilder.ToggleEntryToMultiToggle(STRINGS.UI.TOOLS.FILTERLAYERS.RS_HEP_PORT, 0, moreDetail));
                 }
                 typeToggleGroup.toggles = multiToggles.ToArray();
@@ -101,42 +96,39 @@ namespace RsTransferPort
                 diagram.moreDetailParent = moreDetail;
                 diagram.disableLineAnimToggle = disableLineAnim;
                 root.SetActive(true);
-                
+
                 return root;
             });
         }
         public static GameObject Prefab => RsResources.Load<GameObject>("ui/port_overlay_diagram");
 
-        
+
         // [SerializeField] private MultiToggle centralConnectionToggle;
         // [SerializeField] private MultiToggle nearbyConnectionToggle;
         // [SerializeField] private MultiToggle noneConnectionToggle;
 
         [SerializeField] private RsMultiToggleGroupCom lineToggleGroup;
-        
+
         [SerializeField] private RsMultiToggleGroupCom typeToggleGroup;
 
         [SerializeField] private MultiToggle showOnlyNameToggle;
-        
+
         [SerializeField] private MultiToggle showOnlyGlobalToggle;
-        
+
         [SerializeField] private MultiToggle showPriorityInfoToggle;
         [SerializeField] private MultiToggle disableLineAnimToggle;
 
         [SerializeField] private GameObject moreDetailParent;
-        
-        public void Start()
-        {
+
+        public void Start() {
             lineToggleGroup.onSelected += ToggleWiredPreviewMode;
             typeToggleGroup.onSelected += ToggleBuildingType;
 
-            if (showOnlyNameToggle != null)
-            {
+            if (showOnlyNameToggle != null) {
                 showOnlyNameToggle.onClick += ToggleShowOnlyName;
             }
 
-            if (showOnlyGlobalToggle != null)
-            {
+            if (showOnlyGlobalToggle != null) {
                 showOnlyGlobalToggle.onClick += ToggleGlobalChannel;
             }
 
@@ -144,38 +136,31 @@ namespace RsTransferPort
             disableLineAnimToggle.onClick += ToggleDisableLineAnim;
         }
 
-        public void OnEnable()
-        {
+        public void OnEnable() {
             UpdateState();
         }
 
-        private void Update()
-        {
-            if (OverlayScreen.Instance.mode == MyOverlayModes.PortChannel.ID)
-            {
-                if (moreDetailParent.activeSelf == MyOverlayModes.PortChannel.IsActiveChannelStatus())
-                {
+        private void Update() {
+            if (OverlayScreen.Instance.mode == MyOverlayModes.PortChannel.ID) {
+                if (moreDetailParent.activeSelf == MyOverlayModes.PortChannel.IsActiveChannelStatus()) {
                     UpdateState();
                 }
             }
 
         }
 
-        private void UpdateState()
-        {
-            if (OverlayScreen.Instance.mode == MyOverlayModes.PortChannel.ID)
-            {
-                lineToggleGroup.Select((int)MyOverlayModes.PortChannel.wiredPreviewMode);
+        private void UpdateState() {
+            if (OverlayScreen.Instance.mode == MyOverlayModes.PortChannel.ID) {
+                lineToggleGroup.Select((int)MyOverlayModes.PortChannel.OpWiredPreviewMode);
 
                 bool activeChannelStatus = MyOverlayModes.PortChannel.IsActiveChannelStatus();
                 moreDetailParent.SetActiveNR(!activeChannelStatus);
-                
-                showPriorityInfoToggle.ChangeState(MyOverlayModes.PortChannel.showPriorityInfo? 1 : 0);
-                disableLineAnimToggle.ChangeState(MyOverlayModes.PortChannel.disableLineAnim? 1 : 0);
-                if (!activeChannelStatus)
-                {
-                    typeToggleGroup.Select((int)MyOverlayModes.PortChannel.buildingType);
-                    showOnlyNameToggle.ChangeState(MyOverlayModes.PortChannel.showOnlyNullChannel ? 1 : 0);
+
+                showPriorityInfoToggle.ChangeState(MyOverlayModes.PortChannel.OpShowPriorityInfo ? 1 : 0);
+                disableLineAnimToggle.ChangeState(MyOverlayModes.PortChannel.OpDisableLineAnim ? 1 : 0);
+                if (!activeChannelStatus) {
+                    typeToggleGroup.Select((int)MyOverlayModes.PortChannel.OpBuildingType);
+                    showOnlyNameToggle.ChangeState(MyOverlayModes.PortChannel.OpShowOnlyNullChannel ? 1 : 0);
                 }
             }
         }
@@ -183,68 +168,54 @@ namespace RsTransferPort
         /// <summary>
         /// 切换连线预览方式
         /// </summary>
-        private void ToggleWiredPreviewMode(int i)
-        {
-            MyOverlayModes.PortChannel.wiredPreviewMode = (MyOverlayModes.PortChannel.WiredPreviewMode)i;
-        }
-        
-        private void ToggleBuildingType(int i)
-        {
-            MyOverlayModes.PortChannel.buildingType = (BuildingType)i;
+        private void ToggleWiredPreviewMode(int i) {
+            MyOverlayModes.PortChannel.OpWiredPreviewMode = (MyOverlayModes.PortChannel.WiredPreviewMode)i;
         }
 
-        private void ToggleShowOnlyName()
-        {
-            if (MyOverlayModes.PortChannel.showOnlyNullChannel)
-            {
-                MyOverlayModes.PortChannel.showOnlyNullChannel = false;
+        private void ToggleBuildingType(int i) {
+            MyOverlayModes.PortChannel.OpBuildingType = (BuildingType)i;
+        }
+
+        private void ToggleShowOnlyName() {
+            if (MyOverlayModes.PortChannel.OpShowOnlyNullChannel) {
+                MyOverlayModes.PortChannel.OpShowOnlyNullChannel = false;
                 showOnlyNameToggle.ChangeState(0);
             }
-            else
-            {
-                MyOverlayModes.PortChannel.showOnlyNullChannel = true;
+            else {
+                MyOverlayModes.PortChannel.OpShowOnlyNullChannel = true;
                 showOnlyNameToggle.ChangeState(1);
             }
         }
-        
-        private void ToggleGlobalChannel()
-        {
-            if (MyOverlayModes.PortChannel.showOnlyGlobalChannel)
-            {
-                MyOverlayModes.PortChannel.showOnlyGlobalChannel = false;
+
+        private void ToggleGlobalChannel() {
+            if (MyOverlayModes.PortChannel.OpShowOnlyGlobalChannel) {
+                MyOverlayModes.PortChannel.OpShowOnlyGlobalChannel = false;
                 showOnlyGlobalToggle.ChangeState(0);
             }
-            else
-            {
-                MyOverlayModes.PortChannel.showOnlyGlobalChannel = true;
+            else {
+                MyOverlayModes.PortChannel.OpShowOnlyGlobalChannel = true;
                 showOnlyGlobalToggle.ChangeState(1);
             }
         }
-        
-        private void ToggleShowPriorityInfo()
-        {
-            if (MyOverlayModes.PortChannel.showPriorityInfo)
-            {
-                MyOverlayModes.PortChannel.showPriorityInfo = false;
+
+        private void ToggleShowPriorityInfo() {
+            if (MyOverlayModes.PortChannel.OpShowPriorityInfo) {
+                MyOverlayModes.PortChannel.OpShowPriorityInfo = false;
                 showPriorityInfoToggle.ChangeState(0);
             }
-            else
-            {
-                MyOverlayModes.PortChannel.showPriorityInfo = true;
+            else {
+                MyOverlayModes.PortChannel.OpShowPriorityInfo = true;
                 showPriorityInfoToggle.ChangeState(1);
             }
         }
-        
-        private void ToggleDisableLineAnim()
-        {
-            if (MyOverlayModes.PortChannel.disableLineAnim)
-            {
-                MyOverlayModes.PortChannel.disableLineAnim = false;
+
+        private void ToggleDisableLineAnim() {
+            if (MyOverlayModes.PortChannel.OpDisableLineAnim) {
+                MyOverlayModes.PortChannel.OpDisableLineAnim = false;
                 disableLineAnimToggle.ChangeState(0);
             }
-            else
-            {
-                MyOverlayModes.PortChannel.disableLineAnim = true;
+            else {
+                MyOverlayModes.PortChannel.OpDisableLineAnim = true;
                 disableLineAnimToggle.ChangeState(1);
             }
         }

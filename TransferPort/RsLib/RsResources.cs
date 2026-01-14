@@ -4,27 +4,22 @@ using UnityEngine;
 using UnityEngine.U2D;
 using Object = UnityEngine.Object;
 
-namespace RsLib
-{
-    
-    public class RsResources
-    {
+namespace RsLib {
+
+    public class RsResources {
         public delegate Object CreateDelegate();
 
         public delegate GameObject CreatePrefabDelegate(GameObject prefabParent);
-        
-        private static GameObject m_prefabParent;
-        private static Dictionary<ResourcesKey, Object> container = new Dictionary<ResourcesKey, Object>();
-        private static Dictionary<string, MulticastDelegate> loadTask = new Dictionary<string, MulticastDelegate>();
-        private static List<AssetBundle> assetBundles = new List<AssetBundle>();
-        private static List<SpriteAtlas> spriteAtlases = new List<SpriteAtlas>();
 
-        public static GameObject prefabParent
-        {
-            get
-            {
-                if (m_prefabParent == null)
-                {
+        private static GameObject m_prefabParent;
+        private static readonly Dictionary<ResourcesKey, Object> container = new Dictionary<ResourcesKey, Object>();
+        private static readonly Dictionary<string, MulticastDelegate> loadTask = new Dictionary<string, MulticastDelegate>();
+        private static readonly List<AssetBundle> assetBundles = new List<AssetBundle>();
+        private static readonly List<SpriteAtlas> spriteAtlases = new List<SpriteAtlas>();
+
+        public static GameObject PrefabParent {
+            get {
+                if (m_prefabParent == null) {
                     m_prefabParent = new GameObject();
                     m_prefabParent.SetActive(false);
                     m_prefabParent.name = "RsPrefabParent";
@@ -35,36 +30,29 @@ namespace RsLib
             }
         }
 
-        public static GameObject Create()
-        {
-            GameObject parent = prefabParent;
+        public static GameObject Create() {
+            GameObject parent = PrefabParent;
             GameObject gameObject = new GameObject();
             gameObject.transform.SetParent(parent.transform);
             return gameObject;
         }
-        
-        public static Object LoadByAssetBundle(string path, Type tType)
-        {
+
+        public static Object LoadByAssetBundle(string path, Type tType) {
             Object obj = null;
-            foreach (AssetBundle assetBundle in assetBundles)
-            {
+            foreach (AssetBundle assetBundle in assetBundles) {
                 obj = assetBundle.LoadAsset(path, tType);
-                if (obj != null)
-                {
+                if (obj != null) {
                     break;
                 }
             }
             return obj;
         }
-        
-        public static Object LoadByAssetBundle(string path)
-        {
+
+        public static Object LoadByAssetBundle(string path) {
             Object obj = null;
-            foreach (AssetBundle assetBundle in assetBundles)
-            {
+            foreach (AssetBundle assetBundle in assetBundles) {
                 obj = assetBundle.LoadAsset(path);
-                if (obj != null)
-                {
+                if (obj != null) {
                     break;
                 }
             }
@@ -73,101 +61,79 @@ namespace RsLib
         }
 
         public static T Load<T>(string path)
-        where T : Object
-        {
+        where T : Object {
             Type tType = typeof(T);
             ResourcesKey resourcesKey = new ResourcesKey(path, tType);
 
-            Object obj ;
-            if (container.TryGetValue(resourcesKey, out obj))
-            {
-                if (!RsUtil.IsNullOrDestroyed(obj))
-                {
-                    return (T) obj;
+            if (container.TryGetValue(resourcesKey, out Object obj)) {
+                if (!RsUtil.IsNullOrDestroyed(obj)) {
+                    return (T)obj;
                 }
-                obj = null;
             }
-            
+
             obj = LoadByTask(path, tType);
-            
-            if (obj == null)
-            {
+
+            if (obj == null) {
                 obj = LoadByAssetBundle(path, tType);
             }
-            
-            if (obj == null)
-            {
+
+            if (obj == null) {
                 Debug.LogErrorFormat("RsResources no find, path:{0}, type:{1}", path, tType.FullName);
             }
 
             container[resourcesKey] = obj;
-            return (T) obj;
+            return (T)obj;
         }
 
-        private static Object LoadByTask(string path, Type tType)
-        {
+        private static Object LoadByTask(string path, Type tType) {
             Object obj = null;
             //从任务中获取
-            if (loadTask.TryGetValue(path, out var create))
-            {
-                if (create is CreatePrefabDelegate createPrefab)
-                {
-                    obj = createPrefab.Invoke(prefabParent);
+            if (loadTask.TryGetValue(path, out var create)) {
+                if (create is CreatePrefabDelegate createPrefab) {
+                    obj = createPrefab.Invoke(PrefabParent);
                 }
-                else if (create is CreateDelegate createPrefab2)
-                {
+                else if (create is CreateDelegate createPrefab2) {
                     obj = createPrefab2.Invoke();
                 }
 
                 //转为GameObject
-                if (typeof(Component).IsAssignableFrom(tType) && obj is GameObject go)
-                {
+                if (typeof(Component).IsAssignableFrom(tType) && obj is GameObject go) {
                     obj = go.GetComponent(tType);
                 }
-            
+
             }
 
             return obj;
         }
 
-        public static void AddLoadTask(string path, CreateDelegate create)
-        {
-            loadTask[path] = create;
-        }
-        
-        public static void AddLoadPrefabTask(string path, CreatePrefabDelegate create)
-        {
+        public static void AddLoadTask(string path, CreateDelegate create) {
             loadTask[path] = create;
         }
 
-        public static void AddAssetBundle(AssetBundle assetBundle, bool autoLoadSpriteAtlas = true)
-        {
-            if (!assetBundles.Contains(assetBundle))
-            {
+        public static void AddLoadPrefabTask(string path, CreatePrefabDelegate create) {
+            loadTask[path] = create;
+        }
+
+        public static void AddAssetBundle(AssetBundle assetBundle, bool autoLoadSpriteAtlas = true) {
+            if (!assetBundles.Contains(assetBundle)) {
                 assetBundles.Add(assetBundle);
-                if (autoLoadSpriteAtlas)
-                {
+                if (autoLoadSpriteAtlas) {
                     SpriteAtlas[] atlases = assetBundle.LoadAllAssets<SpriteAtlas>();
-                    if (atlases != null)
-                    { 
+                    if (atlases != null) {
                         spriteAtlases.AddRange(atlases);
                     }
                 }
             }
         }
-        
-        public static void AddSpriteAtlas(SpriteAtlas spriteAtlas)
-        {
+
+        public static void AddSpriteAtlas(SpriteAtlas spriteAtlas) {
             spriteAtlases.Add(spriteAtlas);
         }
 
-        private static Sprite LoadSpriteBySpriteAtlas(string name)
-        {
-            foreach (SpriteAtlas atlases in spriteAtlases)
-            {
+        private static Sprite LoadSpriteBySpriteAtlas(string name) {
+            foreach (SpriteAtlas atlases in spriteAtlases) {
                 Sprite sprite = atlases.GetSprite(name);
-                if (sprite != null)
-                {
+                if (sprite != null) {
                     sprite.name = name;
                     return sprite;
                 }
@@ -176,32 +142,27 @@ namespace RsLib
         }
 
 
-        struct ResourcesKey : IEquatable<ResourcesKey>
-        {
+        struct ResourcesKey : IEquatable<ResourcesKey> {
             private int hash;
             private string name;
             private Type type;
 
-            public ResourcesKey(string name, Type type) : this()
-            {
+            public ResourcesKey(string name, Type type) : this() {
                 this.name = name;
                 this.type = type;
                 this.hash = ((name != null ? name.GetHashCode() : 0) * 397) ^ (type != null ? type.GetHashCode() : 0);
             }
 
 
-            public bool Equals(ResourcesKey other)
-            {
+            public bool Equals(ResourcesKey other) {
                 return name == other.name && Equals(type, other.type);
             }
 
-            public override bool Equals(object obj)
-            {
+            public override bool Equals(object obj) {
                 return obj is ResourcesKey other && Equals(other);
             }
 
-            public override int GetHashCode()
-            {
+            public override int GetHashCode() {
                 return hash;
             }
         }

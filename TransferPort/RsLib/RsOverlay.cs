@@ -38,7 +38,6 @@ namespace RsLib
                 {
                     itemOverlaysMap.Add(mode.ViewMode(), StatusItem.StatusItemOverlays.None);
                 }
-                
                 RegisterModesMethodInfo.Invoke(__instance, new object[]
                 {
                     mode
@@ -189,10 +188,5 @@ namespace RsLib
             public TextStyleSetting TooltipDescription;
             public LogicModeUI logicModeUIPrefab;
         }
-
-        // public class OverlayModeInfo
-        // {
-        //     
-        // }
     }
 }

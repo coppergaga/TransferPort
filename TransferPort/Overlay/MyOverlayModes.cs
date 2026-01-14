@@ -1,29 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using RsLib;
+﻿using RsLib;
 using RsLib.Adapter;
 using RsLib.Collections;
 using RsLib.Components;
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace RsTransferPort
-{
-    public class MyOverlayModes
-    {
-        public class PortChannel : OverlayModes.Mode
-        {
-            public static class FILTERLAYERS
-            {
-                public const string Gas = "RS_GAS_PORT";
-                public const string Liquid = "RS_LIQUID_PORT";
-                public const string Solid = "RS_SOLID_PORT";
-                public const string Power = "RS_POWER_PORT";
-                public const string Logic = "RS_LOGIC_PORT";
-                public const string HEP = "RS_HEP_PORT";
-            }
-
-            public enum WiredPreviewMode
-            {
+namespace RsTransferPort {
+    public class MyOverlayModes {
+        public class PortChannel : OverlayModes.Mode {
+            public enum WiredPreviewMode {
                 None,
                 Center,
                 Nearby
@@ -46,63 +31,51 @@ namespace RsTransferPort
             private static WiredPreviewMode m_wiredPreviewMode = WiredPreviewMode.Center;
             private static PortChannelKey showOneChannelKey;
 
-            public static bool showOnlyNullChannel
-            {
+            public static bool OpShowOnlyNullChannel {
                 get => m_showOnlyNullChannel;
-                set
-                {
+                set {
                     needRefresh = true;
                     m_showOnlyNullChannel = value;
                 }
             }
-            public static bool showOnlyGlobalChannel { 
+            public static bool OpShowOnlyGlobalChannel {
                 get => m_showOnlyGlobalChannel;
-                set
-                {
+                set {
                     needRefresh = true;
                     m_showOnlyGlobalChannel = value;
                 }
             }
-            public static BuildingType buildingType
-            {
+            public static BuildingType OpBuildingType {
                 get => m_buildingType;
-                set
-                {
+                set {
                     needRefresh = true;
                     m_buildingType = value;
                 }
             }
-            public static WiredPreviewMode wiredPreviewMode
-            {
+            public static WiredPreviewMode OpWiredPreviewMode {
                 get => m_wiredPreviewMode;
-                set
-                {
+                set {
                     needRefresh = true;
                     m_wiredPreviewMode = value;
                 }
             }
-            
-            public static bool showPriorityInfo
-            {
+
+            public static bool OpShowPriorityInfo {
                 get => m_showPriorityInfo;
-                set
-                {
+                set {
                     needRefresh = true;
                     m_showPriorityInfo = value;
                 }
             }
-            public static bool disableLineAnim
-            {
+            public static bool OpDisableLineAnim {
                 get => m_disableLineAnim;
-                set
-                {
+                set {
                     needRefresh = true;
                     m_disableLineAnim = value;
                 }
             }
 
-            private static readonly Dictionary<BuildingType, Color> BuildingTypeColors = new Dictionary<BuildingType, Color>()
-            {
+            private static readonly Dictionary<BuildingType, Color> BuildingTypeColorMap = new Dictionary<BuildingType, Color> {
                 [BuildingType.None] = Color.white,
                 [BuildingType.Gas] = new Color(0.44f, 0.96f, 0.16f),
                 [BuildingType.Liquid] = new Color(0.16f, 0.65f, 0.97f),
@@ -112,8 +85,7 @@ namespace RsTransferPort
                 [BuildingType.HEP] = new Color(0.34f, 0.56f, 0.06f),
             };
 
-            private static readonly Color[] Colors = new Color[]
-            {
+            private static readonly Color[] ColorsList = new Color[] {
                 new Color(0.49f, 0.28f, 1f),//530CC8
                 new Color(1f, 0f, 0.02f),//FF0006
                 new Color(0.06f, 0.74f, 0.05f),//10BC0E
@@ -127,8 +99,8 @@ namespace RsTransferPort
                 new Color(0.03f, 0.32f, 1f),//063FCA
                 new Color(1f, 0.77f, 0.19f),//FED403
             };
-            
-            private static readonly Color[] PriorityColors = new Color[]
+
+            private static readonly Color[] PriorityColorsList = new Color[]
             {
                 new Color(0.41f, 0.97f, 1f),//#69F7FF
                 new Color(0.17f, 0.79f, 0.99f),//#2BC9FC
@@ -141,25 +113,21 @@ namespace RsTransferPort
                 new Color(1f, 0.24f, 0.19f),//#FE3E30
                 new Color(0.98f, 0.01f, 0f),//#FB0200
             };
-            
-            private GameObject canvasParent;
-            private GameObject channelNameParent;
-            private GameObject arrowParent;
-            private GameObject priorityParent;
-            private GameObject lineCenterParent;
 
-            private LineList<GameObject> filterChannels = new LineList<GameObject>();
-
-            private RsHashUIPool<RsHierarchyReferences> namePool;
-
-            private RsHashUIPool<LineArrow> lineArrowPool;
-            private UIPool<LineCenterImage> lineCenterImagePool;
-            private RsHashUIPool<PriorityImage> priorityPool;
-
-            private int objectTargetLayer;
-            private int cameraLayerMask;
-            private int selectionMask;
-            private ContrastSet<GameObject> layoutTargets;
+            private readonly GameObject canvasParent;
+            private readonly GameObject channelNameParent;
+            private readonly GameObject arrowParent;
+            private readonly GameObject priorityParent;
+            private readonly GameObject lineCenterParent;
+            private readonly LineList<GameObject> filterChannels = new LineList<GameObject>();
+            private readonly RsHashUIPool<RsHierarchyReferences> namePool;
+            private readonly RsHashUIPool<LineArrow> lineArrowPool;
+            private readonly UIPool<LineCenterImage> lineCenterImagePool;
+            private readonly RsHashUIPool<PriorityImage> priorityPool;
+            private readonly int objectTargetLayer;
+            private readonly int cameraLayerMask;
+            private readonly int selectionMask;
+            private readonly ContrastSet<GameObject> layoutTargets;
             private int colorIndex = 0;
             /// <summary>
             /// 是否使用索引颜色
@@ -168,16 +136,15 @@ namespace RsTransferPort
 
             private int activeWorldId = -1;
 
-            public PortChannel(Canvas ___powerLabelParent)
-            {
+            public PortChannel(Canvas parent) {
                 LineArrow arrowPrefab = TransferPortMod.BodyAsset.lineArrow;
-                
+
                 namePool = new RsHashUIPool<RsHierarchyReferences>(TransferPortMod.BodyAsset.portChannelName);
                 lineArrowPool = new RsHashUIPool<LineArrow>(arrowPrefab);
                 priorityPool = new RsHashUIPool<PriorityImage>(RsResources.Load<PriorityImage>("prefabs/priority_image"));
                 lineCenterImagePool = new UIPool<LineCenterImage>(TransferPortMod.BodyAsset.lineCenterImage);
-                    
-                canvasParent = ___powerLabelParent.gameObject;
+
+                canvasParent = parent.gameObject;
                 arrowParent = CreateLayer("arrowParent", canvasParent);
                 channelNameParent = CreateLayer("channelNameParent", canvasParent);
                 priorityParent = CreateLayer("priorityParent", canvasParent);
@@ -186,13 +153,11 @@ namespace RsTransferPort
                 objectTargetLayer = LayerMask.NameToLayer("MaskedOverlayBG");
                 cameraLayerMask = LayerMask.GetMask("MaskedOverlay", "MaskedOverlayBG");
                 selectionMask = cameraLayerMask;
-                layoutTargets = new ContrastSet<GameObject>((root) =>
-                {
+                layoutTargets = new ContrastSet<GameObject>((root) => {
                     Vector3 position = root.transform.GetPosition();
                     float num = position.z;
                     KPrefabID component = root.GetComponent<KPrefabID>();
-                    if (component != null)
-                    {
+                    if (component != null) {
                         if (component.HasTag(GameTags.OverlayInFrontOfConduits))
                             num = Grid.GetLayerZ(ViewMode() == OverlayModes.LiquidConduits.ID
                                 ? Grid.SceneLayer.LiquidConduits
@@ -206,12 +171,8 @@ namespace RsTransferPort
                     position.z = num;
                     root.transform.SetPosition(position);
                     KBatchedAnimController animController = root.GetComponent<KBatchedAnimController>();
-                    if (animController != null)
-                    {
-                        animController.SetLayer(objectTargetLayer);
-                    }
-                }, (root) =>
-                {
+                    animController?.SetLayer(objectTargetLayer);
+                }, (root) => {
                     if (root == null)
                         return;
                     float defaultDepth = GetDefaultDepth(root.GetComponent<KMonoBehaviour>());
@@ -220,30 +181,26 @@ namespace RsTransferPort
                     root.transform.SetPosition(position);
 
                     KBatchedAnimController animController = root.GetComponent<KBatchedAnimController>();
-                    if (animController)
-                    {
+                    if (animController) {
                         ResetDisplayValues(animController);
                     }
                 });
             }
 
-            public override HashedString ViewMode()
-            {
+            public override HashedString ViewMode() {
                 return ID;
             }
 
-            public override string GetSoundName()
-            {
+            public override string GetSoundName() {
                 return "Disease";
             }
 
-            public override void Enable()
-            {
+            public override void Enable() {
                 //关闭功能
                 Camera.main.cullingMask |= cameraLayerMask;
                 SelectTool.Instance.SetLayerMask(selectionMask);
                 GridCompositor.Instance.ToggleMinor(false);
-                
+
                 //添加事件监听
                 PortManager.Instance.OnChannelChange += OnChannelChange;
                 needRefresh = true;
@@ -251,8 +208,7 @@ namespace RsTransferPort
                 base.Enable();
             }
 
-            public override void Disable()
-            {
+            public override void Disable() {
                 namePool.ClearAll();
                 lineArrowPool.ClearAll();
                 priorityPool.ClearAll();
@@ -262,48 +218,41 @@ namespace RsTransferPort
 
                 ClearActiveChannel();
                 //恢复摄像机
-                Camera.main.cullingMask &= ~ cameraLayerMask;
+                Camera.main.cullingMask &= ~cameraLayerMask;
                 SelectTool.Instance.ClearLayerMask();
                 GridCompositor.Instance.ToggleMinor(false);
                 PortManager.Instance.OnChannelChange -= OnChannelChange;
                 base.Disable();
             }
-            
-            public void OnChannelChange(TransferPortChannel channel)
-            {
+
+            public void OnChannelChange(TransferPortChannel channel) {
                 needRefresh = true;
             }
 
-            public static void ActiveChannel(PortChannelKey channelKey)
-            {
+            public static void ActiveChannel(PortChannelKey channelKey) {
                 showOneChannelKey = channelKey;
                 enableShowOneChannel = true;
                 needRefresh = true;
             }
-            
-            public static bool IsActiveChannelStatus()
-            {
+
+            public static bool IsActiveChannelStatus() {
                 return enableShowOneChannel;
             }
-            
-            public static void ClearActiveChannel()
-            {
+
+            public static void ClearActiveChannel() {
                 enableShowOneChannel = false;
                 showOneChannelKey = default;
             }
-            
-            public override void Update()
-            {
+
+            public override void Update() {
                 base.Update();
 
-                if (activeWorldId != ClusterManager.Instance.activeWorld.id)
-                {
+                if (activeWorldId != ClusterManager.Instance.activeWorld.id) {
                     needRefresh = true;
                     activeWorldId = ClusterManager.Instance.activeWorld.id;
                 }
-                
-                if (needRefresh)
-                {
+
+                if (needRefresh) {
                     needRefresh = false;
                     FilterChannel();
                     UpdateColorMode();
@@ -313,20 +262,16 @@ namespace RsTransferPort
                     UpdatePriority();
                 }
             }
-            
-            public void UpdateColorMode()
-            {
-                userIndexColor = !IsActiveChannelStatus() && buildingType != BuildingType.None;
+
+            public void UpdateColorMode() {
+                userIndexColor = !IsActiveChannelStatus() && OpBuildingType != BuildingType.None;
                 colorIndex = 0;
             }
 
-            public void UpdateSort()
-            {
+            public void UpdateSort() {
                 layoutTargets.StartRecord();
-                foreach (List<GameObject> channel in filterChannels)
-                {
-                    foreach (GameObject go in channel)
-                    {
+                foreach (List<GameObject> channel in filterChannels) {
+                    foreach (GameObject go in channel) {
                         layoutTargets.Add(go);
                     }
                 }
@@ -334,20 +279,15 @@ namespace RsTransferPort
                 layoutTargets.EndAndContrast();
             }
 
-            public void UpdatePriority()
-            {
+            public void UpdatePriority() {
                 priorityPool.RecordStart();
 
-                if (showPriorityInfo)
-                {
-                    foreach (List<GameObject> channel in filterChannels)
-                    {
-                        foreach (GameObject gameObject in channel)
-                        {
+                if (OpShowPriorityInfo) {
+                    foreach (List<GameObject> channel in filterChannels) {
+                        foreach (GameObject gameObject in channel) {
                             TransferPortChannel portChannel = gameObject.GetComponent<TransferPortChannel>();
                             int priority = portChannel.Priority;
-                            if (MyUtils.IsUsePriority(portChannel.BuildingType))
-                            {
+                            if (MyUtils.IsUsePriority(portChannel.BuildingType)) {
                                 Vector3 position = gameObject.transform.position + new Vector3(0, 0.5f, 0);
                                 PriorityImage pi = priorityPool.GetFreeElement(gameObject, priorityParent, true);
                                 pi.priority = priority;
@@ -359,8 +299,7 @@ namespace RsTransferPort
                 priorityPool.ClearNoRecordElement();
             }
 
-            private void FilterChannel()
-            {
+            private void FilterChannel() {
                 filterChannels.Clear();
 
                 FilterOneTypeChannel(activeWorldId, BuildingType.Gas);
@@ -371,17 +310,13 @@ namespace RsTransferPort
                 FilterOneTypeChannel(activeWorldId, BuildingType.HEP);
             }
 
-            private void FilterOneTypeChannel(int activeWorldId, BuildingType buildingType)
-            {
-                if (NeedShowBuildingType(buildingType))
-                {
+            private void FilterOneTypeChannel(int activeWorldId, BuildingType buildingType) {
+                if (NeedShowBuildingType(buildingType)) {
                     var channels = PortManager.Instance.GetChannels(buildingType);
                     foreach (var channel in channels)
-                        if (NeedShowChannel(channel))
-                        {
+                        if (NeedShowChannel(channel)) {
                             filterChannels.NextLine();
-                            foreach (TransferPortChannel obj in channel.all)
-                            {
+                            foreach (TransferPortChannel obj in channel.all) {
                                 if (obj.GetMyWorldId() == activeWorldId) filterChannels.Add(obj.gameObject);
                             }
 
@@ -390,42 +325,32 @@ namespace RsTransferPort
                 }
             }
 
-            private bool NeedShowBuildingType(BuildingType _buildingType)
-            {
-                if (enableShowOneChannel)
-                {
-                    return showOneChannelKey.buildingType == _buildingType;
+            private bool NeedShowBuildingType(BuildingType buildingType) {
+                if (enableShowOneChannel) {
+                    return showOneChannelKey.buildingType == buildingType;
                 }
-                else
-                {
-                    if (buildingType == BuildingType.None)
-                    {
+                else {
+                    if (OpBuildingType == BuildingType.None) {
                         return true;
                     }
 
-                    return buildingType == _buildingType;
+                    return OpBuildingType == buildingType;
                 }
             }
 
-            private bool NeedShowChannel(SingleChannelController controller)
-            {
-                if (enableShowOneChannel)
-                {
+            private bool NeedShowChannel(SingleChannelController controller) {
+                if (enableShowOneChannel) {
                     return showOneChannelKey.worldId == controller.WorldIdAG &&
                            showOneChannelKey.name == controller.ChannelName;
                 }
-                if (showOnlyGlobalChannel)
-                {
-                    if (!controller.IsGlobal)
-                    {
+                if (OpShowOnlyGlobalChannel) {
+                    if (!controller.IsGlobal) {
                         return false;
                     }
                 }
 
-                if (showOnlyNullChannel)
-                {
-                    if (!controller.IsInvalid())
-                    {
+                if (OpShowOnlyNullChannel) {
+                    if (!controller.IsInvalid()) {
                         return false;
                     }
                 }
@@ -433,73 +358,54 @@ namespace RsTransferPort
                 return true;
             }
 
-            private void UpdateLabel()
-            {
+            private void UpdateLabel() {
                 namePool.RecordStart();
                 foreach (var channel in filterChannels) UpdateLabelFromChannel(channel);
                 namePool.ClearNoRecordElement();
             }
-            
-            // private void UpdateLabel()
-            // {
-            //     namePool.RecordStart();
-            //     foreach (var channel in filterChannels) UpdateLabelFromChannel(channel);
-            //     namePool.ClearNoRecordElement();
-            // }
 
-            private void UpdateArrow()
-            {
+            private void UpdateArrow() {
                 lineCenterImagePool.ClearAll();
                 lineArrowPool.RecordStart();
-                foreach (IList<GameObject> channelObjects in filterChannels)
-                {
-                    if (channelObjects.Count == 0)
-                    {
+                foreach (IList<GameObject> channelObjects in filterChannels) {
+                    if (channelObjects.Count == 0) {
                         continue;
                     }
 
                     TransferPortChannel component = channelObjects[0].GetComponent<TransferPortChannel>();
 
-                    if (string.IsNullOrEmpty(component.ChannelName))
-                    {
+                    if (string.IsNullOrEmpty(component.ChannelName)) {
                         continue;
                     }
 
                     Color color;
                     //选取颜色
-                    if (userIndexColor)
-                    {
-                        colorIndex = colorIndex % Colors.Length;
-                        color = Colors[colorIndex];
+                    if (userIndexColor) {
+                        colorIndex = colorIndex % ColorsList.Length;
+                        color = ColorsList[colorIndex];
                         colorIndex++;
                     }
-                    else
-                    {
-                        color = BuildingTypeColors[component.BuildingType];
+                    else {
+                        color = BuildingTypeColorMap[component.BuildingType];
                     }
 
-                    if (wiredPreviewMode == WiredPreviewMode.Center)
-                    {
+                    if (OpWiredPreviewMode == WiredPreviewMode.Center) {
                         UpdateCenterPreview(channelObjects, component.BuildingType, component.ChannelName, color);
                     }
-                    else if (wiredPreviewMode == WiredPreviewMode.Nearby)
-                    {
+                    else if (OpWiredPreviewMode == WiredPreviewMode.Nearby) {
                         UpdateNearbyPreview(channelObjects, component.BuildingType, component.ChannelName, color);
                     }
                 }
                 lineArrowPool.ClearNoRecordElement();
             }
 
-            private void UpdateLabelFromChannel(ICollection<GameObject> items)
-            {
-                foreach (var item in items)
-                {
+            private void UpdateLabelFromChannel(ICollection<GameObject> items) {
+                foreach (var item in items) {
                     var transferPortChannel = item.GetComponent<TransferPortChannel>();
                     if (transferPortChannel == null) continue;
 
-                    RsHierarchyReferences label;
 
-                    if (namePool.GetFreeElement(item, out label, channelNameParent, true))
+                    if (namePool.GetFreeElement(item, out RsHierarchyReferences label, channelNameParent, true))
                         label.transform.SetPositionXY(item.transform.position);
 
                     // label.GetReference("Icon").SetActiveNR(transferPortChannel.IsGlobal);
@@ -510,35 +416,30 @@ namespace RsTransferPort
                 }
             }
 
-            private void UpdateNearbyPreview(IList<GameObject> items, BuildingType _buildingType, string channelName, Color color)
-            {
+            private void UpdateNearbyPreview(IList<GameObject> items, BuildingType _buildingType, string channelName, Color color) {
                 if (items.Count == 0) return;
 
                 RsUtil.NearestSort(items);
 
-                for (var i = 0; i < items.Count - 1; i++)
-                {
+                for (var i = 0; i < items.Count - 1; i++) {
                     LineArrow lineArrow = lineArrowPool.GetFreeElement(items[i], arrowParent, true);
                     lineArrow.transform.SetAsLastSibling();
-                    lineArrow.SetTwoPoint((Vector2) items[i].transform.position + new Vector2(0, 0.5f),
-                        (Vector2) items[i + 1].transform.position + new Vector2(0, 0.5f));
-                    lineArrow.EnableAnim = !disableLineAnim;
+                    lineArrow.SetTwoPoint((Vector2)items[i].transform.position + new Vector2(0, 0.5f),
+                        (Vector2)items[i + 1].transform.position + new Vector2(0, 0.5f));
+                    lineArrow.EnableAnim = !OpDisableLineAnim;
                     lineArrow.SetColor(color);
                 }
             }
-            
-            private void UpdateCenterPreview(IList<GameObject> items, BuildingType _buildingType, string channelName, Color color)
-            {
-                if (items.Count < 2)
-                {
+
+            private void UpdateCenterPreview(IList<GameObject> items, BuildingType _buildingType, string channelName, Color color) {
+                if (items.Count < 2) {
                     return;
                 }
 
                 var center = items.Center();
                 center.y += 0.5f;
-                
-                foreach (var item in items)
-                {
+
+                foreach (var item in items) {
                     var transferPortChannel = item.GetComponent<TransferPortChannel>();
                     var endPos = item.transform.position;
                     if (transferPortChannel == null) continue;
@@ -551,15 +452,13 @@ namespace RsTransferPort
                     else
                         lineArrow.SetTwoPoint(endPos, center);
 
-                    lineArrow.EnableAnim = !disableLineAnim;
+                    lineArrow.EnableAnim = !OpDisableLineAnim;
 
-                    if (showPriorityInfo && MyUtils.IsUsePriority(_buildingType))
-                    {
-                        int priority = Mathf.Clamp(transferPortChannel.Priority, 1,9);
-                        lineArrow.SetColor(PriorityColors[priority - 1]);
+                    if (OpShowPriorityInfo && MyUtils.IsUsePriority(_buildingType)) {
+                        int priority = Mathf.Clamp(transferPortChannel.Priority, 1, 9);
+                        lineArrow.SetColor(PriorityColorsList[priority - 1]);
                     }
-                    else
-                    {
+                    else {
                         lineArrow.SetColor(color);
                     }
                 }
@@ -571,8 +470,7 @@ namespace RsTransferPort
                 centerImage.transform.position = center;
             }
 
-            private GameObject CreateLayer(string name, GameObject parent)
-            {
+            private GameObject CreateLayer(string name, GameObject parent) {
                 GameObject gameObject = RsUIBuilder.UIGameObject(name, parent);
                 CanvasGroup canvasGroup = gameObject.AddComponent<CanvasGroup>();
                 canvasGroup.interactable = false;
