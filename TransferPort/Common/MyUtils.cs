@@ -5,46 +5,30 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using TUNING;
-using UnityEngine;
 
-namespace RsTransferPort
-{
-    public static partial class MyUtils
-    {
+namespace RsTransferPort {
+    public static partial class MyUtils {
         public static MyIdGenerate ID = new MyIdGenerate();
 
-        public static long CurrentSecond =>
-            (System.DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
-        
-        public static string UniqueSaveName(string name)
-        {
+        public static string UniqueSaveName(string name) {
             return name + "-" + ID.Next();
         }
 
-        /// <summary>
-        ///     添加建筑到研究中
-        /// </summary>
-        /// <param name="techID"></param>
-        /// <param name="buildingID"></param>
-        public static void AddBuildingToTech(string techID, string buildingID)
-        {
+        public static void AddBuildingToTech(string techID, string buildingID) {
             var tech = Db.Get().Techs.Get(techID);
-            var flag = tech != null;
-            if (flag)
+            if (tech != null)
                 tech.unlockedItemIDs.Add(buildingID);
             else
                 Debug.LogWarning("AddBuildingToTech() Failed to find tech ID: " + techID);
         }
 
-        public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID)
-        {
+        public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID) {
             ModUtil.AddBuildingToPlanScreen(category, buildingID);
             AddBuildingToTech(techID, buildingID);
         }
 
         public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID,
-            string subcategoryID)
-        {
+            string subcategoryID) {
             ModUtil.AddBuildingToPlanScreen(category, buildingID, subcategoryID);
             AddBuildingToTech(techID, buildingID);
         }
@@ -53,17 +37,13 @@ namespace RsTransferPort
         /// <summary>
         ///     获取指定的class下的所有静态属性（深度遍历）
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public static Dictionary<string, object> FlatFields(Type type)
-        {
+        public static Dictionary<string, object> FlatFields(Type type) {
             var dir = new Dictionary<string, object>();
             FlatFields(type, "", dir);
             return dir;
         }
 
-        private static void FlatFields(Type type, string prefix, Dictionary<string, object> container)
-        {
+        private static void FlatFields(Type type, string prefix, Dictionary<string, object> container) {
             if (string.IsNullOrEmpty(prefix))
                 prefix = type.Name;
             else
@@ -72,7 +52,7 @@ namespace RsTransferPort
             //普通属性
             var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static);
 
-            foreach (var t in fieldInfos) container.Add(prefix + "." + t.Name, t.GetValue(null));
+            foreach (var t in fieldInfos) { container.Add(prefix + "." + t.Name, t.GetValue(null)); }
 
             //类
             var nestedTypes = type.GetNestedTypes(BindingFlags.Public);
@@ -83,54 +63,30 @@ namespace RsTransferPort
         /// <summary>
         ///     通过一个类添加到Strings里
         /// </summary>
-        /// <param name="type"></param>
-        public static void AddStrings(Type type)
-        {
+        public static void AddStrings(Type type) {
             var flatFields = FlatFields(type);
-            foreach (var keyValuePair in flatFields) Strings.Add(keyValuePair.Key, (LocString) keyValuePair.Value);
+            foreach (var kv in flatFields) { Strings.Add(kv.Key, (LocString)kv.Value); }
         }
 
-        public static int Count(this IEnumerable source)
-        {
+        public static int Count(this IEnumerable source) {
             if (source == null) throw new ArgumentNullException(nameof(source));
 
-            if (source is ICollection) return ((ICollection) source).Count;
+            if (source is ICollection collection) return collection.Count;
 
             var num = 0;
             var enumerator = source.GetEnumerator();
             while (enumerator.MoveNext())
-                checked
-                {
+                checked {
                     ++num;
                 }
 
             return num;
         }
 
-        public static Vector3 Center(this ICollection<GameObject> points)
-        {
-            var total = points.Count;
-            var center = Vector3.zero;
-
-            foreach (var point in points) center += point.transform.position;
-            center /= total;
-            return center;
-        }
-
-        public static Vector2 Center(this ICollection<Vector2> points)
-        {
-            var total = points.Count;
-            var center = Vector2.zero;
-
-            foreach (var point in points) center += point;
-            center /= total;
-            return center;
-        }
-        
-        public static bool IsUsePriority(BuildingType buildingType)
-        {
-            return buildingType == BuildingType.Gas || buildingType == BuildingType.Liquid ||
-                   buildingType == BuildingType.Solid;
+        public static bool IsUsePriority(BuildingType buildingType) {
+            return buildingType == BuildingType.Gas
+                || buildingType == BuildingType.Liquid
+                || buildingType == BuildingType.Solid;
         }
 
         public static BuildingDef CreateTransferBuildingDef(
@@ -138,8 +94,7 @@ namespace RsTransferPort
             string anim,
             float[] construction_mass,
             string[] construction_materials
-        )
-        {
+        ) {
             var buildingDef = global::BuildingTemplates.CreateBuildingDef(
                 id,
                 1,
@@ -164,8 +119,7 @@ namespace RsTransferPort
             return buildingDef;
         }
 
-        public class BuildingTemplates
-        {
+        public class BuildingTemplates {
             /// <summary>
             ///     动画
             /// </summary>
@@ -206,7 +160,6 @@ namespace RsTransferPort
             /// </summary>
             public int hitpoints;
 
-
             /// <summary>
             ///     唯一标识
             /// </summary>
@@ -232,8 +185,7 @@ namespace RsTransferPort
             /// </summary>
             public int width;
 
-            public static BuildingTemplates OneAnyWhere()
-            {
+            public static BuildingTemplates OneAnyWhere() {
                 var templates = new BuildingTemplates();
 
                 templates.width = 1;
@@ -249,8 +201,7 @@ namespace RsTransferPort
                 return templates;
             }
 
-            public BuildingDef ToBuildingDef()
-            {
+            public BuildingDef ToBuildingDef() {
                 return global::BuildingTemplates.CreateBuildingDef(
                     id,
                     width,
@@ -271,44 +222,39 @@ namespace RsTransferPort
     }
 
 
-    public class MyIdGenerate
-    {
+    public class MyIdGenerate {
         private const string ID_T = "0123456789abcdefghijklnmopqrstuvwxyzABCDEFGHIJKLNMOPQRSTUVWXYZ";
         private const int ID_LEN = 62;
 
-        private int _nextBit;
+        private int nextBit;
         private long lastTime;
 
+        public static long CurrentSecond => System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        //(System.DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
 
-        public static string NumberToAscall(long number)
-        {
+        public static string NumberToAscall(long number) {
             var builder = new StringBuilder();
-            while (number > 0)
-            {
-                var n = (int) (number % ID_LEN);
-                number = number / ID_LEN;
+            while (number > 0) {
+                var n = (int)(number % ID_LEN);
+                number /= ID_LEN;
                 builder.Append(ID_T[n]);
             }
 
             return new string(builder.ToString().Reverse().ToArray());
         }
 
+        public string Next() {
+            var currentSecond = CurrentSecond;
 
-        public string Next()
-        {
-            var currentSecond = MyUtils.CurrentSecond;
-
-            if (lastTime == currentSecond)
-            {
-                _nextBit++;
+            if (lastTime == currentSecond) {
+                nextBit++;
             }
-            else
-            {
-                _nextBit = 0;
+            else {
+                nextBit = 0;
                 lastTime = currentSecond;
             }
 
-            var id = currentSecond * 100 + _nextBit;
+            var id = currentSecond * 100 + nextBit;
 
             return NumberToAscall(id);
         }

@@ -82,7 +82,6 @@
     <Compile Include="Center\TransferPortCenter.cs" />
     <Compile Include="Center\TransferPortCenterConfig.cs" />
     <Compile Include="Common\IMyHighEnergyParticleDirection.cs" />
-    <Compile Include="Common\ISelectableChannel.cs" />
     <Compile Include="Common\MyResource.cs" />
     <Compile Include="Common\MyUtils.cs" />
     <Compile Include="Common\MyUtilsExtend1.cs" />
