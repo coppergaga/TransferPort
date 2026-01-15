@@ -201,10 +201,7 @@ namespace RsLib
             
             foreach (Task task in tasks)
             {
-                if (task.create != null)
-                {
-                    task.create.DynamicInvoke(task.instance, this);
-                }
+                task.create?.DynamicInvoke(task.instance, this);
             }
         }
 
@@ -279,9 +276,10 @@ namespace RsLib
         
         public static GameObject UIGameObject(string name = "UIGameObject",GameObject parent = null, bool active = true)
         {
-            GameObject gameObject = new GameObject();
-            gameObject.name = name;
-            gameObject.layer = LayerMask.NameToLayer("UI");
+            GameObject gameObject = new GameObject {
+                name = name,
+                layer = LayerMask.NameToLayer("UI")
+            };
             if (parent != null)
             {
                 gameObject.transform.SetParent(parent.transform, false);
