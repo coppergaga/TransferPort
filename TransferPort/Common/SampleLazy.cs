@@ -1,44 +1,34 @@
 ﻿using System;
-using Object = UnityEngine.Object;
+using System.Threading;
 
-namespace RsTransferPort
-{
-    public class SampleLazy<T> where T: class
-    {
-        private T m_value;
+namespace RsTransferPort {
+    public class SampleLazy<T> where T : class {
+        private Lazy<T> m_lazyInst;
         private readonly Func<T> m_valueFactory;
+        private readonly LazyThreadSafetyMode m_threadSafetyMode;
+        private readonly object m_lock = new object();
 
-        public SampleLazy(Func<T> valueFactory, bool preLoadSceneClear = false)
-        {
-            if (valueFactory == null)
-                throw new ArgumentNullException(nameof(valueFactory));
-            m_valueFactory = valueFactory;
+        public SampleLazy(
+            Func<T> valueFactory,
+            bool preLoadSceneClear = false,
+            LazyThreadSafetyMode mode = LazyThreadSafetyMode.ExecutionAndPublication) {
 
+            m_valueFactory = valueFactory ?? throw new ArgumentNullException(nameof(valueFactory));
+            m_threadSafetyMode = mode;
+            CreateNewLazy();
             if (preLoadSceneClear) App.OnPreLoadScene += ClearValue;
         }
 
-        public T Value
-        {
-            get
-            {
-                // if (!isInit)
-                // {
-                //     isInit = true;
-                //     m_value = m_valueFactory();
-                // }
+        public T Value => m_lazyInst.Value;
+        public bool IsValueCreated => m_lazyInst.IsValueCreated;
 
-                if (m_value == null)
-                {
-                    m_value = m_valueFactory();
-                }
-
-                return m_value;
-            }
+        public void ClearValue() {
+            // 防止在高并发下，多个线程同时重置导致 Lazy 实例不一致
+            lock (m_lock) { CreateNewLazy(); }
         }
 
-        public void ClearValue()
-        {
-            m_value = default;
+        private void CreateNewLazy() {
+            m_lazyInst = new Lazy<T>(m_valueFactory, m_threadSafetyMode);
         }
     }
 }
