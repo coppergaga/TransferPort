@@ -1,45 +1,34 @@
-﻿using System;
-using RsLib;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace RsTransferPort
-{
-    public class PriorityImage : MonoBehaviour
-    {
+namespace RsTransferPort {
+    public class PriorityImage : MonoBehaviour {
         [SerializeField] private Image image;
         [SerializeField] private int m_priority = 0;
 
-        private void Awake()
-        {
-            if (image == null)
-            {
+        private void Awake() {
+            if (image == null) {
                 image = GetComponent<Image>();
             }
         }
 
-        private void Start()
-        {
+        private void Start() {
             UpdateSprite();
         }
 
-        public int priority
-        {
+        public int Priority {
             get => m_priority;
-            set
-            {
-                if (m_priority != value)
-                {
+            set {
+                if (m_priority != value) {
                     m_priority = value;
                     UpdateSprite();
                 }
             }
         }
 
-        private void UpdateSprite()
-        {
+        private void UpdateSprite() {
             int clamp = Mathf.Clamp(m_priority, 1, 9);
-            image.sprite = RsUITuning.Images.GetSpriteByName("priority_" + clamp);
+            image.sprite = RsLib.RsUITuning.Images.GetSpriteByName("priority_" + clamp);
             image.SetNativeSize();
         }
 

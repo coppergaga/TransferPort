@@ -6,16 +6,14 @@ using RsLib;
 using UnityEngine;
 using Object = System.Object;
 
-namespace RsTransferPort
-{
-    public class TransferPortChannel : KMonoBehaviour, ISaveLoadable
-    {
-        public delegate void PriorityChangeDelegate(TransferPortChannel target, int newPriority, int oldPriority); 
+namespace RsTransferPort {
+    public class TransferPortChannel : KMonoBehaviour, ISaveLoadable {
+        public delegate void PriorityChangeDelegate(TransferPortChannel target, int newPriority, int oldPriority);
         /// <summary>
         /// 连接状态
         /// </summary>
         private static StatusItem ConnectionStatusItem;
-        
+
         /// <summary>
         /// 行星隔离模式
         /// </summary>
@@ -25,21 +23,17 @@ namespace RsTransferPort
         /// 全球互通模式
         /// </summary>
         private static StatusItem GlobalConnectivityStatusItem;
-        
-        
+
         public static Operational.Flag ConnectionFlag = new Operational.Flag("PortChannelChange", Operational.Flag.Type.Requirement);
 
-        [MyCmpReq]
-        private KSelectable kSelectable;
-        
-        // [SerializeField] 
+        [MyCmpReq] private KSelectable kSelectable;
+
         [Serialize] protected string channelName = "";
 
         /// <summary>
         /// 是否为跨行星传送模式(宇宙互通模式)
         /// </summary>
         [Serialize] protected bool isGlobal = false;
-
 
         [Serialize] protected int priority = 5;
 
@@ -57,119 +51,95 @@ namespace RsTransferPort
         public event Action<SingleChannelController> OnExitChannel;
         public event PriorityChangeDelegate OnPriorityChange;
 
-        public string ChannelName
-        {
+        public string ChannelName {
             get => channelName ?? "";
         }
-        
-        public bool IsGlobal
-        {
+
+        public bool IsGlobal {
             get => isGlobal;
         }
 
-        public int Priority
-        {
+        public int Priority {
             get => priority;
         }
 
-        public PortChannelKey ChannelKey
-        {
+        public PortChannelKey ChannelKey {
             get => new PortChannelKey(ChannelName, WorldIdAG, buildingType);
         }
 
         public int WorldIdAG => IsGlobal ? PortManager.GLOBAL_CHANNEL_WORLD_ID : this.GetMyWorldId();
 
-        public string DisplayChannelName
-        {
+        public string DisplayChannelName {
             get => string.IsNullOrEmpty(channelName)
                 ? STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL.ToString()
                 : channelName;
         }
 
-        public InOutType InOutType
-        {
+        public InOutType InOutType {
             get => inOutType;
             set => inOutType = value;
         }
 
-        public BuildingType BuildingType
-        {
+        public BuildingType BuildingType {
             get => buildingType;
             set => buildingType = value;
         }
 
-        // public PortChannelKey ChannelKey => new(channelName, this.GetMyWorldId(), buildingType);
-
         public SingleChannelController ChannelController => PortManager.Instance.GetChannelController(this);
 
-        protected override void OnPrefabInit()
-        {
+        protected override void OnPrefabInit() {
             base.OnPrefabInit();
-            Subscribe((int) GameHashes.CopySettings, OnCopySettings);
+            Subscribe((int)GameHashes.CopySettings, OnCopySettings);
 
-            if (ConnectionStatusItem == null)
-            {
+            if (ConnectionStatusItem == null) {
                 ConnectionStatusItem = new StatusItem("RsTransferPortChannelConnection", "BUILDING",
                     "unconnected_channel_icon", StatusItem.IconType.Custom, NotificationType.BadMinor, false,
                     MyOverlayModes.PortChannel.ID, true);
             }
 
-            if (PlanetaryIsolationStatusItem == null)
-            {
+            if (PlanetaryIsolationStatusItem == null) {
                 PlanetaryIsolationStatusItem = new StatusItem("RsChannelPlanetaryIsolationModel", "BUILDING",
                     "planetary_isolation_icon", StatusItem.IconType.Custom, NotificationType.Neutral, false,
                     OverlayModes.None.ID, false);
             }
 
-            if (GlobalConnectivityStatusItem == null)
-            {
+            if (GlobalConnectivityStatusItem == null) {
                 GlobalConnectivityStatusItem = new StatusItem("RsChannelGlobalConnectivityModel", "BUILDING",
                     "global_connectivity_icon", StatusItem.IconType.Custom, NotificationType.Neutral, false,
                     OverlayModes.None.ID, false);
             }
-            
+
         }
 
-        protected override void OnSpawn()
-        {
-            
+        protected override void OnSpawn() {
             base.OnSpawn();
-            if (channelName == null)
-            {
+            if (channelName == null) {
                 channelName = "";
             }
 
             UpdateConnectionStatusItem();
 
-            // if (!PortManager.Instance.Contains(this))
-            // {
             PortManager.Instance.Add(this);
-            // }
             OnChannelNameInitialized?.Invoke(ChannelName);
             PortManager.Instance.TriggerChannelChange(this);
         }
 
-        protected override void OnCleanUp()
-        {
+        protected override void OnCleanUp() {
             PortManager.Instance.Remove(this);
             PortManager.Instance.TriggerChannelChange(this);
         }
 
-        protected void UpdateConnectionStatusItem()
-        {
+        protected void UpdateConnectionStatusItem() {
             bool b = string.IsNullOrEmpty(channelName);
             GetComponent<KSelectable>().ToggleStatusItem(ConnectionStatusItem, b, this);
             GetComponent<Operational>().SetFlag(ConnectionFlag, !b);
         }
 
 
-        protected void OnCopySettings(object data)
-        {
-            if (data is GameObject source && source != gameObject)
-            {
+        protected void OnCopySettings(object data) {
+            if (data is GameObject source && source != gameObject) {
                 TransferPortChannel sourceChannelItem = source.GetComponent<TransferPortChannel>();
-                if (sourceChannelItem != null)
-                {
+                if (sourceChannelItem != null) {
                     CheckSetChannelNameAndGlobal(sourceChannelItem.ChannelName, sourceChannelItem.isGlobal, sourceChannelItem.priority);
                 }
             }
@@ -178,99 +148,80 @@ namespace RsTransferPort
         /// <summary>
         /// 不重复触发事件
         /// </summary>
-        /// <param name="newName"></param>
-        public void CheckSetChannelName(string newName)
-        {
+        public void CheckSetChannelName(string newName) {
             CheckSetChannelNameAndGlobal(newName, isGlobal, priority);
         }
 
-        public void CheckSetGlobal(bool global)
-        {
+        public void CheckSetGlobal(bool global) {
             CheckSetChannelNameAndGlobal(channelName, global, priority);
         }
-        public void CheckSetPriority(int newPriority)
-        {
+        public void CheckSetPriority(int newPriority) {
             CheckSetChannelNameAndGlobal(channelName, isGlobal, newPriority);
         }
-        
-        public void CheckSetChannelNameAndGlobal(string newName, bool global, int newPriority)
-        {
+
+        public void CheckSetChannelNameAndGlobal(string newName, bool global, int newPriority) {
             bool triggerAddOrRemove = false;
             bool triggerChannelChange = false;
             bool triggerPriorityChange = false;
             int oldPriority = priority;
 
-            if (isGlobal != global)
-            {
+            if (isGlobal != global) {
                 isGlobal = global;
                 triggerAddOrRemove = true;
                 triggerChannelChange = true;
             }
 
-            if (newName != null)
-            {
+            if (newName != null) {
                 newName = newName.Trim();
-                if (!Object.Equals(channelName, newName))
-                {
+                if (!Object.Equals(channelName, newName)) {
                     channelName = newName;
                     triggerAddOrRemove = true;
                     triggerChannelChange = true;
                 }
             }
 
-            if (newPriority != priority)
-            {
+            if (newPriority != priority) {
                 priority = newPriority;
                 triggerChannelChange = true;
                 triggerPriorityChange = true;
             }
 
-            if (triggerAddOrRemove)
-            {
+            if (triggerAddOrRemove) {
                 PortManager.Instance.Remove(this);
                 PortManager.Instance.Add(this);
                 UpdateConnectionStatusItem();
             }
 
-            if (triggerChannelChange)
-            {
+            if (triggerChannelChange) {
                 PortManager.Instance.TriggerChannelChange(this);
             }
 
-            if (!triggerAddOrRemove && triggerPriorityChange)
-            {
+            if (!triggerAddOrRemove && triggerPriorityChange) {
                 OnPriorityChange?.Invoke(this, priority, oldPriority);
             }
         }
 
 
-        public void EnterChannelController(SingleChannelController controller)
-        {
-            if (kSelectable != null && DlcManager.IsExpansion1Active())
-            {
+        public void EnterChannelController(SingleChannelController controller) {
+            if (kSelectable != null && DlcManager.IsExpansion1Active()) {
                 kSelectable.ToggleStatusItem(PlanetaryIsolationStatusItem, !isGlobal);
                 kSelectable.ToggleStatusItem(GlobalConnectivityStatusItem, isGlobal);
             }
             OnEnterChannel?.Invoke(controller);
         }
 
-        public void ExitChannelController(SingleChannelController controller)
-        {
+        public void ExitChannelController(SingleChannelController controller) {
             OnExitChannel?.Invoke(controller);
         }
 
-        public void SetChannel(object target)
-        {
-            if (target is SingleChannelController channel)
-            {
+        public void SetChannel(object target) {
+            if (target is SingleChannelController channel) {
                 CheckSetChannelName(channel.ChannelName);
             }
         }
 
-        public bool HasChannel(object target)
-        {
-            if (target is SingleChannelController channel)
-            {
+        public bool HasChannel(object target) {
+            if (target is SingleChannelController channel) {
                 return channel?.Contains(this) ?? false;
             }
 

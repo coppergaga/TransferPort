@@ -32,8 +32,9 @@ namespace RsTransferPort {
         }
 
         public void Add(TransferPortChannel portChannelItem) {
-            if (allPort.ContainsKey(portChannelItem)) {
-                throw new Exception("Repeat addition PortChannelItem");
+            if (Contains(portChannelItem)) {
+                //throw new Exception("Repeat addition PortChannelItem");
+                return;
             }
 
             PortChannelKey channelKey =
@@ -67,7 +68,7 @@ namespace RsTransferPort {
         }
 
         public void Remove(TransferPortChannel portChannelItem) {
-            if (!allPort.ContainsKey(portChannelItem))
+            if (!Contains(portChannelItem))
                 return;
 
             PortChannelKey channelKey = allPort[portChannelItem];

@@ -1,7 +1,5 @@
-﻿namespace RsTransferPort
-{
-    public interface IMyHighEnergyParticleDirection : IHighEnergyParticleDirection
-    {
-        
+﻿namespace RsTransferPort {
+    public interface IMyHighEnergyParticleDirection : IHighEnergyParticleDirection {
+
     }
 }

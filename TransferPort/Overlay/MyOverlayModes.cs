@@ -290,7 +290,7 @@ namespace RsTransferPort {
                             if (MyUtils.IsUsePriority(portChannel.BuildingType)) {
                                 Vector3 position = gameObject.transform.position + new Vector3(0, 0.5f, 0);
                                 PriorityImage pi = priorityPool.GetFreeElement(gameObject, priorityParent, true);
-                                pi.priority = priority;
+                                pi.Priority = priority;
                                 pi.transform.position = position;
                             }
                         }

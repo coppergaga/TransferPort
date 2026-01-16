@@ -1,19 +1,15 @@
-﻿namespace RsTransferPort
-{
-    public class ShowOverlaySelf : KMonoBehaviour
-    {
+﻿namespace RsTransferPort {
+    public class ShowOverlaySelf : KMonoBehaviour {
         [MyCmpReq] private TransferPortChannel channelItem;
 
-        protected override void OnPrefabInit()
-        {
+        protected override void OnPrefabInit() {
             base.OnPrefabInit();
-            Subscribe(493375141, OnRefreshUserMenu);
+            Subscribe((int)GameHashes.RefreshUserMenu, OnRefreshUserMenu);
         }
 
-        protected override void OnCleanUp()
-        {
+        protected override void OnCleanUp() {
             base.OnCleanUp();
-            Unsubscribe(493375141, OnRefreshUserMenu);
+            Unsubscribe((int)GameHashes.RefreshUserMenu, OnRefreshUserMenu);
         }
 
         private void OnRefreshUserMenu(object data) =>
@@ -23,15 +19,12 @@
                     tooltipText: RsTransferPort.STRINGS.UI.USERMENU.SHOWOVERLAYSELF_BUTTON.TOOLTIP));
 
 
-        public void ShowOverlay()
-        {
-            if (OverlayScreen.Instance == null)
-            {
+        public void ShowOverlay() {
+            if (OverlayScreen.Instance == null) {
                 return;
             }
             MyOverlayModes.PortChannel.ActiveChannel(channelItem.ChannelKey);
-            if (OverlayScreen.Instance.mode != MyOverlayModes.PortChannel.ID)
-            {
+            if (OverlayScreen.Instance.mode != MyOverlayModes.PortChannel.ID) {
                 OverlayScreen.Instance.ToggleOverlay(MyOverlayModes.PortChannel.ID);
             }
         }
