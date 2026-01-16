@@ -10,7 +10,6 @@ namespace RsTransferPort {
             else {
                 receiverPriorityList.AddChannelItem(item);
             }
-
         }
 
         protected override void OnRemove(PortItem item) {
