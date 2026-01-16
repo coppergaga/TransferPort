@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RsLib;
 using RsLib.Adapter;
-using RsLib.Builder;
 using UnityEngine;
 using UnityEngine.UI;
 
