@@ -3,10 +3,8 @@ using TUNING;
 using UnityEngine;
 using S_BUILDINGS = STRINGS.BUILDINGS;
 
-namespace RsTransferPort
-{
-    public class WirelessLogicSenderConfig : WirelessLogicConfig
-    {
+namespace RsTransferPort {
+    public class WirelessLogicSenderConfig : WirelessLogicConfig {
         public const string ID = "RsWirelessLogicSender";
         public override string id => ID;
         public override string anim => "rs_wireless_logic_sender_kanim";
@@ -15,8 +13,7 @@ namespace RsTransferPort
         public override string defaultName => STRINGS.BUILDINGS.PREFABS.RSWIRELESSLOGICSENDER.DEFAULTNAME;
     }
 
-    public class WirelessLogicReceiverConfig : WirelessLogicConfig
-    {
+    public class WirelessLogicReceiverConfig : WirelessLogicConfig {
         public const string ID = "RsWirelessLogicReceiver";
         public override string id => ID;
         public override string anim => "rs_wireless_logic_receiver_kanim";
@@ -25,8 +22,7 @@ namespace RsTransferPort
         public override string defaultName => STRINGS.BUILDINGS.PREFABS.RSWIRELESSLOGICRECEIVER.DEFAULTNAME;
     }
 
-    public abstract class WirelessLogicConfig : IBuildingConfig
-    {
+    public abstract class WirelessLogicConfig : IBuildingConfig {
         public const string PORT_ID = "MyPort";
 
         public abstract string id { get; }
@@ -35,8 +31,7 @@ namespace RsTransferPort
 
         public abstract string defaultName { get; }
 
-        public override BuildingDef CreateBuildingDef()
-        {
+        public override BuildingDef CreateBuildingDef() {
             var buildingDef = MyUtils.CreateTransferBuildingDef(id, anim, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1,
                 MATERIALS.REFINED_METALS);
 
@@ -66,8 +61,7 @@ namespace RsTransferPort
             return buildingDef;
         }
 
-        public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
-        {
+        public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag) {
             go.AddOrGet<CopyBuildingSettings>().copyGroupTag = Tags.WirelessLogic;
             var channel = go.AddOrGet<PortItem>();
             channel.BuildingType = BuildingType.Logic;
@@ -79,8 +73,7 @@ namespace RsTransferPort
             go.AddOrGet<ShowOverlaySelf>();
         }
 
-        public override void DoPostConfigureComplete(GameObject go)
-        {
+        public override void DoPostConfigureComplete(GameObject go) {
             Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
         }
     }

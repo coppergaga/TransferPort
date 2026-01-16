@@ -1,19 +1,15 @@
 ﻿
-namespace RsTransferPort
-{
-    public class WirelessLogicPort : KMonoBehaviour
-    {
+namespace RsTransferPort {
+    public class WirelessLogicPort : KMonoBehaviour {
         [MyCmpGet] public PortItem channelItem;
         public InOutType inOutType;
         public HashedString portId;
 
-        public virtual int GetInputSignal()
-        {
+        public virtual int GetInputSignal() {
             return GetComponent<LogicPorts>().GetInputValue(portId);
         }
 
-        public virtual void SendSignal(int signal)
-        {
+        public virtual void SendSignal(int signal) {
             GetComponent<LogicPorts>().SendSignal(portId, signal);
         }
     }
