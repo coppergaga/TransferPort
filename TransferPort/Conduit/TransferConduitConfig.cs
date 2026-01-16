@@ -172,7 +172,7 @@ namespace RsTransferPort
         {
             go.AddOrGet<CopyBuildingSettings>().copyGroupTag = Tags.TransferConduit;
             var channel = go.AddOrGet<TransferPortChannel>();
-            channel.BuildingType = BuildingTypeConvert.FromConduitType(conduitType);
+            channel.BuildingType = Converter.FromConduitType(conduitType);
             channel.InOutType = inOutType;
 
             go.AddOrGet<ShowOverlaySelf>();

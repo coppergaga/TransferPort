@@ -2,78 +2,61 @@
 using System.Collections.Generic;
 using RsLib.Collections;
 
-namespace RsTransferPort
-{
-    public class PriorityChannelItemList : IList<PriorityChannelItemInfo>
-    {
+namespace RsTransferPort {
+    public class PriorityChannelItemList : IList<PriorityChannelItemInfo> {
         private RsSortedList<PriorityChannelItemInfo> priorityList = new RsSortedList<PriorityChannelItemInfo>();
 
-        public void Add(PriorityChannelItemInfo item)
-        {
+        public void Add(PriorityChannelItemInfo item) {
             throw new System.NotImplementedException();
         }
 
-        public void Clear()
-        {
+        public void Clear() {
             priorityList.Clear();
         }
 
-        public bool Contains(PriorityChannelItemInfo item)
-        {
+        public bool Contains(PriorityChannelItemInfo item) {
             throw new System.NotImplementedException();
         }
 
-        public void CopyTo(PriorityChannelItemInfo[] array, int arrayIndex)
-        {
+        public void CopyTo(PriorityChannelItemInfo[] array, int arrayIndex) {
             throw new System.NotImplementedException();
         }
 
-        public bool Remove(PriorityChannelItemInfo item)
-        {
+        public bool Remove(PriorityChannelItemInfo item) {
             throw new System.NotImplementedException();
         }
 
         public int Count => priorityList.Count;
         public bool IsReadOnly => true;
 
-        public void AddChannelItem(TransferPortChannel item)
-        {
+        public void AddChannelItem(TransferPortChannel item) {
             AddChannelItem(item, true);
         }
-        
-        private void AddChannelItem(TransferPortChannel item, bool addEvent)
-        {
+
+        private void AddChannelItem(TransferPortChannel item, bool addEvent) {
             PriorityChannelItemInfo itemInfo = GetOrAddPriorityInfo(item.Priority);
             itemInfo.items.Add(item);
-            if (addEvent)
-            {
+            if (addEvent) {
                 item.OnPriorityChange += ItemOnOnPriorityChange;
             }
         }
 
-        private void ItemOnOnPriorityChange(TransferPortChannel channel, int newPriority, int oldPriority)
-        {
+        private void ItemOnOnPriorityChange(TransferPortChannel channel, int newPriority, int oldPriority) {
             RemoveChannelItem(channel, false);
             AddChannelItem(channel, false);
         }
 
-        public void RemoveChannelItem(TransferPortChannel item)
-        {
+        public void RemoveChannelItem(TransferPortChannel item) {
             RemoveChannelItem(item, true);
         }
 
-        public void RemoveChannelItem(TransferPortChannel item, bool removeEvent)
-        {
-            foreach (PriorityChannelItemInfo info in priorityList)
-            {
-                if (info.items.Remove(item))
-                {
-                    if (removeEvent)
-                    {
+        public void RemoveChannelItem(TransferPortChannel item, bool removeEvent) {
+            foreach (PriorityChannelItemInfo info in priorityList) {
+                if (info.items.Remove(item)) {
+                    if (removeEvent) {
                         item.OnPriorityChange -= ItemOnOnPriorityChange;
                     }
-                    if (info.items.Count == 0)
-                    {
+                    if (info.items.Count == 0) {
                         //移除
                         priorityList.Remove(info);
                     }
@@ -81,13 +64,10 @@ namespace RsTransferPort
                 }
             }
         }
-        
-        private PriorityChannelItemInfo GetOrAddPriorityInfo(int priority)
-        {
-            foreach (PriorityChannelItemInfo itemInfo in priorityList)
-            {
-                if (itemInfo.priority == priority)
-                {
+
+        private PriorityChannelItemInfo GetOrAddPriorityInfo(int priority) {
+            foreach (PriorityChannelItemInfo itemInfo in priorityList) {
+                if (itemInfo.priority == priority) {
                     return itemInfo;
                 }
             }
@@ -97,57 +77,46 @@ namespace RsTransferPort
             priorityList.Add(info);
             return info;
         }
-        
-        public PriorityChannelItemInfo GetByPriority(int priority)
-        {
-            foreach (PriorityChannelItemInfo itemInfo in priorityList)
-            {
-                if (itemInfo.priority == priority)
-                {
+
+        public PriorityChannelItemInfo GetByPriority(int priority) {
+            foreach (PriorityChannelItemInfo itemInfo in priorityList) {
+                if (itemInfo.priority == priority) {
                     return itemInfo;
                 }
             }
-            
+
             return null;
         }
-        
 
-        public IEnumerator<PriorityChannelItemInfo> GetEnumerator()
-        {
+
+        public IEnumerator<PriorityChannelItemInfo> GetEnumerator() {
             return priorityList.GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
+        IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
 
-        public int IndexOf(PriorityChannelItemInfo item)
-        {
+        public int IndexOf(PriorityChannelItemInfo item) {
             throw new System.NotImplementedException();
         }
 
-        public void Insert(int index, PriorityChannelItemInfo item)
-        {
+        public void Insert(int index, PriorityChannelItemInfo item) {
             throw new System.NotImplementedException();
         }
 
-        public void RemoveAt(int index)
-        {
+        public void RemoveAt(int index) {
             throw new System.NotImplementedException();
         }
 
-        public PriorityChannelItemInfo this[int index]
-        {
+        public PriorityChannelItemInfo this[int index] {
             get => priorityList[index];
             set => throw new System.NotImplementedException();
         }
 
-        public int[] AllPriority()
-        {
+        public int[] AllPriority() {
             int[] priorities = new int[priorityList.Count];
-            for (var i = 0; i < priorityList.Count; i++)
-            {
+            for (var i = 0; i < priorityList.Count; i++) {
                 priorities[i] = priorityList[i].priority;
             }
 

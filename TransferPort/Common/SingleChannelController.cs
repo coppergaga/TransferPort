@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RsTransferPort
-{
-    public class SingleChannelController : IComparable<SingleChannelController>
-    {
+namespace RsTransferPort {
+    public class SingleChannelController : IComparable<SingleChannelController> {
         public BuildingType BuildingType { get; }
         public string ChannelName { get; }
 
@@ -16,33 +14,27 @@ namespace RsTransferPort
         public int WorldIdAG { get; } // -1表示全球 
 
         public bool IsGlobal => WorldIdAG == -1;
-        
-        public String DisplayChannelName
-        {
-            get
-            {
-                if (IsInvalid())
-                {
-                    return STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL;
+
+        public String DisplayChannelName {
+            get {
+                if (IsInvalid()) {
+                    return STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL.ToString();
                 }
 
                 return ChannelName;
             }
         }
 
-        public SingleChannelController(BuildingType buildingType, string channelName, int worldIdAG)
-        {
+        public SingleChannelController(BuildingType buildingType, string channelName, int worldIdAG) {
             BuildingType = buildingType;
             ChannelName = channelName;
             WorldIdAG = worldIdAG;
             OnInit();
         }
 
-        public void Add(TransferPortChannel item)
-        {
+        public void Add(TransferPortChannel item) {
 
-            if (item == null)
-            {
+            if (item == null) {
                 Debug.LogErrorFormat("SingleChannelController buildingType:{0} Add null", BuildingType);
                 return;
             }
@@ -55,10 +47,8 @@ namespace RsTransferPort
             OnAdd(item);
         }
 
-        public void Remove(TransferPortChannel item)
-        {
-            if (item == null)
-            {
+        public void Remove(TransferPortChannel item) {
+            if (item == null) {
                 return;
             }
             if (item.InOutType == InOutType.Receiver)
@@ -69,60 +59,48 @@ namespace RsTransferPort
             OnRemove(item);
         }
 
-        protected virtual void OnAdd(TransferPortChannel item)
-        {
+        protected virtual void OnAdd(TransferPortChannel item) {
         }
 
-        protected virtual void OnRemove(TransferPortChannel item)
-        {
-            
+        protected virtual void OnRemove(TransferPortChannel item) {
+
         }
 
-        public virtual bool Contains(TransferPortChannel item)
-        {
+        public virtual bool Contains(TransferPortChannel item) {
             return all.Contains(item);
         }
 
-        protected virtual void OnInit()
-        {
-            
+        protected virtual void OnInit() {
+
         }
-        public virtual void OnSpawn()
-        {
+        public virtual void OnSpawn() {
         }
 
-        public virtual void OnConUpdate()
-        {
+        public virtual void OnConUpdate() {
         }
 
-        public virtual void OnCleanUp()
-        {
+        public virtual void OnCleanUp() {
             senders = null;
             receivers = null;
             all = null;
         }
 
-        public bool IsInvalid()
-        {
+        public bool IsInvalid() {
             return string.IsNullOrEmpty(ChannelName);
         }
 
 
-        public int CompareTo(SingleChannelController other)
-        {
+        public int CompareTo(SingleChannelController other) {
             if (ReferenceEquals(this, other)) return 0;
-            if (ReferenceEquals(null, other)) return 1;
+            if (other is null) return 1;
             return string.Compare(ChannelName, other.ChannelName, StringComparison.Ordinal);
         }
 
-        public ICollection<WorldContainer> GetIncludeWorldContainer()
-        {
+        public ICollection<WorldContainer> GetIncludeWorldContainer() {
             HashSet<WorldContainer> worldContainers = new HashSet<WorldContainer>();
-            foreach (TransferPortChannel channel in all)
-            {
+            foreach (TransferPortChannel channel in all) {
                 WorldContainer myWorld = channel.GetMyWorld();
-                if (myWorld != null)
-                {
+                if (myWorld != null) {
                     worldContainers.Add(myWorld);
                 }
             }
