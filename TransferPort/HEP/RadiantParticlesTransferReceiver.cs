@@ -1,21 +1,18 @@
 ﻿using KSerialization;
-using RsLib;
 using UnityEngine;
 
-namespace RsTransferPort
-{
+namespace RsTransferPort {
     public class RadiantParticlesTransferReceiver :
         StateMachineComponent<RadiantParticlesTransferReceiver.StatesInstance>,
-        IMyHighEnergyParticleDirection
-    {
-        
+        IMyHighEnergyParticleDirection {
+
         // public static HashedString PORT_ID = "RadiantParticlesTransferReceiver";
-        
+
         [MyCmpReq]
         private KSelectable selectable;
         [MyCmpGet]
         private HighEnergyParticlePort port;
-        
+
         [MyCmpGet]
         private KBatchedAnimController anim;
 
@@ -28,27 +25,19 @@ namespace RsTransferPort
         [Serialize] private EightDirection _direction;
 
         private EightDirectionController directionController;
-        
+
         public float directorDelay = 0.5f;
 
         /// <summary>
-        /// 是否需要发射
-        /// </summary>
-        // private bool needLaunch = false;
-
-        
-        /// <summary>
         /// 是否可用传送
         /// </summary>
-        public bool Transmissible => operational != null && operational.IsOperational ;
+        public bool Transmissible => operational != null && operational.IsOperational;
 
-        public EightDirection Direction
-        {
+        public EightDirection Direction {
             get => _direction;
-            set
-            {
+            set {
                 _direction = value;
-                
+
                 directionController.SetRotation(45 * EightDirectionUtil.GetDirectionIndex(_direction));
                 directionController.controller.enabled = false;
                 directionController.controller.enabled = true;
@@ -56,13 +45,11 @@ namespace RsTransferPort
         }
 
 
-        protected override void OnPrefabInit()
-        {
+        protected override void OnPrefabInit() {
             base.OnPrefabInit();
         }
 
-        protected override void OnSpawn()
-        {
+        protected override void OnSpawn() {
             base.OnSpawn();
             // Subscribe((int) GameHashes.OperationalChanged, OnOperationalChanged);
             directionController = new EightDirectionController(GetComponent<KBatchedAnimController>(),
@@ -71,38 +58,31 @@ namespace RsTransferPort
             this.smi.StartSM();
         }
 
-        
-        protected override void OnCleanUp()
-        {
+
+        protected override void OnCleanUp() {
             base.OnCleanUp();
         }
-        
-        public int GetInputSignal()
-        {
+
+        public int GetInputSignal() {
             return GetComponent<LogicPorts>().GetInputValue(LogicOperationalController.PORT_ID);
         }
 
 
-        public float StoreAndLaunch(float amount)
-        {
-            if (amount <= 0)
-            {
+        public float StoreAndLaunch(float amount) {
+            if (amount <= 0) {
                 return 0;
             }
             return storage.Store(amount);
         }
 
 
-        private void LaunchParticle()
-        {
-            if (storage.Particles < 0.100000001490116)
-            {
+        private void LaunchParticle() {
+            if (storage.Particles < 0.100000001490116) {
                 storage.ConsumeAll();
             }
-            else
-            {
+            else {
                 int particleOutputCell = GetComponent<Building>().GetHighEnergyParticleOutputCell();
-                GameObject gameObject = GameUtil.KInstantiate(global::Assets.GetPrefab((Tag) "HighEnergyParticle"),
+                GameObject gameObject = GameUtil.KInstantiate(global::Assets.GetPrefab((Tag)"HighEnergyParticle"),
                     Grid.CellToPosCCC(particleOutputCell, Grid.SceneLayer.FXFront2), Grid.SceneLayer.FXFront2);
                 gameObject.SetActive(true);
                 if (!(gameObject != null))
@@ -116,22 +96,17 @@ namespace RsTransferPort
             }
         }
 
-        public class StatesInstance : GameStateMachine<States, StatesInstance, RadiantParticlesTransferReceiver, object>.GameInstance
-        {
-            public StatesInstance(RadiantParticlesTransferReceiver smi) : base(smi) {
-            }
+        public class StatesInstance : GameStateMachine<States, StatesInstance, RadiantParticlesTransferReceiver, object>.GameInstance {
+            public StatesInstance(RadiantParticlesTransferReceiver smi) : base(smi) { }
         }
 
         public class States : GameStateMachine<States, StatesInstance,
-                RadiantParticlesTransferReceiver>
-        {
+                RadiantParticlesTransferReceiver> {
             public State off;
             public State ready;
-            // public State launch_pre;
             public State launch;
 
-            public override void InitializeStates(out BaseState default_state)
-            {
+            public override void InitializeStates(out BaseState default_state) {
                 default_state = off;
                 off.PlayAnim("off")
                     .Enter(smi => smi.master.directionController.PlayAnim("redirector_off"))
@@ -141,7 +116,7 @@ namespace RsTransferPort
                     .Enter(smi => smi.master.directionController.PlayAnim("redirector_on", KAnim.PlayMode.Loop))
                     .TagTransition(GameTags.Operational, off, true)
                     .UpdateTransition(launch, (smi, dt) => !smi.master.storage.IsEmpty(), UpdateRate.SIM_200ms);
-                    // .EventTransition(GameHashes.OnParticleStorageChanged, launch);
+                // .EventTransition(GameHashes.OnParticleStorageChanged, launch);
 
                 // launch_pre.PlayAnim("on").ScheduleGoTo(smi => smi.master.directorDelay, launch);
                 launch.PlayAnim("on")

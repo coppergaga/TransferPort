@@ -1,14 +1,10 @@
-﻿using System;
-using KSerialization;
-using UnityEngine;
+﻿using KSerialization;
 
-namespace RsTransferPort
-{
+namespace RsTransferPort {
     public class RadiantParticlesTransferSender :
-        StateMachineComponent<RadiantParticlesTransferSender.StatesInstance>
-    {
+        StateMachineComponent<RadiantParticlesTransferSender.StatesInstance> {
         public static HashedString PORT_ID = "RadiantParticlesTransferSender";
-        
+
         [MyCmpReq]
         private KSelectable selectable;
         [MyCmpReq]
@@ -19,17 +15,17 @@ namespace RsTransferPort
         private LogicPorts logicPorts;
         [MyCmpReq]
         private Operational operational;
-        
+
         [Serialize] private EightDirection _direction;
 
         private EightDirectionController directionController;
-        
+
         public float directorDelay = 0.5f;
 
         private bool hasLogicWire;
 
         private static StatusItem infoStatusItem;
-        
+
         public static Operational.Flag receiverFlag = new Operational.Flag("ParticlesTransferSenderFlag", Operational.Flag.Type.Requirement);
 
         private bool m_receiverAllow = false;
@@ -37,11 +33,9 @@ namespace RsTransferPort
         /// <summary>
         /// 接收端可用,受频道控制
         /// </summary>
-        public bool receiverAllow
-        {
+        public bool ReceiverAllow {
             get => m_receiverAllow;
-            set
-            {
+            set {
                 m_receiverAllow = value;
                 GetComponent<KSelectable>().ToggleStatusItem(infoStatusItem, !value);
                 operational.SetFlag(receiverFlag, value);
@@ -49,43 +43,36 @@ namespace RsTransferPort
             }
         }
 
-        protected override void OnPrefabInit()
-        {
+        protected override void OnPrefabInit() {
             base.OnPrefabInit();
-            if (infoStatusItem == null)
-            {
+            if (infoStatusItem == null) {
                 infoStatusItem = new StatusItem("RsRadiantParticlesTransferSenderInfo", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID);
             }
         }
-        
-        protected override void OnSpawn()
-        {
+
+        protected override void OnSpawn() {
             base.OnSpawn();
             port.onParticleCaptureAllowed += OnParticleCaptureAllowed;
             smi.StartSM();
         }
 
-        private bool OnParticleCaptureAllowed(HighEnergyParticle particle) => receiverAllow;
-        
+        private bool OnParticleCaptureAllowed(HighEnergyParticle particle) => ReceiverAllow;
+
         public class StatesInstance :
-            GameStateMachine<States, StatesInstance, RadiantParticlesTransferSender, object>.GameInstance
-        {
+            GameStateMachine<States, StatesInstance, RadiantParticlesTransferSender, object>.GameInstance {
             public StatesInstance(RadiantParticlesTransferSender smi)
-                : base(smi)
-            {
+                : base(smi) {
             }
         }
 
         public class States :
             GameStateMachine<States, StatesInstance,
-                RadiantParticlesTransferSender>
-        {
+                RadiantParticlesTransferSender> {
             public State inoperational;
             public State ready;
             public State redirect;
 
-            public override void InitializeStates(out BaseState default_state)
-            {
+            public override void InitializeStates(out BaseState default_state) {
                 default_state = inoperational;
                 inoperational.PlayAnim("off").TagTransition(GameTags.Operational, ready);
                 ready.PlayAnim("on", KAnim.PlayMode.Loop).TagTransition(GameTags.Operational, inoperational, true)

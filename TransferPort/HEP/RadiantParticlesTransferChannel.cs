@@ -1,75 +1,59 @@
-﻿namespace RsTransferPort
-{
-    public class RadiantParticlesTransferChannel : SingleChannelController
-    {
+﻿namespace RsTransferPort {
+    public class RadiantParticlesTransferChannel : SingleChannelController {
         public RadiantParticlesTransferChannel(BuildingType buildingType, string channelName, int worldIdAG) : base(
-            buildingType, channelName, worldIdAG)
-        {
+            buildingType, channelName, worldIdAG) {
         }
 
         private int senderIndex;
         private int receiverIndex;
 
-        protected override void OnAdd(PortItem item)
-        {
+        protected override void OnAdd(PortItem item) {
             if (IsInvalid()) return;
-            if (item.InOutType == InOutType.Sender)
-            {
-                item.Subscribe((int) GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
+            if (item.InOutType == InOutType.Sender) {
+                item.Subscribe((int)GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
             }
-            else
-            {
-                item.Subscribe((int) GameHashes.OperationalChanged, OnReceiverOperationalChange);
+            else {
+                item.Subscribe((int)GameHashes.OperationalChanged, OnReceiverOperationalChange);
             }
 
             SyncSignal();
         }
 
-        protected override void OnRemove(PortItem item)
-        {
+        protected override void OnRemove(PortItem item) {
             if (IsInvalid()) return;
-            if (item.InOutType == InOutType.Sender)
-            {
-                item.Unsubscribe((int) GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
-                item.GetComponent<RadiantParticlesTransferSender>().receiverAllow = false;
+            if (item.InOutType == InOutType.Sender) {
+                item.Unsubscribe((int)GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
+                item.GetComponent<RadiantParticlesTransferSender>().ReceiverAllow = false;
             }
-            else
-            {
-                item.Unsubscribe((int) GameHashes.OperationalChanged, OnReceiverOperationalChange);
+            else {
+                item.Unsubscribe((int)GameHashes.OperationalChanged, OnReceiverOperationalChange);
             }
 
             SyncSignal();
         }
 
-        private void OnParticleStorageChanged(object data)
-        {
+        private void OnParticleStorageChanged(object data) {
             Update();
         }
 
-        private void Update()
-        {
+        private void Update() {
             var receiverIndexCount = 0; //循环次数计算
-            //设置一次只能传送一种液体
-            for (var i = 0; i < senders.Count; i++)
-            {
+            for (var i = 0; i < senders.Count; i++) {
                 if (receiverIndexCount == receivers.Count) return;
 
-                senderIndex = senderIndex % senders.Count;
+                senderIndex %= senders.Count;
                 var sender = senders[senderIndex].GetComponent<RadiantParticlesTransferSender>();
-                if (!sender.storage.HasRadiation())
-                {
+                if (!sender.storage.HasRadiation()) {
                     senderIndex++;
                     continue;
                 }
 
-                if (receiverIndex >= receivers.Count) receiverIndex = 0;
-                while (receiverIndexCount < receivers.Count)
-                {
+                if (receiverIndex >= receivers.Count) { receiverIndex = 0; }
+                while (receiverIndexCount < receivers.Count) {
                     var receiver = receivers[receiverIndex].GetComponent<RadiantParticlesTransferReceiver>();
                     receiverIndex = ++receiverIndex % receivers.Count;
                     receiverIndexCount++;
-                    if (receiver.Transmissible)
-                    {
+                    if (receiver.Transmissible) {
                         float amount = sender.storage.ConsumeAll();
                         //这里需要计算入口到出口的距离，销毁一定量的粒子
                         receiver.StoreAndLaunch(amount);
@@ -80,35 +64,28 @@
             }
         }
 
-        public void OnReceiverOperationalChange(object data)
-        {
+        public void OnReceiverOperationalChange(object data) {
             SyncSignal();
         }
 
         /// <summary>
         ///     输入逻辑信号改变
         /// </summary>
-        public void SyncSignal()
-        {
-            var signal = hasOutletEnable();
-            foreach (PortItem sender in senders)
-            {
+        public void SyncSignal() {
+            var signal = HasOutletEnable();
+            foreach (PortItem sender in senders) {
                 RadiantParticlesTransferSender particlesTransferSender =
                     sender.GetComponent<RadiantParticlesTransferSender>();
-                if (particlesTransferSender != null)
-                {
-                    particlesTransferSender.receiverAllow = signal;
+                if (particlesTransferSender != null) {
+                    particlesTransferSender.ReceiverAllow = signal;
                 }
             }
         }
 
-        private bool hasOutletEnable()
-        {
-            foreach (PortItem receiver in receivers)
-            {
+        private bool HasOutletEnable() {
+            foreach (PortItem receiver in receivers) {
                 RadiantParticlesTransferReceiver transferReceiver = receiver.GetComponent<RadiantParticlesTransferReceiver>();
-                if (transferReceiver != null && transferReceiver.Transmissible)
-                {
+                if (transferReceiver != null && transferReceiver.Transmissible) {
                     return true;
                 }
             }
