@@ -5,7 +5,7 @@
         IHaveUtilityNetworkMgr,
         ICircuitConnected
     {
-        [MyCmpGet] public TransferPortChannel channelItem;
+        [MyCmpGet] public PortItem channelItem;
 
         public object VirtualCircuitKey { get; private set; }
 

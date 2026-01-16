@@ -6,9 +6,9 @@ namespace RsTransferPort {
         public BuildingType BuildingType { get; }
         public string ChannelName { get; }
 
-        public List<TransferPortChannel> senders = new List<TransferPortChannel>();
-        public List<TransferPortChannel> receivers = new List<TransferPortChannel>();
-        public List<TransferPortChannel> all = new List<TransferPortChannel>();
+        public List<PortItem> senders = new List<PortItem>();
+        public List<PortItem> receivers = new List<PortItem>();
+        public List<PortItem> all = new List<PortItem>();
 
         public int Total => all.Count;
         public int WorldIdAG { get; } // -1表示全球 
@@ -32,7 +32,7 @@ namespace RsTransferPort {
             OnInit();
         }
 
-        public void Add(TransferPortChannel item) {
+        public void Add(PortItem item) {
 
             if (item == null) {
                 Debug.LogErrorFormat("SingleChannelController buildingType:{0} Add null", BuildingType);
@@ -47,7 +47,7 @@ namespace RsTransferPort {
             OnAdd(item);
         }
 
-        public void Remove(TransferPortChannel item) {
+        public void Remove(PortItem item) {
             if (item == null) {
                 return;
             }
@@ -59,14 +59,14 @@ namespace RsTransferPort {
             OnRemove(item);
         }
 
-        protected virtual void OnAdd(TransferPortChannel item) {
+        protected virtual void OnAdd(PortItem item) {
         }
 
-        protected virtual void OnRemove(TransferPortChannel item) {
+        protected virtual void OnRemove(PortItem item) {
 
         }
 
-        public virtual bool Contains(TransferPortChannel item) {
+        public virtual bool Contains(PortItem item) {
             return all.Contains(item);
         }
 
@@ -98,7 +98,7 @@ namespace RsTransferPort {
 
         public ICollection<WorldContainer> GetIncludeWorldContainer() {
             HashSet<WorldContainer> worldContainers = new HashSet<WorldContainer>();
-            foreach (TransferPortChannel channel in all) {
+            foreach (PortItem channel in all) {
                 WorldContainer myWorld = channel.GetMyWorld();
                 if (myWorld != null) {
                     worldContainers.Add(myWorld);

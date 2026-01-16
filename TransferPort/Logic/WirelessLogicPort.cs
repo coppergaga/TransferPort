@@ -3,7 +3,7 @@ namespace RsTransferPort
 {
     public class WirelessLogicPort : KMonoBehaviour
     {
-        [MyCmpGet] public TransferPortChannel channelItem;
+        [MyCmpGet] public PortItem channelItem;
         public InOutType inOutType;
         public HashedString portId;
 

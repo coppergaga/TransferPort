@@ -85,7 +85,6 @@
     <Compile Include="Common\MyResource.cs" />
     <Compile Include="Common\MyUtils.cs" />
     <Compile Include="Common\MyUtilsExtend1.cs" />
-    <Compile Include="Common\PortalUtilityNetworkLinkContainer.cs" />
     <Compile Include="Common\PortChannelKey.cs" />
     <Compile Include="Common\PortManager.cs" />
     <Compile Include="Common\PriorityChannelItemInfo.cs" />
@@ -96,16 +95,12 @@
     <Compile Include="Common\Types.cs" />
     <Compile Include="Components\LineArrow.cs" />
     <Compile Include="Components\LineCenterImage.cs" />
-    <Compile Include="Components\MyCopyBuildingSettings.cs" />
     <Compile Include="Components\PriorityImage.cs" />
     <Compile Include="Components\ShowOverlaySelf.cs" />
-    <Compile Include="Components\TransferPortChannel.cs" />
-    <Compile Include="Components\UniqueUserNameable.cs" />
-    <Compile Include="Components\UVAnimate.cs" />
+    <Compile Include="Components\PortItem.cs" />
     <Compile Include="Conduit\TransferConduit.cs" />
     <Compile Include="Conduit\TransferConduitChannel.cs" />
     <Compile Include="Conduit\TransferConduitConfig.cs" />
-    <Compile Include="Conduit\TransferConduitManager.cs" />
     <Compile Include="HEP\RadiantParticlesTransferChannel.cs" />
     <Compile Include="HEP\RadiantParticlesTransferConfig.cs" />
     <Compile Include="HEP\RadiantParticlesTransferReceiver.cs" />

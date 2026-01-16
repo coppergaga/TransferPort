@@ -1,6 +1,6 @@
 ﻿namespace RsTransferPort {
     public class ShowOverlaySelf : KMonoBehaviour {
-        [MyCmpReq] private TransferPortChannel channelItem;
+        [MyCmpReq] private PortItem channelItem;
 
         protected override void OnPrefabInit() {
             base.OnPrefabInit();

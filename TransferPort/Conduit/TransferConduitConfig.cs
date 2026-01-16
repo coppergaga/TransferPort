@@ -171,7 +171,7 @@ namespace RsTransferPort
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
             go.AddOrGet<CopyBuildingSettings>().copyGroupTag = Tags.TransferConduit;
-            var channel = go.AddOrGet<TransferPortChannel>();
+            var channel = go.AddOrGet<PortItem>();
             channel.BuildingType = Converter.FromConduitType(conduitType);
             channel.InOutType = inOutType;
 

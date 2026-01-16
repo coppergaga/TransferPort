@@ -30,7 +30,7 @@ namespace RsTransferPort
         [SerializeField] private RsHierarchyReferences worldInfoPrefab;
         [SerializeField] private CandidateNameScreen candidateNameScreenPrefab;
 
-        private TransferPortChannel target;
+        private PortItem target;
         private bool needRefresh = true;
         private RsInterval refreshInterval = new RsInterval(1);
         private bool isBatchMode = false;
@@ -266,7 +266,7 @@ namespace RsTransferPort
         
         public override bool IsValidForTarget(GameObject target)
         {
-            return target.GetComponent<TransferPortChannel>() != null;
+            return target.GetComponent<PortItem>() != null;
         }
 
         public override void SetTarget(GameObject new_target)
@@ -276,7 +276,7 @@ namespace RsTransferPort
                 return;
             }
 
-            target = new_target.GetComponent<TransferPortChannel>();
+            target = new_target.GetComponent<PortItem>();
             RefreshCandidateNameState();
             SetBatchRenameState(isBatchMode);
             Refresh();

@@ -1,14 +1,16 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using KSerialization;
-using RsLib;
 using UnityEngine;
-using Object = System.Object;
 
 namespace RsTransferPort {
-    public class TransferPortChannel : KMonoBehaviour, ISaveLoadable {
-        public delegate void PriorityChangeDelegate(TransferPortChannel target, int newPriority, int oldPriority);
+    [Obsolete("use PortItem instead")]
+    public class TransferPortChannel : PortItem { }
+
+    /// <summary>
+    /// 传送端口中 固/液/气/辐射/电力端口的ViewModel类
+    /// </summary>
+    public class PortItem : KMonoBehaviour, ISaveLoadable {
+        public delegate void PriorityChangeDelegate(PortItem target, int newPriority, int oldPriority);
         /// <summary>
         /// 连接状态
         /// </summary>
@@ -63,9 +65,7 @@ namespace RsTransferPort {
             get => priority;
         }
 
-        public PortChannelKey ChannelKey {
-            get => new PortChannelKey(ChannelName, WorldIdAG, buildingType);
-        }
+        public PortChannelKey ChannelKey => new PortChannelKey(ChannelName, WorldIdAG, buildingType);
 
         public int WorldIdAG => IsGlobal ? PortManager.GLOBAL_CHANNEL_WORLD_ID : this.GetMyWorldId();
 
@@ -138,7 +138,7 @@ namespace RsTransferPort {
 
         protected void OnCopySettings(object data) {
             if (data is GameObject source && source != gameObject) {
-                TransferPortChannel sourceChannelItem = source.GetComponent<TransferPortChannel>();
+                PortItem sourceChannelItem = source.GetComponent<PortItem>();
                 if (sourceChannelItem != null) {
                     CheckSetChannelNameAndGlobal(sourceChannelItem.ChannelName, sourceChannelItem.isGlobal, sourceChannelItem.priority);
                 }
@@ -173,7 +173,7 @@ namespace RsTransferPort {
 
             if (newName != null) {
                 newName = newName.Trim();
-                if (!Object.Equals(channelName, newName)) {
+                if (!System.Object.Equals(channelName, newName)) {
                     channelName = newName;
                     triggerAddOrRemove = true;
                     triggerChannelChange = true;

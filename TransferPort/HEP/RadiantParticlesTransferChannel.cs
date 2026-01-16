@@ -10,7 +10,7 @@
         private int senderIndex;
         private int receiverIndex;
 
-        protected override void OnAdd(TransferPortChannel item)
+        protected override void OnAdd(PortItem item)
         {
             if (IsInvalid()) return;
             if (item.InOutType == InOutType.Sender)
@@ -25,7 +25,7 @@
             SyncSignal();
         }
 
-        protected override void OnRemove(TransferPortChannel item)
+        protected override void OnRemove(PortItem item)
         {
             if (IsInvalid()) return;
             if (item.InOutType == InOutType.Sender)
@@ -91,7 +91,7 @@
         public void SyncSignal()
         {
             var signal = hasOutletEnable();
-            foreach (TransferPortChannel sender in senders)
+            foreach (PortItem sender in senders)
             {
                 RadiantParticlesTransferSender particlesTransferSender =
                     sender.GetComponent<RadiantParticlesTransferSender>();
@@ -104,7 +104,7 @@
 
         private bool hasOutletEnable()
         {
-            foreach (TransferPortChannel receiver in receivers)
+            foreach (PortItem receiver in receivers)
             {
                 RadiantParticlesTransferReceiver transferReceiver = receiver.GetComponent<RadiantParticlesTransferReceiver>();
                 if (transferReceiver != null && transferReceiver.Transmissible)

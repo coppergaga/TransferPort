@@ -106,7 +106,7 @@ namespace RsTransferPort
                 go.AddOrGet<Operational>().SetFlag(LogicOperationalController.LogicOperationalFlag, false);
             }
             
-            TransferPortChannel channel = go.AddOrGet<TransferPortChannel>();
+            PortItem channel = go.AddOrGet<PortItem>();
             channel.BuildingType = BuildingType.HEP;
             channel.InOutType = inOutType;
         }

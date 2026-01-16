@@ -225,7 +225,7 @@ namespace RsTransferPort {
                 base.Disable();
             }
 
-            public void OnChannelChange(TransferPortChannel channel) {
+            public void OnChannelChange(PortItem channel) {
                 needRefresh = true;
             }
 
@@ -285,7 +285,7 @@ namespace RsTransferPort {
                 if (OpShowPriorityInfo) {
                     foreach (List<GameObject> channel in filterChannels) {
                         foreach (GameObject gameObject in channel) {
-                            TransferPortChannel portChannel = gameObject.GetComponent<TransferPortChannel>();
+                            PortItem portChannel = gameObject.GetComponent<PortItem>();
                             int priority = portChannel.Priority;
                             if (MyUtils.IsUsePriority(portChannel.BuildingType)) {
                                 Vector3 position = gameObject.transform.position + new Vector3(0, 0.5f, 0);
@@ -316,7 +316,7 @@ namespace RsTransferPort {
                     foreach (var channel in channels)
                         if (NeedShowChannel(channel)) {
                             filterChannels.NextLine();
-                            foreach (TransferPortChannel obj in channel.all) {
+                            foreach (PortItem obj in channel.all) {
                                 if (obj.GetMyWorldId() == activeWorldId) filterChannels.Add(obj.gameObject);
                             }
 
@@ -372,7 +372,7 @@ namespace RsTransferPort {
                         continue;
                     }
 
-                    TransferPortChannel component = channelObjects[0].GetComponent<TransferPortChannel>();
+                    PortItem component = channelObjects[0].GetComponent<PortItem>();
 
                     if (string.IsNullOrEmpty(component.ChannelName)) {
                         continue;
@@ -401,7 +401,7 @@ namespace RsTransferPort {
 
             private void UpdateLabelFromChannel(ICollection<GameObject> items) {
                 foreach (var item in items) {
-                    var transferPortChannel = item.GetComponent<TransferPortChannel>();
+                    var transferPortChannel = item.GetComponent<PortItem>();
                     if (transferPortChannel == null) continue;
 
 
@@ -440,7 +440,7 @@ namespace RsTransferPort {
                 center.y += 0.5f;
 
                 foreach (var item in items) {
-                    var transferPortChannel = item.GetComponent<TransferPortChannel>();
+                    var transferPortChannel = item.GetComponent<PortItem>();
                     var endPos = item.transform.position;
                     if (transferPortChannel == null) continue;
 

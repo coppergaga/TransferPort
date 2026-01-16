@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RsTransferPort {
     public class PriorityChannelItemInfo : IComparable<PriorityChannelItemInfo> {
         public int priority = 0;
-        public List<TransferPortChannel> items = new List<TransferPortChannel>();
+        public List<PortItem> items = new List<PortItem>();
         /// <summary>
         /// 轮询索引
         /// </summary>
@@ -31,7 +31,7 @@ namespace RsTransferPort {
             }
         }
 
-        public TransferPortChannel GetItemByPollIndex() {
+        public PortItem GetItemByPollIndex() {
             return items[pollIndex];
         }
 

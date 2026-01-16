@@ -29,11 +29,11 @@ namespace RsTransferPort {
         public int Count => priorityList.Count;
         public bool IsReadOnly => true;
 
-        public void AddChannelItem(TransferPortChannel item) {
+        public void AddChannelItem(PortItem item) {
             AddChannelItem(item, true);
         }
 
-        private void AddChannelItem(TransferPortChannel item, bool addEvent) {
+        private void AddChannelItem(PortItem item, bool addEvent) {
             PriorityChannelItemInfo itemInfo = GetOrAddPriorityInfo(item.Priority);
             itemInfo.items.Add(item);
             if (addEvent) {
@@ -41,16 +41,16 @@ namespace RsTransferPort {
             }
         }
 
-        private void ItemOnOnPriorityChange(TransferPortChannel channel, int newPriority, int oldPriority) {
+        private void ItemOnOnPriorityChange(PortItem channel, int newPriority, int oldPriority) {
             RemoveChannelItem(channel, false);
             AddChannelItem(channel, false);
         }
 
-        public void RemoveChannelItem(TransferPortChannel item) {
+        public void RemoveChannelItem(PortItem item) {
             RemoveChannelItem(item, true);
         }
 
-        public void RemoveChannelItem(TransferPortChannel item, bool removeEvent) {
+        public void RemoveChannelItem(PortItem item, bool removeEvent) {
             foreach (PriorityChannelItemInfo info in priorityList) {
                 if (info.items.Remove(item)) {
                     if (removeEvent) {

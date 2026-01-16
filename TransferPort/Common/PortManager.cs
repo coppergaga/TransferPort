@@ -6,7 +6,7 @@ namespace RsTransferPort {
     public class PortManager : SingleManager<PortManager> {
         public const int GLOBAL_CHANNEL_WORLD_ID = -1;
 
-        private readonly Dictionary<TransferPortChannel, PortChannelKey> allPort = new Dictionary<TransferPortChannel, PortChannelKey>();
+        private readonly Dictionary<PortItem, PortChannelKey> allPort = new Dictionary<PortItem, PortChannelKey>();
 
         private readonly HashSet<SingleChannelController> allChannel = new HashSet<SingleChannelController>();
 
@@ -20,18 +20,18 @@ namespace RsTransferPort {
                 [BuildingType.HEP] = new Dictionary<PortChannelKey, SingleChannelController>(),
             };
 
-        public event Action<TransferPortChannel> OnChannelChange;
+        public event Action<PortItem> OnChannelChange;
 
         /// <summary>
         /// 开启跨行星频道
         /// </summary>
         // public bool EnableGlobalChannel { get; private set; }
 
-        private int GetWorldIdAG(TransferPortChannel portChannelItem) {
+        private int GetWorldIdAG(PortItem portChannelItem) {
             return portChannelItem.IsGlobal ? GLOBAL_CHANNEL_WORLD_ID : portChannelItem.GetMyWorldId();
         }
 
-        public void Add(TransferPortChannel portChannelItem) {
+        public void Add(PortItem portChannelItem) {
             if (Contains(portChannelItem)) {
                 //throw new Exception("Repeat addition PortChannelItem");
                 return;
@@ -63,11 +63,11 @@ namespace RsTransferPort {
 
         }
 
-        public bool Contains(TransferPortChannel portChannelItem) {
+        public bool Contains(PortItem portChannelItem) {
             return allPort.ContainsKey(portChannelItem);
         }
 
-        public void Remove(TransferPortChannel portChannelItem) {
+        public void Remove(PortItem portChannelItem) {
             if (!Contains(portChannelItem))
                 return;
 
@@ -88,7 +88,7 @@ namespace RsTransferPort {
             allPort.Remove(portChannelItem);
         }
 
-        public void TriggerChannelChange(TransferPortChannel target) {
+        public void TriggerChannelChange(PortItem target) {
             OnChannelChange?.Invoke(target);
         }
 
@@ -97,7 +97,7 @@ namespace RsTransferPort {
                 return;
             }
 
-            foreach (TransferPortChannel channel in controller.all.ToList()) {
+            foreach (PortItem channel in controller.all.ToList()) {
                 channel.CheckSetChannelNameAndGlobal(newName, global, channel.Priority);
             }
         }
@@ -107,7 +107,7 @@ namespace RsTransferPort {
                 return;
             }
 
-            foreach (TransferPortChannel channel in controller.all.ToList()) {
+            foreach (PortItem channel in controller.all.ToList()) {
                 channel.CheckSetPriority(priority);
             }
         }
@@ -156,11 +156,11 @@ namespace RsTransferPort {
             return allChannel;
         }
 
-        public ICollection<TransferPortChannel> GetAllPort() {
+        public ICollection<PortItem> GetAllPort() {
             return allPort.Keys;
         }
 
-        public SingleChannelController GetChannelController(TransferPortChannel item) {
+        public SingleChannelController GetChannelController(PortItem item) {
             if (!allPort.TryGetValue(item, out PortChannelKey channelKey)) {
                 return null;
             }

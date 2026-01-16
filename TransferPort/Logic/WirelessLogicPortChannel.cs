@@ -3,7 +3,7 @@ namespace RsTransferPort
 {
     public class WirelessLogicPortChannel : SingleChannelController
     {
-        protected override void OnAdd(TransferPortChannel port)
+        protected override void OnAdd(PortItem port)
         {
 
             if (IsInvalid())
@@ -18,7 +18,7 @@ namespace RsTransferPort
             SyncSignal();
         }
 
-        protected override void OnRemove(TransferPortChannel port)
+        protected override void OnRemove(PortItem port)
         {
             if (IsInvalid())
             {
@@ -50,7 +50,7 @@ namespace RsTransferPort
             //开始同步信号
             if (receivers.Count == 0) return;
             var signal = GetSignal();
-            foreach (TransferPortChannel receiver in receivers) receiver.GetComponent<WirelessLogicPort>().SendSignal(signal);
+            foreach (PortItem receiver in receivers) receiver.GetComponent<WirelessLogicPort>().SendSignal(signal);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace RsTransferPort
         {
             int signal = 0;
 
-            foreach (TransferPortChannel sender in senders)
+            foreach (PortItem sender in senders)
             {
                 int inputSignal = sender.GetComponent<WirelessLogicPort>().GetInputSignal();
                 signal = signal | inputSignal;
