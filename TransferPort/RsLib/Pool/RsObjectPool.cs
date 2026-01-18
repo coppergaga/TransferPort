@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RsLib.Pool
-{
+namespace RsLib.Pool {
     public class RsObjectPool<T> {
         private readonly Stack<T> pool = new Stack<T>();
         private readonly Func<T> createFn;
@@ -13,10 +12,8 @@ namespace RsLib.Pool
             this.releaseFn = releaseFn;
         }
 
-        public T Get()
-        {
-            if (!pool.TryPop(out T last))
-            {
+        public T Get() {
+            if (!pool.TryPop(out T last)) {
                 last = createFn();
                 pool.Push(last);
             }
@@ -24,20 +21,16 @@ namespace RsLib.Pool
             return last;
         }
 
-        public void Release(T t)
-        {
+        public void Release(T t) {
             pool.Push(t);
             releaseFn(t);
         }
     }
 }
 
-public static class StackExtensions
-{
-    public static bool TryPop<T>(this Stack<T> stack, out T result)
-    {
-        if (stack.Count > 0)
-        {
+public static class StackExtensions {
+    public static bool TryPop<T>(this Stack<T> stack, out T result) {
+        if (stack.Count > 0) {
             result = stack.Pop();
             return true;
         }
