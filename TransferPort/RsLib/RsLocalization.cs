@@ -5,23 +5,17 @@ using HarmonyLib;
 using KMod;
 using Newtonsoft.Json.Linq;
 
-namespace RsLib
-{
-    public class RsLocalization : RsModule<RsLocalization>
-    {
+namespace RsLib {
+    public class RsLocalization : RsModule<RsLocalization> {
         protected HashSet<Type> addStringsTypes = new HashSet<Type>();
-
-
         protected HashSet<Type> loadTypes = new HashSet<Type>();
 
-        protected override void Initialized()
-        {
+        protected override void Initialized() {
             Harmony.Patch(typeof(Localization), "Initialize",
                 postfix: new HarmonyMethod(typeof(RsLocalization), nameof(Localization_Initialize_Patch)));
         }
 
-        private static void Localization_Initialize_Patch()
-        {
+        private static void Localization_Initialize_Patch() {
             foreach (var type in Instance.loadTypes) Load(type, Instance.Mod);
             foreach (var type in Instance.addStringsTypes) CreateLocStringKeys(type);
         }
@@ -30,20 +24,17 @@ namespace RsLib
         ///     注册从mod位置的translations位置读取翻译内容
         /// </summary>
         /// <param name="type"></param>
-        public RsLocalization RegisterLoad(Type type)
-        {
+        public RsLocalization RegisterLoad(Type type) {
             loadTypes.Add(type);
             return this;
         }
 
-        public RsLocalization RegisterAddStrings(Type type)
-        {
+        public RsLocalization RegisterAddStrings(Type type) {
             addStringsTypes.Add(type);
             return this;
         }
 
-        public static void Load(Type type, Mod mod)
-        {
+        public static void Load(Type type, Mod mod) {
             var localeCode = Localization.GetLocale()?.Code;
             if (localeCode.IsNullOrWhiteSpace()) return;
             //json文件
@@ -81,8 +72,7 @@ namespace RsLib
             }
         }
 
-        public static void CreateLocStringKeys(Type type)
-        {
+        public static void CreateLocStringKeys(Type type) {
             LocString.CreateLocStringKeys(type);
         }
     }

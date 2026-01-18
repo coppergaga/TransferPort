@@ -24,27 +24,6 @@ namespace RsLib {
             return str;
         }
 
-        public static void AddBuildingToTech(string techID, string buildingID) {
-            var tech = Db.Get().Techs.Get(techID);
-            var flag = tech != null;
-            if (flag)
-                tech.unlockedItemIDs.Add(buildingID);
-            else
-                Debug.LogWarning("AddBuildingToTech() Failed to find tech ID: " + techID);
-        }
-
-        public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID) {
-            ModUtil.AddBuildingToPlanScreen(category, buildingID);
-            AddBuildingToTech(techID, buildingID);
-        }
-
-        public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID,
-            string subcategoryID) {
-            ModUtil.AddBuildingToPlanScreen(category, buildingID, subcategoryID);
-            AddBuildingToTech(techID, buildingID);
-        }
-
-
         public static void ContrastSet<T>(ISet<T> source, ISet<T> target, Action<T> onAdd = null, Action<T> onRemove = null) {
             ISet<T> oldTarget = new HashSet<T>(target);
             foreach (T x1 in source) {
@@ -61,7 +40,6 @@ namespace RsLib {
                 onRemove?.Invoke(x1);
             }
         }
-
 
         /// <summary>
         /// 散点就近有序连接排序

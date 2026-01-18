@@ -1,9 +1,6 @@
-﻿namespace RsLib
-{
-    public class RsTypes
-    {
-        public class PlanType
-        {
+﻿namespace RsLib {
+    public class RsTypes {
+        public class PlanType {
             /// <summary>
             /// 基础
             /// </summary>

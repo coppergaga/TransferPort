@@ -5,7 +5,6 @@ using UnityEngine.U2D;
 using Object = UnityEngine.Object;
 
 namespace RsLib {
-
     public class RsResources {
         public delegate Object CreateDelegate();
 
