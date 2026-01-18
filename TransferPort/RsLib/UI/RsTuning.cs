@@ -1,28 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace RsLib
-{
-    public static class RsUITuning
-    {
-        // internal static ButtonSoundPlayer ButtonSounds { get; }
-        //
-        // internal static ToggleSoundPlayer ToggleSounds { get; }
-        //
-        // static RsUITuning()
-        // {
-        //   ButtonSoundPlayer buttonSoundPlayer = new ButtonSoundPlayer();
-        //   buttonSoundPlayer.Enabled = true;
-        //   ButtonSounds = buttonSoundPlayer;
-        //   ToggleSounds = new ToggleSoundPlayer();
-        // }
-
-        public static class Images
-        {
+namespace RsLib {
+    public static class RsUITuning {
+        public static class Images {
             private static readonly IDictionary<string, Sprite> SPRITES = new Dictionary<string, Sprite>(512);
 
             public static Sprite Arrow { get; }
@@ -55,10 +39,8 @@ namespace RsLib
 
             public static Sprite SliderHandle { get; }
 
-            static Images()
-            {
-                foreach (Sprite sprite in Resources.FindObjectsOfTypeAll<Sprite>())
-                {
+            static Images() {
+                foreach (Sprite sprite in Resources.FindObjectsOfTypeAll<Sprite>()) {
                     string name = sprite?.name;
                     if (!string.IsNullOrEmpty(name) && !SPRITES.ContainsKey(name))
                         SPRITES.Add(name, sprite);
@@ -81,8 +63,7 @@ namespace RsLib
                 SliderHandle = GetSpriteByName("game_speed_selected_med");
             }
 
-            public static Sprite GetSpriteByName(string name)
-            {
+            public static Sprite GetSpriteByName(string name) {
                 Sprite sprite;
                 if (!SPRITES.TryGetValue(name, out sprite))
                     sprite = null;
@@ -90,8 +71,7 @@ namespace RsLib
             }
         }
 
-        public static class Colors
-        {
+        public static class Colors {
             public static Color BackgroundLight { get; } =
                 new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
@@ -122,8 +102,7 @@ namespace RsLib
             public static Color UITextLight { get; } =
                 new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
-            static Colors()
-            {
+            static Colors() {
                 UITextDark = new Color32(0, 0, 0, byte.MaxValue);
                 Color color1 = new Color(0.0f, 0.0f, 0.0f);
                 Color color2 = new Color(0.784f, 0.784f, 0.784f, 1f);
@@ -156,8 +135,7 @@ namespace RsLib
                 ButtonBlueStyle.disabledActiveColor = new Color(0.625f, 0.6158088f, 0.5882353f);
                 ButtonBlueStyle.hoverColor = new Color(0.3461289f, 0.3739619f, 0.4852941f);
                 ButtonBlueStyle.disabledhoverColor = new Color(0.5f, 0.4898898f, 0.4595588f);
-                ScrollbarColors = new ColorBlock
-                {
+                ScrollbarColors = new ColorBlock {
                     colorMultiplier = 1f,
                     fadeDuration = 0.1f,
                     disabledColor = new Color(0.392f, 0.392f, 0.392f),
@@ -168,86 +146,7 @@ namespace RsLib
             }
         }
 
-        // public static class Fonts
-        // {
-        //   private const string DEFAULT_FONT_TEXT = "NotoSans-Regular";
-        //   private const string DEFAULT_FONT_UI = "GRAYSTROKE REGULAR SDF";
-        //   private static readonly TMP_FontAsset DefaultTextFont;
-        //   private static readonly TMP_FontAsset DefaultUIFont;
-        //   private static readonly IDictionary<string, TMP_FontAsset> FONTS = new Dictionary<string, TMP_FontAsset>(16);
-        //
-        //   public static int DefaultSize { get; }
-        //
-        //   internal static TMP_FontAsset Text
-        //   {
-        //     get
-        //     {
-        //       TMP_FontAsset tmpFontAsset = null;
-        //       if (Localization.GetSelectedLanguageType() != Localization.SelectedLanguageType.None)
-        //         tmpFontAsset = Localization.FontAsset;
-        //       return tmpFontAsset ?? DefaultTextFont;
-        //     }
-        //   }
-        //
-        //   public static TextStyleSetting TextDarkStyle { get; }
-        //
-        //   public static TextStyleSetting TextLightStyle { get; }
-        //
-        //   internal static TMP_FontAsset UI
-        //   {
-        //     get
-        //     {
-        //       TMP_FontAsset tmpFontAsset = null;
-        //       if (Localization.GetSelectedLanguageType() != Localization.SelectedLanguageType.None)
-        //         tmpFontAsset = Localization.FontAsset;
-        //       return tmpFontAsset ?? DefaultUIFont;
-        //     }
-        //   }
-        //
-        //   public static TextStyleSetting UIDarkStyle { get; }
-        //
-        //   public static TextStyleSetting UILightStyle { get; }
-        //
-        //   static Fonts()
-        //   {
-        //     foreach (TMP_FontAsset tmpFontAsset in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
-        //     {
-        //       string name = tmpFontAsset?.name;
-        //       if (!string.IsNullOrEmpty(name) && !FONTS.ContainsKey(name))
-        //         FONTS.Add(name, tmpFontAsset);
-        //     }
-        //     if ((DefaultTextFont = GetFontByName("NotoSans-Regular")) == null)
-        //       Debug.LogWarning("Unable to find font NotoSans-Regular");
-        //     if ((DefaultUIFont = GetFontByName("GRAYSTROKE REGULAR SDF")) == null)
-        //       Debug.LogWarning("Unable to find font GRAYSTROKE REGULAR SDF");
-        //     DefaultSize = 14;
-        //     TextDarkStyle = ScriptableObject.CreateInstance<TextStyleSetting>();
-        //     TextDarkStyle.enableWordWrapping = false;
-        //     TextDarkStyle.fontSize = DefaultSize;
-        //     TextDarkStyle.sdfFont = Text;
-        //     TextDarkStyle.style = FontStyles.Normal;
-        //     TextDarkStyle.textColor = Colors.UITextDark;
-        //     TextLightStyle = TextDarkStyle.DeriveStyle(newColor: new Color?(Colors.UITextLight));
-        //     UIDarkStyle = ScriptableObject.CreateInstance<TextStyleSetting>();
-        //     UIDarkStyle.enableWordWrapping = false;
-        //     UIDarkStyle.fontSize = DefaultSize;
-        //     UIDarkStyle.sdfFont = UI;
-        //     UIDarkStyle.style = FontStyles.Normal;
-        //     UIDarkStyle.textColor = Colors.UITextDark;
-        //     UILightStyle = UIDarkStyle.DeriveStyle(newColor: new Color?(Colors.UITextLight));
-        //   }
-        //
-        //   internal static TMP_FontAsset GetFontByName(string name)
-        //   {
-        //     TMP_FontAsset tmpFontAsset;
-        //     if (!FONTS.TryGetValue(name, out tmpFontAsset))
-        //       tmpFontAsset = null;
-        //     return tmpFontAsset;
-        //   }
-        // }
-
-        public class Prefabs
-        {
+        public class Prefabs {
             [Resource("LocTextInputField")]
             public static KInputTextField InputTextField;
 
@@ -257,7 +156,7 @@ namespace RsLib
             /// 				|- 	InputField(Clone) Input Caret	[-403900 active 0x0]	[UnityEngine.RectTransform | UnityEngine.CanvasRenderer | TMPro.TMP_SelectionCaret | UnityEngine.UI.LayoutElement]
             /// 				|- 	Placeholder	[-403884 active 0x0]	[UnityEngine.RectTransform | UnityEngine.CanvasRenderer | LocText | SetTextStyleSetting]
             /// </summary>
-            
+
             [Resource("InputField")]
             public static KInputField InputField;
 
@@ -284,23 +183,17 @@ namespace RsLib
             public static GameObject ToggleEntry;
 
 
-            static Prefabs()
-            {
+            static Prefabs() {
                 GameObject[] gos = Resources.FindObjectsOfTypeAll<GameObject>();
                 Dictionary<string, FieldInfo> dictionary = ResourceAttribute.GetFields(typeof(Prefabs));
-                foreach (GameObject go in gos)
-                {
-                    if (dictionary.TryGetValue(go.name, out FieldInfo fieldInfo))
-                    {
-                        if (fieldInfo.FieldType == typeof(GameObject))
-                        {
+                foreach (GameObject go in gos) {
+                    if (dictionary.TryGetValue(go.name, out FieldInfo fieldInfo)) {
+                        if (fieldInfo.FieldType == typeof(GameObject)) {
                             fieldInfo.SetValue(null, go);
                         }
-                        else
-                        {
+                        else {
                             Component component = go.GetComponent(fieldInfo.FieldType);
-                            if (component != null)
-                            {
+                            if (component != null) {
                                 fieldInfo.SetValue(null, component);
                             }
                         }
@@ -309,29 +202,24 @@ namespace RsLib
             }
         }
 
-        public class ScriptableObjects
-        {
+        public class ScriptableObjects {
             [Resource] public static TextStyleSetting style_labelText;
             [Resource] public static TextStyleSetting style_titleTextBlack;
 
-            static ScriptableObjects()
-            {
+            static ScriptableObjects() {
                 TextStyleSetting[] settings = Resources.FindObjectsOfTypeAll<TextStyleSetting>();
                 Dictionary<string, FieldInfo> dictionary = ResourceAttribute.GetFields(typeof(ScriptableObjects));
-                foreach (TextStyleSetting setting in settings)
-                {
-                    if (dictionary.TryGetValue(setting.name, out FieldInfo fieldInfo))
-                    {
+                foreach (TextStyleSetting setting in settings) {
+                    if (dictionary.TryGetValue(setting.name, out FieldInfo fieldInfo)) {
                         fieldInfo.SetValue(null, setting);
                     }
                 }
             }
         }
-        
-        public class TextStyleSettings
-        {
+
+        public class TextStyleSettings {
             private static Dictionary<string, TextStyleSetting> textStyleSettings = new Dictionary<string, TextStyleSetting>();
-            
+
             [Resource]
             public static TextStyleSetting style_labelText;
             [Resource]
@@ -342,69 +230,55 @@ namespace RsLib
             public static TextStyleSetting style_bodyText;
             [Resource]
             public static TextStyleSetting style_bodyTextSmall;
-            
-            static TextStyleSettings()
-            {
+
+            static TextStyleSettings() {
                 TextStyleSetting[] settings = Resources.FindObjectsOfTypeAll<TextStyleSetting>();
-                foreach (TextStyleSetting setting in settings)
-                {
-                    if (!textStyleSettings.ContainsKey(setting.name))
-                    {
+                foreach (TextStyleSetting setting in settings) {
+                    if (!textStyleSettings.ContainsKey(setting.name)) {
                         textStyleSettings[setting.name] = setting;
                     }
                 }
-                
+
                 Dictionary<string, FieldInfo> dictionary = ResourceAttribute.GetFields(typeof(TextStyleSettings));
-                foreach (var keyValuePair in dictionary)
-                {
+                foreach (var keyValuePair in dictionary) {
                     keyValuePair.Value.SetValue(null, GetTextStyleSetting(keyValuePair.Key));
                 }
             }
 
-            public static TextStyleSetting GetTextStyleSetting(string name)
-            {
+            public static TextStyleSetting GetTextStyleSetting(string name) {
                 textStyleSettings.TryGetValue(name, out var setting);
                 return setting;
             }
 
-            public static void AddTextStyleSetting(TextStyleSetting setting)
-            {
+            public static void AddTextStyleSetting(TextStyleSetting setting) {
                 textStyleSettings[setting.name] = setting;
             }
         }
 
 
         [AttributeUsage(AttributeTargets.Field)]
-        private class ResourceAttribute : Attribute
-        {
+        private class ResourceAttribute : Attribute {
             public string alias;
 
-            public ResourceAttribute()
-            {
+            public ResourceAttribute() {
             }
 
-            public ResourceAttribute(string alias)
-            {
+            public ResourceAttribute(string alias) {
                 this.alias = alias;
             }
 
-            public static Dictionary<string, FieldInfo> GetFields(Type type)
-            {
+            public static Dictionary<string, FieldInfo> GetFields(Type type) {
                 FieldInfo[] fieldInfos =
                     type.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 
                 Dictionary<string, FieldInfo> map = new Dictionary<string, FieldInfo>();
-                foreach (FieldInfo fieldInfo in fieldInfos)
-                {
+                foreach (FieldInfo fieldInfo in fieldInfos) {
                     ResourceAttribute resourceAttribute = fieldInfo.GetCustomAttribute<ResourceAttribute>();
-                    if (resourceAttribute != null)
-                    {
-                        if (resourceAttribute.alias != null)
-                        {
+                    if (resourceAttribute != null) {
+                        if (resourceAttribute.alias != null) {
                             map[resourceAttribute.alias] = fieldInfo;
                         }
-                        else
-                        {
+                        else {
                             map[fieldInfo.Name] = fieldInfo;
                         }
                     }
@@ -412,10 +286,10 @@ namespace RsLib
 
                 return map;
             }
-            
+
         }
-        
-        
+
+
 
     }
 }
