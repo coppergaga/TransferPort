@@ -1,26 +1,14 @@
 ﻿using TUNING;
 using UnityEngine;
 
-namespace RsTransferPort
-{
-    // public class PortalPowerSenderConfig : PortalPowerConfig
-    // {
-    //     public static string ID = "PortalPowerSender";
-    //     public static string Anim = "portal_power_sender_kanim";
-    //     public PortalPowerSenderConfig() : base(id, anim, conduitType, portalType)
-    //     {
-    //     }
-    // }
-
+namespace RsTransferPort {
     /// <summary>
     ///     电力传送的基类
     /// </summary>
-    public class WirelessPowerPortConfig : IBuildingConfig
-    {
+    public class WirelessPowerPortConfig : IBuildingConfig {
         public const string ID = "RsWirelessPowerPort";
 
-        public override BuildingDef CreateBuildingDef()
-        {
+        public override BuildingDef CreateBuildingDef() {
             var buildingDef = MyUtils.CreateTransferBuildingDef(
                 ID,
                 "rs_wireless_power_port_Kanim",
@@ -39,8 +27,7 @@ namespace RsTransferPort
             return buildingDef;
         }
 
-        public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
-        {
+        public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag) {
             var channel = go.AddOrGet<PortItem>();
             channel.BuildingType = BuildingType.Power;
             channel.InOutType = InOutType.None;
@@ -49,8 +36,7 @@ namespace RsTransferPort
             go.AddOrGet<ShowOverlaySelf>();
         }
 
-        public override void DoPostConfigureComplete(GameObject go)
-        {
+        public override void DoPostConfigureComplete(GameObject go) {
             Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
         }
     }
