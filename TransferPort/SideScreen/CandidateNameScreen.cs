@@ -5,10 +5,8 @@ using RsLib.Adapter;
 using RsLib.Components;
 using UnityEngine;
 
-namespace RsTransferPort
-{
-    public class CandidateNameScreen : KScreen
-    {
+namespace RsTransferPort {
+    public class CandidateNameScreen : KScreen {
         [SerializeField] protected RsHierarchyReferences rowPrefab;
         [SerializeField] protected GameObject listContainer;
         [SerializeField] protected MultiToggleAdapter supplyToggle;
@@ -25,19 +23,15 @@ namespace RsTransferPort
         /// <summary>
         /// 0无 1供应 2 回收
         /// </summary>
-        private int supplyState
-        {
+        private int SupplyState {
             get => m_supplyState;
-            set
-            {
+            set {
                 m_supplyState = value % 3;
-                if (!RsUtil.IsNullOrDestroyed(supplyToggle))
-                {
+                if (!RsUtil.IsNullOrDestroyed(supplyToggle)) {
                     supplyToggle.ChangeState(m_supplyState);
                     supplyToggle.FindOrAddComponent<ToolTip>().toolTip =
                         Strings.Get("STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.SUPPLY_STATE_" + m_temperatureState);
                 }
-               
             }
         }
 
@@ -45,14 +39,11 @@ namespace RsTransferPort
         /// <summary>
         /// 0无 1低温 2高温
         /// </summary>
-        private int temperatureState
-        {
+        private int TemperatureState {
             get => m_temperatureState;
-            set
-            {
+            set {
                 m_temperatureState = value % 3;
-                if (!RsUtil.IsNullOrDestroyed(supplyToggle))
-                {
+                if (!RsUtil.IsNullOrDestroyed(supplyToggle)) {
                     temperatureToggle.ChangeState(m_temperatureState);
                     temperatureToggle.FindOrAddComponent<ToolTip>().toolTip =
                         Strings.Get("STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.TEMPERATURE_STATE_" + m_temperatureState);
@@ -61,8 +52,7 @@ namespace RsTransferPort
         }
 
         private static bool initialized = false;
-        private static Dictionary<BuildingType, string[]> candidateNameMap = new Dictionary<BuildingType, string[]>()
-        {
+        private static Dictionary<BuildingType, string[]> candidateNameMap = new Dictionary<BuildingType, string[]>() {
             [BuildingType.Gas] = new string[]
             {
                 "GAS_0",
@@ -132,64 +122,50 @@ namespace RsTransferPort
         };
 
 
-        protected override void OnPrefabInit()
-        {
+        protected override void OnPrefabInit() {
             base.OnPrefabInit();
             rowPool = new RsHashUIPool<RsHierarchyReferences>(rowPrefab);
-            if (supplyToggle == null || temperatureToggle == null)
-            {
+            if (supplyToggle == null || temperatureToggle == null) {
                 Debug.LogWarning("supplyToggle or temperatureToggle is null");
                 return;
             }
 
-            supplyState = 0;
-            supplyToggle.onClick = delegate
-            {
-                supplyState = ++supplyState % 3;
-                supplyToggle.ChangeState(supplyState);
+            SupplyState = 0;
+            supplyToggle.onClick = delegate {
+                SupplyState = ++SupplyState % 3;
+                supplyToggle.ChangeState(SupplyState);
                 Refresh();
             };
 
-            temperatureState = 0;
-            temperatureToggle.onClick = delegate
-            {
-                temperatureState = ++temperatureState % 3;
-                temperatureToggle.ChangeState(temperatureState);
+            TemperatureState = 0;
+            temperatureToggle.onClick = delegate {
+                TemperatureState = ++TemperatureState % 3;
+                temperatureToggle.ChangeState(TemperatureState);
                 Refresh();
             };
 
-            if (!initialized)
-            {
-                foreach (var keyValuePair in candidateNameMap)
-                {
+            if (!initialized) {
+                foreach (var keyValuePair in candidateNameMap) {
                     string[] names = keyValuePair.Value;
-                    for (var i = 0; i < names.Length; i++)
-                    {
+                    for (var i = 0; i < names.Length; i++) {
                         names[i] = Strings.Get("STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.LABELS." + names[i]);
                     }
                 }
                 initialized = true;
             }
-            
         }
 
-        public void SwitchCandidate(BuildingType buildingType)
-        {
-            if (currentBuildingType != buildingType)
-            {
+        public void SwitchCandidate(BuildingType buildingType) {
+            if (currentBuildingType != buildingType) {
                 currentBuildingType = buildingType;
-                temperatureState = 0;
-                supplyState = 0;
+                TemperatureState = 0;
+                SupplyState = 0;
                 Refresh();
             }
         }
 
-        private void Refresh()
-        {
-            
-            
-            if (currentBuildingType == BuildingType.None || !candidateNameMap.ContainsKey(currentBuildingType))
-            {
+        private void Refresh() {
+            if (currentBuildingType == BuildingType.None || !candidateNameMap.ContainsKey(currentBuildingType)) {
                 rowPool.ClearAll();
                 return;
             }
@@ -197,25 +173,20 @@ namespace RsTransferPort
             string[] candidateName = candidateNameMap[currentBuildingType];
 
             rowPool.RecordStart();
-            foreach (string sName in candidateName)
-            {
+            foreach (string sName in candidateName) {
                 var name = sName;
                 //生成名称
-                if (supplyState == 1)
-                {
+                if (SupplyState == 1) {
                     name = name + STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.S_NAMES.SUPPLY;
                 }
-                else if (supplyState == 2)
-                {
+                else if (SupplyState == 2) {
                     name = name + STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.S_NAMES.RECYCLE;
                 }
 
-                if (temperatureState == 1)
-                {
+                if (TemperatureState == 1) {
                     name = STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.S_NAMES.LOW_TEMPERATURE + name;
                 }
-                else if (temperatureState == 2)
-                {
+                else if (TemperatureState == 2) {
                     name = STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.S_NAMES.HIGH_TEMPERATURE + name;
                 }
 
@@ -232,11 +203,8 @@ namespace RsTransferPort
             rowPool.ClearNoRecordElement();
         }
 
-        private void OnRowClick(string name)
-        {
+        private void OnRowClick(string name) {
             selected?.Invoke(name);
         }
-
-        
     }
 }

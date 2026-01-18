@@ -3,16 +3,13 @@ using System.Linq;
 using System.Text;
 using RsLib;
 using RsLib.Adapter;
-using RsLib.Builder;
 using RsLib.Components;
 using UnityEngine;
 using UnityEngine.UI;
 using OUI = STRINGS.UI;
 
-namespace RsTransferPort
-{
-    public class PortChannelSideScreen : SideScreenContent
-    {
+namespace RsTransferPort {
+    public class PortChannelSideScreen : SideScreenContent {
         [SerializeField] private MultiToggleAdapter detailLevelToggle;
         [SerializeField] private KInputTextFieldAdapter channelNameInputField;
         [SerializeField] private GameObject listContainer;
@@ -21,7 +18,7 @@ namespace RsTransferPort
         [SerializeField] private MultiToggleAdapter batchRenameToggle;
         [SerializeField] private MultiToggleAdapter globalToggle;
         [SerializeField] private PriorityBar priorityBar;
-        
+
         [SerializeField] private LocTextAdapter warningLabel;
 
         [SerializeField] private RsHierarchyReferences row1Prefab;
@@ -42,8 +39,7 @@ namespace RsTransferPort
         private RsHashUIPool<LocTextAdapter> locTextPool;
         private RsHashUIPool<RsHierarchyReferences> worldInfoPool;
 
-        protected override void OnPrefabInit()
-        {
+        protected override void OnPrefabInit() {
             base.OnPrefabInit();
             activateOnSpawn = true;
 
@@ -56,68 +52,56 @@ namespace RsTransferPort
             batchRenameToggle.onClick = OnBatchRenameClick;
             openCandidateNameToggle.onClick = OnCandidateNameToggleClick;
             globalToggle.onClick = OnGlobalToggleClick;
-            
+
             channelNameInputField.onSelect.AddListener(OnChangeNameEditStart);
             channelNameInputField.onEndEdit.AddListener(OnChangeNameEditEnd);
             priorityBar.OnPriorityClick = OnPriorityClick;
             priorityBar.Help.OnToolTip = OnPriorityBarHelp;
         }
 
-        protected override void OnSpawn()
-        {
+        protected override void OnSpawn() {
             base.OnSpawn();
             headerLabel.SetText(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NAME);
-            PortManager.Instance.OnChannelChange += (channel) =>
-            {
+            PortManager.Instance.OnChannelChange += (channel) => {
                 Refresh();
             };
-            
+
             globalToggle.gameObject.SetActiveNR(DlcManager.IsExpansion1Active());
         }
-        
-        private void OnChangeNameEditStart(string text)
-        {
+
+        private void OnChangeNameEditStart(string text) {
             isEditing = true;
         }
 
-        private void OnChangeNameEditEnd(string text)
-        {
+        private void OnChangeNameEditEnd(string text) {
             isEditing = false;
-            if (target != null)
-            {
+            if (target != null) {
                 ChangeName(text);
             }
 
             channelNameInputField.text = target.ChannelName;
         }
 
-
-        protected void ChangeName(string str)
-        {
-            if (isBatchMode)
-            {
+        protected void ChangeName(string str) {
+            if (isBatchMode) {
                 PortManager.Instance.BatchChange(target.ChannelController, str, target.IsGlobal);
                 SetBatchRenameState(false);
                 return;
             }
 
-            if (!RsUtil.IsNullOrDestroyed(target))
-            {
+            if (!RsUtil.IsNullOrDestroyed(target)) {
                 target.CheckSetChannelName(str);
             }
         }
 
-        protected void SetBatchRenameState(bool enable)
-        {
+        protected void SetBatchRenameState(bool enable) {
             isBatchMode = enable;
             batchRenameToggle.ChangeState(isBatchMode ? 1 : 0);
-            if (isBatchMode)
-            {
+            if (isBatchMode) {
                 warningLabel.gameObject.SetActiveNR(true);
                 warningLabel.SetTextNoRepeat(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.WARIN_BATCH_MODE);
             }
-            else
-            {
+            else {
                 warningLabel.gameObject.SetActiveNR(false);
             }
         }
@@ -125,37 +109,29 @@ namespace RsTransferPort
         /// <summary>
         /// 详细等级
         /// </summary>
-        private void OnDetailLevelToggleClick()
-        {
-            if (target != null)
-            {
+        private void OnDetailLevelToggleClick() {
+            if (target != null) {
                 detailLevel = ++detailLevel % 2;
                 Refresh();
             }
         }
 
-        private void OnBatchRenameClick()
-        {
+        private void OnBatchRenameClick() {
             SetBatchRenameState(!isBatchMode);
         }
 
-        private void OnCandidateNameToggleClick()
-        {
+        private void OnCandidateNameToggleClick() {
             isOpenCandidateName = !isOpenCandidateName;
             RefreshCandidateNameState();
         }
 
-        private void OnGlobalToggleClick()
-        {
-            if (target != null)
-            {
-                if (isBatchMode)
-                {
+        private void OnGlobalToggleClick() {
+            if (target != null) {
+                if (isBatchMode) {
                     PortManager.Instance.BatchChange(target.ChannelController, target.ChannelName, !target.IsGlobal);
                     SetBatchRenameState(false);
                 }
-                else
-                {
+                else {
                     target.CheckSetGlobal(!target.IsGlobal);
                 }
                 globalToggle.ChangeState(target.IsGlobal ? 1 : 0);
@@ -163,49 +139,41 @@ namespace RsTransferPort
             }
         }
 
-        private void RefreshCandidateNameState()
-        {
+        private void RefreshCandidateNameState() {
             openCandidateNameToggle.ChangeState(isOpenCandidateName ? 1 : 0);
             if (DetailsScreen.Instance == null)
                 return;
-            if (isOpenCandidateName)
-            {
+            if (isOpenCandidateName) {
                 CandidateNameScreen sideScreen =
-                    (CandidateNameScreen) DetailsScreen.Instance.SetSecondarySideScreen(
+                    (CandidateNameScreen)DetailsScreen.Instance.SetSecondarySideScreen(
                         candidateNameScreenPrefab,
                         STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.TITLE);
                 sideScreen.selected = ChangeName;
                 sideScreen.SwitchCandidate(target.BuildingType);
             }
-            else
-            {
+            else {
                 DetailsScreen.Instance.ClearSecondarySideScreen();
             }
         }
 
         #region 优先度
 
-        private string OnPriorityBarHelp()
-        {
+        private string OnPriorityBarHelp() {
             if (target.BuildingType == BuildingType.Gas
                 || target.BuildingType == BuildingType.Liquid
-                || target.BuildingType == BuildingType.Solid)
-            {
-                if (target.ChannelController is TransferConduitChannel conduitChannel)
-                {
+                || target.BuildingType == BuildingType.Solid) {
+                if (target.ChannelController is TransferConduitChannel conduitChannel) {
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.Append(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.PRIORITY_TOOLTIP);
                     stringBuilder.AppendLine();
-                    for (int priority = 9; priority >= 0; priority--)
-                    {
+                    for (int priority = 9; priority >= 0; priority--) {
                         PriorityChannelItemInfo senderPriorityInfo = conduitChannel.senderPriorityList.GetByPriority(priority);
                         PriorityChannelItemInfo receiverPriorityInfo = conduitChannel.receiverPriorityList.GetByPriority(priority);
-                        
+
                         int senderNum = senderPriorityInfo == null ? 0 : senderPriorityInfo.items.Count;
                         int receiverNum = receiverPriorityInfo == null ? 0 : receiverPriorityInfo.items.Count;
-                        
-                        if (senderNum != 0 || receiverNum != 0)
-                        {
+
+                        if (senderNum != 0 || receiverNum != 0) {
                             stringBuilder.AppendLine();
                             stringBuilder.AppendFormat(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.PRIORITY_LINE_INFO, priority, senderNum, receiverNum);
                         }
@@ -216,63 +184,52 @@ namespace RsTransferPort
             return "无";
         }
 
-        private void OnPriorityClick(int priority)
-        {
-            if (isBatchMode)
-            {
+        private void OnPriorityClick(int priority) {
+            if (isBatchMode) {
                 PortManager.Instance.BatchChangePriority(target.ChannelController, priority);
                 SetBatchRenameState(false);
             }
-            else
-            {
+            else {
                 target.CheckSetPriority(priority);
             }
         }
-        private void RefreshPriority()
-        {
-            if (RsUtil.IsNullOrDestroyed(target))
-            {
+        private void RefreshPriority() {
+            if (RsUtil.IsNullOrDestroyed(target)) {
                 return;
             }
 
             if (target.BuildingType == BuildingType.Gas
                 || target.BuildingType == BuildingType.Liquid
-                || target.BuildingType == BuildingType.Solid)
-            {
-                if (target.ChannelController is TransferConduitChannel conduitChannel)
-                {
+                || target.BuildingType == BuildingType.Solid) {
+                if (target.ChannelController is TransferConduitChannel conduitChannel) {
                     priorityBar.gameObject.SetActiveNR(true);
-                    
+
                     //重置优先度
                     priorityBar.SetAllStateCache(0);
-                    
+
                     //设置其它的优先度
                     priorityBar.SetStateCacheRange(conduitChannel.senderPriorityList.AllPriority(), 2);
                     priorityBar.SetStateCacheRange(conduitChannel.receiverPriorityList.AllPriority(), 2);
-                    
+
                     //设置目标优先度
                     priorityBar.SetStateCache(target.Priority, 1);
                     //应用
                     priorityBar.ApplyStateCache();
                 }
-               
+
             }
-            else
-            {
+            else {
                 priorityBar.gameObject.SetActiveNR(false);
             }
         }
         #endregion
-        
-        public override bool IsValidForTarget(GameObject target)
-        {
+
+        public override bool IsValidForTarget(GameObject target) {
             return target.GetComponent<PortItem>() != null;
         }
 
-        public override void SetTarget(GameObject new_target)
-        {
-            if (RsUtil.IsNullOrDestroyed(new_target))
-            {
+        public override void SetTarget(GameObject new_target) {
+            if (RsUtil.IsNullOrDestroyed(new_target)) {
                 return;
             }
 
@@ -282,45 +239,37 @@ namespace RsTransferPort
             Refresh();
         }
 
-        public override void ClearTarget()
-        {
+        public override void ClearTarget() {
             target = null;
             isBatchMode = false;
             DetailsScreen.Instance?.ClearSecondarySideScreen();
         }
 
-        protected override void OnDisable()
-        {
+        protected override void OnDisable() {
             base.OnDisable();
             isBatchMode = false;
         }
 
-        private void LateUpdate()
-        {
-            if (refreshInterval.Update(Time.unscaledDeltaTime))
-            {
+        private void LateUpdate() {
+            if (refreshInterval.Update(Time.unscaledDeltaTime)) {
                 needRefresh = true;
             }
 
-            if (needRefresh)
-            {
+            if (needRefresh) {
                 ImmediateRefresh();
             }
         }
-        
-        private void Refresh()
-        {
+
+        private void Refresh() {
             needRefresh = true;
         }
 
-        private void ImmediateRefresh()
-        {
+        private void ImmediateRefresh() {
             needRefresh = false;
             if (target == null) return;
 
             //更新名称
-            if (isEditing == false)
-            {
+            if (isEditing == false) {
                 channelNameInputField.text = target.ChannelName;
             }
 
@@ -339,8 +288,7 @@ namespace RsTransferPort
             locTextPool.RecordStart();
             worldInfoPool.RecordStart();
 
-            foreach (SingleChannelController controller in controllers)
-            {
+            foreach (SingleChannelController controller in controllers) {
                 RsHierarchyReferences row = rowPool2.GetFreeElement(controller, listContainer, true);
                 row.transform.SetAsLastSibling();
 
@@ -350,8 +298,7 @@ namespace RsTransferPort
                 MultiToggle toggle = row.GetComponent<MultiToggle>();
                 toggle.ChangeState(target.HasChannel(controller) ? 1 : 0);
                 toggle.onClick =
-                    delegate
-                    {
+                    delegate {
                         target.SetChannel(controller);
                     };
                 GameObject globalIcon = row.GetReference("GlobalIcon");
@@ -359,85 +306,73 @@ namespace RsTransferPort
 
                 LocTextAdapter num1 = row.GetReference<LocTextAdapter>("Num1");
                 num1.gameObject.SetActiveNR(true);
-                if (controller.BuildingType == BuildingType.Power)
-                {
+                if (controller.BuildingType == BuildingType.Power) {
                     num1.SetTextNoRepeat("N:" + controller.senders.Count);
                 }
-                else
-                {
+                else {
                     num1.SetTextNoRepeat("S:" + controller.senders.Count);
                 }
 
                 LocTextAdapter num2 = row.GetReference<LocTextAdapter>("Num2");
-                if (controller.BuildingType == BuildingType.Power)
-                {
+                if (controller.BuildingType == BuildingType.Power) {
                     num2.gameObject.SetActiveNR(false);
                 }
-                else
-                {
+                else {
                     num2.gameObject.SetActiveNR(true);
                     num2.SetTextNoRepeat("R:" + controller.receivers.Count);
                 }
 
-                if (detailLevel == 1 && controller.BuildingType == BuildingType.Power && !controller.IsInvalid())
-                {
+                if (detailLevel == 1 && controller.BuildingType == BuildingType.Power && !controller.IsInvalid()) {
                     RefreshPowerInfo(row, controller);
                 }
-                
-                if (detailLevel == 1 && controller.IsGlobal && DlcManager.IsContentSubscribed(DlcManager.EXPANSION1_ID))
-                {
+
+                if (detailLevel == 1 && controller.IsGlobal && DlcManager.IsContentSubscribed(DlcManager.EXPANSION1_ID)) {
                     RefreshWorldListInfo(row, controller);
                 }
             }
-            
+
             worldInfoPool.ClearNoRecordElement();
             locTextPool.ClearNoRecordElement();
             rowPool2.ClearNoRecordElement();
         }
 
-        private void RefreshWorldListInfo(RsHierarchyReferences row, SingleChannelController controller)
-        {
+        private void RefreshWorldListInfo(RsHierarchyReferences row, SingleChannelController controller) {
             GameObject infoList = row.GetReference("info");
             WorldContainer[] containers = controller.GetIncludeWorldContainer().ToArray();
-            for (var i = 0; i < containers.Length; i++)
-            {
+            for (var i = 0; i < containers.Length; i++) {
                 WorldContainer world = containers[i];
                 RsHierarchyReferences element = worldInfoPool.GetFreeElement(infoList.GetHashCode() | i, infoList, true);
                 element.transform.SetAsLastSibling();
                 Image image = element.GetReference<Image>("WorldIcon");
 
-                if (world.IsModuleInterior)
-                {
-                    image.sprite = global::Assets.GetSprite((HashedString) "icon_category_rocketry");
+                if (world.IsModuleInterior) {
+                    image.sprite = global::Assets.GetSprite((HashedString)"icon_category_rocketry");
                     image.color = Color.white;
                     string name = world.GetComponent<Clustercraft>()?.Name ?? "unknown";
                     element.GetReference<LocTextAdapter>("Name").SetTextNoRepeat(name);
                 }
-                else
-                {
-                    image.sprite = Def.GetUISprite((object) world.GetComponent<ClusterGridEntity>()).first;
-                    image.color = Def.GetUISprite((object) world.GetComponent<ClusterGridEntity>()).second;
+                else {
+                    image.sprite = Def.GetUISprite((object)world.GetComponent<ClusterGridEntity>()).first;
+                    image.color = Def.GetUISprite((object)world.GetComponent<ClusterGridEntity>()).second;
                     string name = world.GetComponent<AsteroidGridEntity>()?.Name ?? "unknown";
                     element.GetReference<LocTextAdapter>("Name").SetTextNoRepeat(name);
                 }
             }
         }
 
-        private void RefreshPowerInfo(RsHierarchyReferences row, SingleChannelController controller)
-        {
+        private void RefreshPowerInfo(RsHierarchyReferences row, SingleChannelController controller) {
             GameObject infoList = row.GetReference("info");
             infoList.SetActiveNR(true);
             CircuitManager circuitManager = Game.Instance.circuitManager;
             ushort circuitID = circuitManager.GetVirtualCircuitID(controller);
-            if (circuitID == ushort.MaxValue)
-            {
+            if (circuitID == ushort.MaxValue) {
                 return;
             }
 
             LocTextAdapter label1 = locTextPool.GetFreeElement(infoList.GetHashCode() | 1, infoList, true);
             label1.transform.SetAsLastSibling();
-            label1.SetTextNoRepeat(string.Format((string) OUI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES,
-                (object) GameUtil.GetFormattedJoules(
+            label1.SetTextNoRepeat(string.Format((string)OUI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES,
+                (object)GameUtil.GetFormattedJoules(
                     circuitManager.GetJoulesAvailableOnCircuit(circuitID))));
             // label1.GetComponent<ToolTip>().toolTip = (string) UI.DETAILTABS.ENERGYGENERATOR.AVAILABLE_JOULES_TOOLTIP;
 
@@ -445,34 +380,33 @@ namespace RsTransferPort
             float generatedByCircuit2 = circuitManager.GetPotentialWattsGeneratedByCircuit(circuitID);
             LocTextAdapter label2 = locTextPool.GetFreeElement(infoList.GetHashCode() | 2, infoList, true);
             label2.transform.SetAsLastSibling();
-            string str = (double) generatedByCircuit1 != (double) generatedByCircuit2
-                ? string.Format("{0} / {1}", (object) GameUtil.GetFormattedWattage(generatedByCircuit1),
-                    (object) GameUtil.GetFormattedWattage(generatedByCircuit2))
+            string str = (double)generatedByCircuit1 != (double)generatedByCircuit2
+                ? string.Format("{0} / {1}", (object)GameUtil.GetFormattedWattage(generatedByCircuit1),
+                    (object)GameUtil.GetFormattedWattage(generatedByCircuit2))
                 : GameUtil.GetFormattedWattage(generatedByCircuit1);
-            label2.SetTextNoRepeat(string.Format((string) OUI.DETAILTABS.ENERGYGENERATOR.WATTAGE_GENERATED,
-                (object) str));
+            label2.SetTextNoRepeat(string.Format((string)OUI.DETAILTABS.ENERGYGENERATOR.WATTAGE_GENERATED,
+                (object)str));
             // label2.GetComponent<ToolTip>().toolTip = (string) UI.DETAILTABS.ENERGYGENERATOR.WATTAGE_GENERATED_TOOLTIP;
 
             LocTextAdapter label3 = locTextPool.GetFreeElement(infoList.GetHashCode() | 3, infoList, true);
             label3.transform.SetAsLastSibling();
-            label3.SetTextNoRepeat(string.Format((string) OUI.DETAILTABS.ENERGYGENERATOR.WATTAGE_CONSUMED,
-                (object) GameUtil.GetFormattedWattage(circuitManager.GetWattsUsedByCircuit(circuitID))));
+            label3.SetTextNoRepeat(string.Format((string)OUI.DETAILTABS.ENERGYGENERATOR.WATTAGE_CONSUMED,
+                (object)GameUtil.GetFormattedWattage(circuitManager.GetWattsUsedByCircuit(circuitID))));
             // label3.GetComponent<ToolTip>().toolTip = (string) UI.DETAILTABS.ENERGYGENERATOR.WATTAGE_CONSUMED_TOOLTIP;
             LocTextAdapter label4 = locTextPool.GetFreeElement(infoList.GetHashCode() | 4, infoList, true);
             label4.transform.SetAsLastSibling();
             label4.SetTextNoRepeat(string.Format(
-                (string) OUI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED,
-                (object) GameUtil.GetFormattedWattage(circuitManager.GetWattsNeededWhenActive(circuitID))));
+                (string)OUI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED,
+                (object)GameUtil.GetFormattedWattage(circuitManager.GetWattsNeededWhenActive(circuitID))));
             // label4.GetComponent<ToolTip>().toolTip = (string) OUI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED_TOOLTIP;
 
             LocTextAdapter label5 = locTextPool.GetFreeElement(infoList.GetHashCode() | 5, infoList, true);
             label5.transform.SetAsLastSibling();
             label5.SetTextNoRepeat(string.Format(
-                (string) OUI.DETAILTABS.ENERGYGENERATOR.MAX_SAFE_WATTAGE,
-                (object) GameUtil.GetFormattedWattage(
+                (string)OUI.DETAILTABS.ENERGYGENERATOR.MAX_SAFE_WATTAGE,
+                (object)GameUtil.GetFormattedWattage(
                     circuitManager.GetMaxSafeWattageForCircuit(circuitID))));
             // label5.GetComponent<ToolTip>().toolTip = (string) UI.DETAILTABS.ENERGYGENERATOR.MAX_SAFE_WATTAGE_TOOLTIP;
         }
-        
     }
 }

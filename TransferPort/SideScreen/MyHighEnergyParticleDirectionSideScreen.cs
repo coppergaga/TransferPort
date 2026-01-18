@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using RsLib;
 using UnityEngine;
 
-namespace RsTransferPort
-{
-    public class MyHighEnergyParticleDirectionSideScreen : RsSideScreenContent
-    {
+namespace RsTransferPort {
+    public class MyHighEnergyParticleDirectionSideScreen : RsSideScreenContent {
         private IMyHighEnergyParticleDirection target;
 
         [RsSideScreen.CopyField] public List<KButton> Buttons;
@@ -25,18 +23,15 @@ namespace RsTransferPort
             (string) UI.UISIDESCREENS.HIGHENERGYPARTICLEDIRECTIONSIDESCREEN.DIRECTION_NE
         };
 
-        public override string GetTitle() => (string) UI.UISIDESCREENS.HIGHENERGYPARTICLEDIRECTIONSIDESCREEN.TITLE;
+        public override string GetTitle() => (string)UI.UISIDESCREENS.HIGHENERGYPARTICLEDIRECTIONSIDESCREEN.TITLE;
 
-        protected override void OnSpawn()
-        {
+        protected override void OnSpawn() {
             base.OnSpawn();
-            for (int index = 0; index < this.Buttons.Count; ++index)
-            {
+            for (int index = 0; index < this.Buttons.Count; ++index) {
                 KButton button = this.Buttons[index];
-                button.onClick += (System.Action) (() =>
-                {
+                button.onClick += (System.Action)(() => {
                     int num = this.Buttons.IndexOf(button);
-                    if ((UnityEngine.Object) this.activeButton != (UnityEngine.Object) null)
+                    if ((UnityEngine.Object)this.activeButton != (UnityEngine.Object)null)
                         this.activeButton.isInteractable = true;
                     button.isInteractable = false;
                     this.activeButton = button;
@@ -51,38 +46,32 @@ namespace RsTransferPort
 
         public override int GetSideScreenSortOrder() => 10;
 
-        public override bool IsValidForTarget(GameObject target)
-        {
+        public override bool IsValidForTarget(GameObject target) {
             return target.GetComponent<IMyHighEnergyParticleDirection>() != null;
         }
 
-        public override void SetTarget(GameObject new_target)
-        {
-            if (RsUtil.IsNullOrDestroyed(new_target))
-            {
+        public override void SetTarget(GameObject new_target) {
+            if (RsUtil.IsNullOrDestroyed(new_target)) {
                 return;
             }
             target = new_target.GetComponent<IMyHighEnergyParticleDirection>();
             this.Refresh();
         }
 
-        private void Refresh()
-        {
+        private void Refresh() {
             int directionIndex = EightDirectionUtil.GetDirectionIndex(this.target.Direction);
-            if (directionIndex >= 0 && directionIndex < this.Buttons.Count)
-            {
+            if (directionIndex >= 0 && directionIndex < this.Buttons.Count) {
                 this.Buttons[directionIndex].SignalClick(KKeyCode.Mouse0);
             }
-            else
-            {
-                if ((bool) (UnityEngine.Object) this.activeButton)
+            else {
+                if ((bool)(UnityEngine.Object)this.activeButton)
                     this.activeButton.isInteractable = true;
-                this.activeButton = (KButton) null;
+                this.activeButton = (KButton)null;
             }
 
             this.directionLabel.SetText(string.Format(
-                (string) UI.UISIDESCREENS.HIGHENERGYPARTICLEDIRECTIONSIDESCREEN.SELECTED_DIRECTION,
-                (object) this.directionStrings[directionIndex]));
+                (string)UI.UISIDESCREENS.HIGHENERGYPARTICLEDIRECTIONSIDESCREEN.SELECTED_DIRECTION,
+                (object)this.directionStrings[directionIndex]));
         }
     }
 }
