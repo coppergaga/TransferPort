@@ -7,16 +7,13 @@ using RsTransferPort.Assets;
 using TMPro;
 using UnityEngine;
 
-namespace RsTransferPort
-{
-    public class TransferPortMod : UserMod2
-    {
+namespace RsTransferPort {
+    public class TransferPortMod : UserMod2 {
         public static BodyAsset BodyAsset;
-        
-        private void BeforeRsInit()
-        {
+
+        private void BeforeRsInit() {
             TextStyleSetting baseStyle = RsUITuning.TextStyleSettings.style_bodyText;
-            
+
             TextStyleSetting style_rs_channel_name = ScriptableObject.CreateInstance<TextStyleSetting>();
             style_rs_channel_name.name = "style_rs_channel_name";
             style_rs_channel_name.style = FontStyles.Bold;
@@ -34,7 +31,7 @@ namespace RsTransferPort
             style_rs_channel_num.enableWordWrapping = false;
             style_rs_channel_num.fontSize = baseStyle.fontSize;
             RsUITuning.TextStyleSettings.AddTextStyleSetting(style_rs_channel_num);
-            
+
             TextStyleSetting style_rs_input = ScriptableObject.CreateInstance<TextStyleSetting>();
             style_rs_input.name = "style_rs_input";
             style_rs_input.style = baseStyle.style;
@@ -43,7 +40,7 @@ namespace RsTransferPort
             style_rs_input.enableWordWrapping = false;
             style_rs_input.fontSize = 16;
             RsUITuning.TextStyleSettings.AddTextStyleSetting(style_rs_input);
-            
+
             TextStyleSetting style_rs_placeholder = ScriptableObject.CreateInstance<TextStyleSetting>();
             style_rs_placeholder.name = "style_rs_placeholder";
             style_rs_placeholder.style = baseStyle.style;
@@ -52,7 +49,7 @@ namespace RsTransferPort
             style_rs_placeholder.enableWordWrapping = false;
             style_rs_placeholder.fontSize = 16;
             RsUITuning.TextStyleSettings.AddTextStyleSetting(style_rs_placeholder);
-            
+
             TextStyleSetting style_rs_detail_label = ScriptableObject.CreateInstance<TextStyleSetting>();
             style_rs_detail_label.name = "style_rs_detail_label";
             style_rs_detail_label.style = baseStyle.style;
@@ -61,7 +58,7 @@ namespace RsTransferPort
             style_rs_detail_label.enableWordWrapping = false;
             style_rs_detail_label.fontSize = 14;
             RsUITuning.TextStyleSettings.AddTextStyleSetting(style_rs_detail_label);
-            
+
             TextStyleSetting style_rs_warning_label = ScriptableObject.CreateInstance<TextStyleSetting>();
             style_rs_warning_label.name = "style_rs_warning_label";
             style_rs_warning_label.style = baseStyle.style;
@@ -70,7 +67,7 @@ namespace RsTransferPort
             style_rs_warning_label.enableWordWrapping = false;
             style_rs_warning_label.fontSize = 14;
             RsUITuning.TextStyleSettings.AddTextStyleSetting(style_rs_warning_label);
-            
+
             TextStyleSetting style_rs_port_channel_name = ScriptableObject.CreateInstance<TextStyleSetting>();
             style_rs_port_channel_name.name = "style_rs_port_channel_name";
             style_rs_port_channel_name.style = FontStyles.Bold;
@@ -81,16 +78,15 @@ namespace RsTransferPort
             RsUITuning.TextStyleSettings.AddTextStyleSetting(style_rs_port_channel_name);
         }
 
-        public override void OnLoad(Harmony harmony)
-        {
+        public override void OnLoad(Harmony harmony) {
             BeforeRsInit();
             MyResource.InitAllTask();
-            
+
             AssetBundle assetBundle = RsAssetBundle.LoadAssetBundle(mod.ContentPath, "transferport", null, true);
             RsResources.AddAssetBundle(assetBundle);
 
             BodyAsset = assetBundle.LoadAsset<BodyAsset>("BodyAsset");
-            
+
             RsAssets.Initialize(mod, harmony)
                 .AddSprite(MyOverlayModes.PortChannel.Icon, BodyAsset.portOverlayButton)
                 .AddStatusItemIcon("unconnected_channel_icon", BodyAsset.unconnectedChannelIcon)
@@ -98,8 +94,8 @@ namespace RsTransferPort
                 .AddStatusItemIcon("planetary_isolation_icon", BodyAsset.planetaryIsolationIcon);
 
             RsButtonMenu.Initialize(mod, harmony)
-                .AddIcon("show_overlay_self_icon" , BodyAsset.showOverlayButton);
-            
+                .AddIcon("show_overlay_self_icon", BodyAsset.showOverlayButton);
+
             RsLocalization.Initialize(mod, harmony)
                 .RegisterLoad(typeof(STRINGS))
                 .RegisterAddStrings(typeof(STRINGS.BUILDINGS))
@@ -111,7 +107,7 @@ namespace RsTransferPort
                 .CopyAndCreate<ClusterLocationFilterSideScreen, WorldDiscoveredSideScreen>()
                 .CopyAndCreate<HighEnergyParticleDirectionSideScreen, MyHighEnergyParticleDirectionSideScreen>()
                 // .Add(() => ChannelNameSettingSideScreen.Prefab, true)
-                .Add(()=> BodyAsset.portChannelSideScreen, true);
+                .Add(() => BodyAsset.portChannelSideScreen, true);
 
             RsOverlay.Initialize(mod, harmony)
                 .AddOverlayMode((screen) => new MyOverlayModes.PortChannel(screen.powerLabelParent))
@@ -124,8 +120,7 @@ namespace RsTransferPort
                     STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON.ToString()
                 ))
                 .AddOverlayLegendInfo(() =>
-                    new OverlayLegend.OverlayInfo()
-                    {
+                    new OverlayLegend.OverlayInfo() {
                         mode = MyOverlayModes.PortChannel.ID,
                         name = "STRINGS.UI.OVERLAYS.PORTCHANNELMODE.NAME",
                         infoUnits = new List<OverlayLegend.OverlayInfoUnit>()
@@ -139,33 +134,24 @@ namespace RsTransferPort
                         }
                     }
                 )
-                .AddHoverTextCardOverlayFilterMap(MyOverlayModes.PortChannel.ID, () =>
-                {
+                .AddHoverTextCardOverlayFilterMap(MyOverlayModes.PortChannel.ID, () => {
                     // int cell = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
                     return false;
                 });
 
             RsBuilding.Initialize(mod, harmony)
-                .ToAdvanced()
-                .PlanAndTech(RsTypes.PlanType.Plumbing, "rs_transfer_port", "LiquidPiping")
-                .AddBuilding(LiquidTransferConduitSenderConfig.ID)
-                .AddBuilding(LiquidTransferConduitReceiverConfig.ID)
-                .PlanAndTech(RsTypes.PlanType.HVAC, "rs_transfer_port", "GasPiping")
-                .AddBuilding(GasTransferConduitSenderConfig.ID)
-                .AddBuilding(GasTransferConduitReceiverConfig.ID)
-                .PlanAndTech(RsTypes.PlanType.Conveyance, "rs_transfer_port", "SolidTransport")
-                .AddBuilding(SolidTransferConduitSenderConfig.ID)
-                .AddBuilding(SolidTransferConduitReceiverConfig.ID)
-                .PlanAndTech(RsTypes.PlanType.Automation, "rs_transfer_port", "LogicControl")
-                .AddBuilding(WirelessLogicSenderConfig.ID)
-                .AddBuilding(WirelessLogicReceiverConfig.ID)
-                .PlanAndTech(RsTypes.PlanType.Power, "rs_transfer_port", "PrettyGoodConductors")
-                .AddBuilding(WirelessPowerPortConfig.ID)
-                .PlanAndTech(RsTypes.PlanType.HEP, "rs_transfer_port", "AdvancedNuclearResearch", true)
-                .AddBuilding(RadiantParticlesTransferSenderConfig.ID)
-                .AddBuilding(RadiantParticlesTransferReceiverConfig.ID)
-                .OnlyPlan(RsTypes.PlanType.Base, "rs_transfer_port", true)
-                .AddBuilding(TransferPortCenterConfig.ID);
+                .AddBuilding(LiquidTransferConduitSenderConfig.ID, RsTypes.PlanType.Plumbing, "rs_transfer_port", "LiquidPiping")
+                .AddBuilding(LiquidTransferConduitReceiverConfig.ID, RsTypes.PlanType.Plumbing, "rs_transfer_port", "LiquidPiping")
+                .AddBuilding(GasTransferConduitSenderConfig.ID, RsTypes.PlanType.HVAC, "rs_transfer_port", "GasPiping")
+                .AddBuilding(GasTransferConduitReceiverConfig.ID, RsTypes.PlanType.HVAC, "rs_transfer_port", "GasPiping")
+                .AddBuilding(SolidTransferConduitSenderConfig.ID, RsTypes.PlanType.Conveyance, "rs_transfer_port", "SolidTransport")
+                .AddBuilding(SolidTransferConduitReceiverConfig.ID, RsTypes.PlanType.Conveyance, "rs_transfer_port", "SolidTransport")
+                .AddBuilding(WirelessLogicSenderConfig.ID, RsTypes.PlanType.Automation, "rs_transfer_port", "LogicControl")
+                .AddBuilding(WirelessLogicReceiverConfig.ID, RsTypes.PlanType.Automation, "rs_transfer_port", "LogicControl")
+                .AddBuilding(WirelessPowerPortConfig.ID, RsTypes.PlanType.Power, "rs_transfer_port", "PrettyGoodConductors")
+                .AddBuilding(RadiantParticlesTransferSenderConfig.ID, RsTypes.PlanType.HEP, "rs_transfer_port", "AdvancedNuclearResearch", true)
+                .AddBuilding(RadiantParticlesTransferReceiverConfig.ID, RsTypes.PlanType.HEP, "rs_transfer_port", "AdvancedNuclearResearch", true)
+                .AddBuilding(TransferPortCenterConfig.ID, RsTypes.PlanType.Base, "rs_transfer_port", null, true);
 
             base.OnLoad(harmony);
         }

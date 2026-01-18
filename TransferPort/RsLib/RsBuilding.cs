@@ -1,189 +1,86 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
+﻿using HarmonyLib;
+using System.Collections.Generic;
 using TUNING;
 
-namespace RsLib
-{
-    public class RsBuilding : RsModule<RsBuilding>
-    {
-
-        private static void Db_Initialize_Postfix()
-        {
-            foreach (BuildingInfo buildingInfo in Instance.planScreenInfos)
-            {
-                if (buildingInfo.buildingID == null)
-                {
+namespace RsLib {
+    public class RsBuilding : RsModule<RsBuilding> {
+        private static void Db_Initialize_Postfix() {
+            foreach (BuildingInfo buildingInfo in Instance.planScreenInfos) {
+                if (!buildingInfo.IsInfoValid) {
                     return;
                 }
-
-                if (buildingInfo.techID != null)
-                {
+                if (buildingInfo.IsAddTech) {
                     AddBuildingToTech(buildingInfo.techID, buildingInfo.buildingID);
                 }
-                
-                if (buildingInfo.category != null)
-                {
+                if (buildingInfo.IsAddPlan) {
                     AddPlanScreen(buildingInfo.category, buildingInfo.subcategoryID, buildingInfo.buildingID);
                 }
-                
             }
         }
-        
+
         /// <summary>
         ///     添加建筑到研究中
         /// </summary>
-        /// <param name="techID"></param>
-        /// <param name="buildingID"></param>
-        public static void AddBuildingToTech(string techID, string buildingID)
-        {
+        public static void AddBuildingToTech(string techID, string buildingID) {
             var tech = Db.Get().Techs.Get(techID);
-            var flag = tech != null;
-            if (flag)
+            if (tech != null)
                 tech.unlockedItemIDs.Add(buildingID);
             else
                 Debug.LogWarning("AddBuildingToTech() Failed to find tech ID: " + techID);
         }
 
-        public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID,
-            string subcategoryID = null)
-        {
-            AddPlanScreen(category, subcategoryID, buildingID);
-            AddBuildingToTech(techID, buildingID);
-        }
-        public static void AddPlanScreen(HashedString category, string subcategoryID, string buildingID)
-        {
-            if (subcategoryID!= null && BUILDINGS.PLANSUBCATEGORYSORTING != null)
-            {
-                if (!BUILDINGS.PLANSUBCATEGORYSORTING.ContainsKey(buildingID))
-                {
+        public static void AddPlanScreen(HashedString category, string subcategoryID, string buildingID) {
+            if (subcategoryID != null && BUILDINGS.PLANSUBCATEGORYSORTING != null) {
+                if (!BUILDINGS.PLANSUBCATEGORYSORTING.ContainsKey(buildingID)) {
                     BUILDINGS.PLANSUBCATEGORYSORTING[buildingID] = subcategoryID;
                 }
             }
             ModUtil.AddBuildingToPlanScreen(category, buildingID, subcategoryID);
         }
 
-        protected override void Initialized()
-        {
+        public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID, string subcategoryID = null) {
+            AddPlanScreen(category, subcategoryID, buildingID);
+            AddBuildingToTech(techID, buildingID);
+        }
+
+        protected override void Initialized() {
             Harmony.Patch(typeof(Db), "Initialize",
                 postfix: new HarmonyMethod(typeof(RsBuilding), nameof(Db_Initialize_Postfix)));
         }
 
+        private readonly List<BuildingInfo> planScreenInfos = new List<BuildingInfo>();
 
-        private List<BuildingInfo> planScreenInfos = new List<BuildingInfo>();
-
-        public RsBuilding RegisterPlanScreen(string buildingID, HashedString category, string subcategoryID )
-        {
-            RegisterPlanScreenAndTech(buildingID, category, subcategoryID, null);
+        public RsBuilding AddBuilding(BuildingInfo bi) {
+            if (bi.onlyDlc1 && !DlcManager.IsExpansion1Active()) {
+                return this;
+            }
+            planScreenInfos.Add(bi);
             return this;
         }
 
-        public RsBuilding RegisterPlanScreenAndTech(string buildingID, HashedString category, string subcategoryID, string techID)
-        {
-            planScreenInfos.Add(new BuildingInfo(buildingID, category, subcategoryID, techID));
-            return this;
-        }
-        
-        public RsBuilding RegisterTech(string buildingID, string techID)
-        {
-            planScreenInfos.Add(new BuildingInfo(buildingID, null, null, techID));
-            return this;
+        public RsBuilding AddBuilding(string buildingID, HashedString category, string subcategoryID, string techID, bool onlyDlc1 = false) {
+            return AddBuilding(BuildingInfo.BI(buildingID, category, subcategoryID, techID, onlyDlc1));
         }
 
-        public Advanced ToAdvanced()
-        {
-            return new Advanced(this);
-        }
+        public class BuildingInfo {
+            public bool IsInfoValid => buildingID != null;
+            public bool IsAddPlan => category != null;
+            public bool IsAddTech => techID != null;
+            public bool onlyDlc1;
 
-        public class BuildingInfo
-        {
-            public HashedString category;
-            public string techID;
-            public string buildingID;
+            public HashedString category;   // 为null时不添加到建造菜单中
+            public string techID;           // 为null时不添加到研究中
+            public string buildingID;       // 为null时不添加该建筑
             public string subcategoryID;
-        
-            public BuildingInfo()
-            {
-            }
-        
-            public BuildingInfo(string buildingID, HashedString category, string subcategoryID,  string techID)
-            {
-                this.category = category;
-                this.techID = techID;
-                this.buildingID = buildingID;
-                this.subcategoryID = subcategoryID;
-            }
-        }
 
-        public class Advanced
-        {
-            private RsBuilding rsBuilding;
-
-            private bool plan = false;
-            private bool tech = false;
-
-            private HashedString category;
-            private string subcategoryID;
-            private string techID;
-            private bool onlyDlc1;
-
-            public Advanced(RsBuilding rsBuilding)
-            {
-                this.rsBuilding = rsBuilding;
-            }
-
-            public Advanced PlanAndTech(HashedString category , string subcategoryID, string techID, bool onlyDlc1 = false)
-            {
-                this.onlyDlc1 = onlyDlc1;
-                this.category = category;
-                this.subcategoryID = subcategoryID;
-                this.techID = techID;
-                plan = true;
-                tech = true;
-                return this;
-            }
-            
-            public Advanced OnlyPlan(HashedString category, string subcategoryID, bool onlyDlc1 = false)
-            {
-                this.onlyDlc1 = onlyDlc1;
-                this.category = category;
-                this.subcategoryID = subcategoryID;
-                plan = true;
-                tech = false;
-                return this;
-            }
-            
-            public Advanced OnlyTech(string techID, bool onlyDlc1 = false)
-            {
-                this.onlyDlc1 = onlyDlc1;
-                this.techID = techID;
-                plan = false;
-                tech = true;
-                return this;
-            }
-            
-            public Advanced AddBuilding(string buildingId)
-            {
-                if (onlyDlc1 && !DlcManager.IsExpansion1Active())
-                {
-                    return this;
-                }
-                
-                if (plan && tech)
-                {
-                    rsBuilding.RegisterPlanScreenAndTech(buildingId, category, subcategoryID, techID);
-                } else if (plan)
-                {
-                    rsBuilding.RegisterPlanScreen(buildingId, category, subcategoryID);
-                } else if (tech)
-                {
-                    rsBuilding.RegisterTech(buildingId, techID);
-                }
-                return this;
-            }
-
-            public RsBuilding ToNormal()
-            {
-                return rsBuilding;
+            public static BuildingInfo BI(string buildingID, HashedString category, string subcategoryID, string techID, bool onlyDlc1 = false) {
+                return new BuildingInfo {
+                    buildingID = buildingID,
+                    category = category,
+                    subcategoryID = subcategoryID,
+                    techID = techID,
+                    onlyDlc1 = onlyDlc1
+                };
             }
         }
     }

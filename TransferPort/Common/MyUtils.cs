@@ -14,26 +14,6 @@ namespace RsTransferPort {
             return name + "-" + ID.Next();
         }
 
-        public static void AddBuildingToTech(string techID, string buildingID) {
-            var tech = Db.Get().Techs.Get(techID);
-            if (tech != null)
-                tech.unlockedItemIDs.Add(buildingID);
-            else
-                Debug.LogWarning("AddBuildingToTech() Failed to find tech ID: " + techID);
-        }
-
-        public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID) {
-            ModUtil.AddBuildingToPlanScreen(category, buildingID);
-            AddBuildingToTech(techID, buildingID);
-        }
-
-        public static void AddPlanScreenAndTech(HashedString category, string techID, string buildingID,
-            string subcategoryID) {
-            ModUtil.AddBuildingToPlanScreen(category, buildingID, subcategoryID);
-            AddBuildingToTech(techID, buildingID);
-        }
-
-
         /// <summary>
         ///     获取指定的class下的所有静态属性（深度遍历）
         /// </summary>
