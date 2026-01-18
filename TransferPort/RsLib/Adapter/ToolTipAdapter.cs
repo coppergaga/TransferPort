@@ -1,7 +1,5 @@
-﻿namespace RsLib.Adapter
-{
-    public class ToolTipAdapter : ToolTip
-    {
-        
+﻿namespace RsLib.Adapter {
+    public class ToolTipAdapter : ToolTip {
+
     }
 }

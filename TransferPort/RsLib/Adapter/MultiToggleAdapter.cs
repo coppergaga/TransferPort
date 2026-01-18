@@ -1,7 +1,5 @@
-﻿namespace RsLib.Adapter
-{
-    public class MultiToggleAdapter : MultiToggle
-    {
-        
+﻿namespace RsLib.Adapter {
+    public class MultiToggleAdapter : MultiToggle {
+
     }
 }
