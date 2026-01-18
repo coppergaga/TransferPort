@@ -15,7 +15,7 @@ namespace RsTransferPort {
 
         public bool IsGlobal => WorldIdAG == -1;
 
-        public String DisplayChannelName {
+        public string DisplayChannelName {
             get {
                 if (IsInvalid()) {
                     return STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL.ToString();
