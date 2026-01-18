@@ -2,29 +2,24 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace RsLib.Collections
-{
-    public class RsSortedList<T> : ICollection<T> where T : IComparable<T>
-    {
+namespace RsLib.Collections {
+    public class RsSortedList<T> : ICollection<T> where T : IComparable<T> {
         private readonly List<T> _list = new List<T>();
         public RsSortedList() { }
-        
+
         public T this[int index] => _list[index];
 
-        public IEnumerator<T> GetEnumerator()
-        {
+        public IEnumerator<T> GetEnumerator() {
             return _list.GetEnumerator();
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
+        IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
 
-        public void Add(T item)
-        {
+        public void Add(T item) {
             if (item == null) { return; }
-            if (_list.Count < 1) { 
+            if (_list.Count < 1) {
                 _list.Add(item);
                 return;
             }
@@ -41,23 +36,19 @@ namespace RsLib.Collections
             }
         }
 
-        public void Clear()
-        {
+        public void Clear() {
             _list.Clear();
         }
 
-        public bool Contains(T item)
-        {
+        public bool Contains(T item) {
             return _list.Contains(item);
         }
 
-        public void CopyTo(T[] array, int arrayIndex)
-        {
+        public void CopyTo(T[] array, int arrayIndex) {
             _list.CopyTo(array, arrayIndex);
         }
 
-        public bool Remove(T item)
-        {
+        public bool Remove(T item) {
             return _list.Remove(item);
         }
 
