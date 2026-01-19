@@ -32,7 +32,7 @@ namespace RsTransferPort {
         public abstract string defaultName { get; }
 
         public override BuildingDef CreateBuildingDef() {
-            var buildingDef = MyUtils.CreateTransferBuildingDef(id, anim, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1,
+            var buildingDef = MyUtils.BaseBuildingDef(id, anim, BUILDINGS.CONSTRUCTION_MASS_KG.TIER1,
                 MATERIALS.REFINED_METALS);
 
             buildingDef.ViewMode = OverlayModes.Logic.ID;

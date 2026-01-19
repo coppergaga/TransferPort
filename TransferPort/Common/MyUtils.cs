@@ -1,75 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using System.Linq;
 using System.Text;
 using TUNING;
 
 namespace RsTransferPort {
-    public static partial class MyUtils {
+    public static class MyUtils {
         public static MyIdGenerate ID = new MyIdGenerate();
 
         public static string UniqueSaveName(string name) {
             return name + "-" + ID.Next();
         }
 
-        /// <summary>
-        ///     获取指定的class下的所有静态属性（深度遍历）
-        /// </summary>
-        public static Dictionary<string, object> FlatFields(Type type) {
-            var dir = new Dictionary<string, object>();
-            FlatFields(type, "", dir);
-            return dir;
-        }
-
-        private static void FlatFields(Type type, string prefix, Dictionary<string, object> container) {
-            if (string.IsNullOrEmpty(prefix))
-                prefix = type.Name;
-            else
-                prefix = prefix + "." + type.Name;
-
-            //普通属性
-            var fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Static);
-
-            foreach (var t in fieldInfos) { container.Add(prefix + "." + t.Name, t.GetValue(null)); }
-
-            //类
-            var nestedTypes = type.GetNestedTypes(BindingFlags.Public);
-            foreach (var nestedType in nestedTypes) FlatFields(nestedType, prefix, container);
-        }
-
-
-        /// <summary>
-        ///     通过一个类添加到Strings里
-        /// </summary>
-        public static void AddStrings(Type type) {
-            var flatFields = FlatFields(type);
-            foreach (var kv in flatFields) { Strings.Add(kv.Key, (LocString)kv.Value); }
-        }
-
-        public static int Count(this IEnumerable source) {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-
-            if (source is ICollection collection) return collection.Count;
-
-            var num = 0;
-            var enumerator = source.GetEnumerator();
-            while (enumerator.MoveNext())
-                checked {
-                    ++num;
-                }
-
-            return num;
-        }
-
-        public static bool IsUsePriority(BuildingType buildingType) {
-            return buildingType == BuildingType.Gas
-                || buildingType == BuildingType.Liquid
-                || buildingType == BuildingType.Solid;
-        }
-
-        public static BuildingDef CreateTransferBuildingDef(
+        public static BuildingDef BaseBuildingDef(
             string id,
             string anim,
             float[] construction_mass,

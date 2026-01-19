@@ -84,7 +84,6 @@
     <Compile Include="Common\IMyHighEnergyParticleDirection.cs" />
     <Compile Include="Common\MyResource.cs" />
     <Compile Include="Common\MyUtils.cs" />
-    <Compile Include="Common\MyUtilsExtend1.cs" />
     <Compile Include="Common\PortChannelKey.cs" />
     <Compile Include="Common\PortManager.cs" />
     <Compile Include="Common\PriorityChannelItemInfo.cs" />
@@ -130,7 +129,6 @@
     <Compile Include="RsLib\Collections\ContrastSet.cs" />
     <Compile Include="RsLib\Collections\LineList.cs" />
     <Compile Include="RsLib\Collections\RsSortedList.cs" />
-    <Compile Include="RsLib\Components\RsElementReference.cs" />
     <Compile Include="RsLib\Components\RsHierarchyReferences.cs" />
     <Compile Include="RsLib\Components\RsMultiToggleGroupAdapter.cs" />
     <Compile Include="RsLib\Debug\RsGameDebug.cs" />
@@ -145,13 +143,11 @@
     <Compile Include="RsLib\RsBuilding.cs" />
     <Compile Include="RsLib\RsButtonMenu.cs" />
     <Compile Include="RsLib\RsField.cs" />
-    <Compile Include="RsLib\RsGameType.cs" />
     <Compile Include="RsLib\RsHarmonyExtension.cs" />
     <Compile Include="RsLib\RsLocalization.cs" />
     <Compile Include="RsLib\RsMethod.cs" />
     <Compile Include="RsLib\RsModule.cs" />
     <Compile Include="RsLib\RsOverlay.cs" />
-    <Compile Include="RsLib\RsReflection.cs" />
     <Compile Include="RsLib\RsResources.cs" />
     <Compile Include="RsLib\RsTypes.cs" />
     <Compile Include="RsLib\SideScreen\RsSideScreen.cs" />

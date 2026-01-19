@@ -95,7 +95,7 @@ namespace RsTransferPort {
                     break;
             }
 
-            var buildingDef = MyUtils.CreateTransferBuildingDef(
+            var buildingDef = MyUtils.BaseBuildingDef(
                 id,
                 anim,
                 BUILDINGS.CONSTRUCTION_MASS_KG.TIER6,

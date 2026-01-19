@@ -36,7 +36,7 @@ namespace RsTransferPort {
 
         public override BuildingDef CreateBuildingDef() {
             BuildingDef buildingDef =
-                MyUtils.CreateTransferBuildingDef(id, anim, BUILDINGS.CONSTRUCTION_MASS_KG.TIER6,
+                MyUtils.BaseBuildingDef(id, anim, BUILDINGS.CONSTRUCTION_MASS_KG.TIER6,
                     MATERIALS.RAW_MINERALS);
 
             buildingDef.DefaultAnimState = "off";

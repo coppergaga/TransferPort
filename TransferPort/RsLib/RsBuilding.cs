@@ -19,7 +19,7 @@ namespace RsLib {
         }
 
         /// <summary>
-        ///     添加建筑到研究中
+        /// 添加建筑到研究中
         /// </summary>
         public static void AddBuildingToTech(string techID, string buildingID) {
             var tech = Db.Get().Techs.Get(techID);
@@ -29,6 +29,9 @@ namespace RsLib {
                 Debug.LogWarning("AddBuildingToTech() Failed to find tech ID: " + techID);
         }
 
+        /// <summary>
+        /// 添加建筑到建造栏
+        /// </summary>
         public static void AddPlanScreen(HashedString category, string subcategoryID, string buildingID) {
             if (subcategoryID != null && BUILDINGS.PLANSUBCATEGORYSORTING != null) {
                 if (!BUILDINGS.PLANSUBCATEGORYSORTING.ContainsKey(buildingID)) {

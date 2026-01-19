@@ -287,7 +287,7 @@ namespace RsTransferPort {
                         foreach (GameObject gameObject in channel) {
                             PortItem portChannel = gameObject.GetComponent<PortItem>();
                             int priority = portChannel.Priority;
-                            if (MyUtils.IsUsePriority(portChannel.BuildingType)) {
+                            if (Converter.IsUsePriority(portChannel.BuildingType)) {
                                 Vector3 position = gameObject.transform.position + new Vector3(0, 0.5f, 0);
                                 PriorityImage pi = priorityPool.GetFreeElement(gameObject, priorityParent, true);
                                 pi.Priority = priority;
@@ -454,7 +454,7 @@ namespace RsTransferPort {
 
                     lineArrow.EnableAnim = !OpDisableLineAnim;
 
-                    if (OpShowPriorityInfo && MyUtils.IsUsePriority(_buildingType)) {
+                    if (OpShowPriorityInfo && Converter.IsUsePriority(_buildingType)) {
                         int priority = Mathf.Clamp(transferPortChannel.Priority, 1, 9);
                         lineArrow.SetColor(PriorityColorsList[priority - 1]);
                     }

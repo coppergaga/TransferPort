@@ -24,5 +24,11 @@
                 default:                    return BuildingType.None;
             }
         }
+
+        public static bool IsUsePriority(BuildingType buildingType) {
+            return buildingType == BuildingType.Gas
+                || buildingType == BuildingType.Liquid
+                || buildingType == BuildingType.Solid;
+        }
     }
 }

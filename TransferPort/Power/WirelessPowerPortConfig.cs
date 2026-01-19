@@ -9,7 +9,7 @@ namespace RsTransferPort {
         public const string ID = "RsWirelessPowerPort";
 
         public override BuildingDef CreateBuildingDef() {
-            var buildingDef = MyUtils.CreateTransferBuildingDef(
+            var buildingDef = MyUtils.BaseBuildingDef(
                 ID,
                 "rs_wireless_power_port_Kanim",
                 BUILDINGS.CONSTRUCTION_MASS_KG.TIER3,
