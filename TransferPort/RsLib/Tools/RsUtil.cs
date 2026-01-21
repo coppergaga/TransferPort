@@ -8,6 +8,9 @@ using Object = UnityEngine.Object;
 
 namespace RsLib {
     public static class RsUtil {
+        public static Vector2 ArrowV2Offset = new Vector2(0, 0.5f);
+        public static Vector3 ArrowV3Offset = new Vector3(0, 0.5f);
+
         public static string GetModPath(Assembly modDLL) {
             if (modDLL == null)
                 throw new ArgumentNullException(nameof(modDLL));

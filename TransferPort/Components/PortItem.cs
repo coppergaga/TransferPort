@@ -85,8 +85,6 @@ namespace RsTransferPort {
             set => buildingType = value;
         }
 
-        public SingleChannelController ChannelController => PortManager.Instance.GetChannelController(this);
-
         protected override void OnPrefabInit() {
             base.OnPrefabInit();
             Subscribe((int)GameHashes.CopySettings, OnCopySettings);
@@ -173,8 +171,7 @@ namespace RsTransferPort {
 
             if (newName != null) {
                 newName = newName.Trim();
-                if (!System.Object.Equals(channelName, newName)) {
-                    channelName = newName;
+                if (!string.Equals(channelName, newName)) {
                     triggerAddOrRemove = true;
                     triggerChannelChange = true;
                 }
@@ -187,7 +184,10 @@ namespace RsTransferPort {
             }
 
             if (triggerAddOrRemove) {
+                // first remove item, then channelName = new name, last add item
+                // because we get channel controller by the combined name, worldID and buildingType
                 PortManager.Instance.Remove(this);
+                channelName = newName;
                 PortManager.Instance.Add(this);
                 UpdateConnectionStatusItem();
             }
@@ -222,9 +222,8 @@ namespace RsTransferPort {
 
         public bool HasChannel(object target) {
             if (target is SingleChannelController channel) {
-                return channel?.Contains(this) ?? false;
+                return channel.Contains(this);
             }
-
             return false;
         }
 

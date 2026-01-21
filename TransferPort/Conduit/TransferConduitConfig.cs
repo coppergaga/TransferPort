@@ -153,9 +153,9 @@ namespace RsTransferPort {
 
             go.AddOrGet<ShowOverlaySelf>();
 
-            var TransferConduit = go.AddOrGet<TransferConduit>();
-            TransferConduit.inOutType = inOutType;
-            TransferConduit.conduitType = conduitType;
+            var conduit = go.AddOrGet<TransferConduit>();
+            conduit.inOutType = inOutType;
+            conduit.conduitType = conduitType;
         }
     }
 }

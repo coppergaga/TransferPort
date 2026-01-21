@@ -39,7 +39,7 @@ namespace RsTransferPort {
                 element = pool.GetFreeElement(instantiateParent, forceActive);
                 dic.Add(key, element);
             }
-
+            
             noRecord.Remove(key);
             return element;
         }

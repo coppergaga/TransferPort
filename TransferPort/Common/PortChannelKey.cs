@@ -2,21 +2,21 @@
 using RsLib;
 
 namespace RsTransferPort {
-    public struct PortChannelKey : IEquatable<PortChannelKey> {
-        public static PortChannelKey Invalid = default;
+    public readonly struct PortChannelKey : IEquatable<PortChannelKey> {
+        public static readonly PortChannelKey Invalid = default;
 
-        public readonly string name;
-        public readonly int worldId;
-        public readonly BuildingType buildingType;
+        private readonly string name;
+        private readonly int worldId;
+        private readonly BuildingType buildingType;
 
         public PortChannelKey(string name, int worldId, BuildingType buildingType) {
-            this.name = name;
+            this.name = name ?? string.Empty;
             this.worldId = worldId;
             this.buildingType = buildingType;
         }
 
         public bool Equals(PortChannelKey other) {
-            return name == other.name && worldId == other.worldId && buildingType == other.buildingType;
+            return IsSame(other.buildingType) && IsSame(other.worldId) && IsSame(other.name);
         }
 
         public override bool Equals(object obj) {
@@ -25,7 +25,7 @@ namespace RsTransferPort {
 
         public override int GetHashCode() {
             unchecked {
-                var hashCode = name != null ? name.GetHashCode() : 0;
+                int hashCode = name.GetHashCode();
                 hashCode = (hashCode * 397) ^ worldId;
                 hashCode = (hashCode * 397) ^ (int)buildingType;
                 return hashCode;
@@ -39,5 +39,9 @@ namespace RsTransferPort {
         public static bool operator ==(PortChannelKey a, PortChannelKey b) => Equals(a, b);
 
         public static bool operator !=(PortChannelKey a, PortChannelKey b) => !Equals(a, b);
+
+        public bool IsSame(BuildingType bt) => buildingType == bt;
+        public bool IsSame(int worldID) => worldId == worldID;
+        public bool IsSame(string channelName) => string.Equals(name, channelName, StringComparison.Ordinal);
     }
 }

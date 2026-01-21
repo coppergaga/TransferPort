@@ -48,7 +48,7 @@ namespace RsTransferPort {
 
             foreach (PortItem sender in senders) {
                 int inputSignal = sender.GetComponent<WirelessLogicPort>().GetInputSignal();
-                signal = signal | inputSignal;
+                signal |= inputSignal;
             }
 
             return signal;

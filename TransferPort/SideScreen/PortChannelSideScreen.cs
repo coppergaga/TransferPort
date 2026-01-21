@@ -62,11 +62,17 @@ namespace RsTransferPort {
         protected override void OnSpawn() {
             base.OnSpawn();
             headerLabel.SetText(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NAME);
-            PortManager.Instance.OnChannelChange += (channel) => {
-                Refresh();
-            };
+            PortManager.Instance.OnChannelChange += HandleChannelChange;
 
             globalToggle.gameObject.SetActiveNR(DlcManager.IsExpansion1Active());
+        }
+
+        protected override void OnDeactivate() {
+            PortManager.Instance.OnChannelChange -= HandleChannelChange;
+        }
+
+        protected void HandleChannelChange(PortItem item) {
+            Refresh();
         }
 
         private void OnChangeNameEditStart(string text) {
@@ -84,7 +90,7 @@ namespace RsTransferPort {
 
         protected void ChangeName(string str) {
             if (isBatchMode) {
-                PortManager.Instance.BatchChange(target.ChannelController, str, target.IsGlobal);
+                PortManager.Instance.BatchChange(GetController(target), str, target.IsGlobal);
                 SetBatchRenameState(false);
                 return;
             }
@@ -128,7 +134,7 @@ namespace RsTransferPort {
         private void OnGlobalToggleClick() {
             if (target != null) {
                 if (isBatchMode) {
-                    PortManager.Instance.BatchChange(target.ChannelController, target.ChannelName, !target.IsGlobal);
+                    PortManager.Instance.BatchChange(GetController(target), target.ChannelName, !target.IsGlobal);
                     SetBatchRenameState(false);
                 }
                 else {
@@ -162,7 +168,7 @@ namespace RsTransferPort {
             if (target.BuildingType == BuildingType.Gas
                 || target.BuildingType == BuildingType.Liquid
                 || target.BuildingType == BuildingType.Solid) {
-                if (target.ChannelController is TransferConduitChannel conduitChannel) {
+                if (GetController(target) is TransferConduitChannel conduitChannel) {
                     StringBuilder stringBuilder = new StringBuilder();
                     stringBuilder.Append(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.PRIORITY_TOOLTIP);
                     stringBuilder.AppendLine();
@@ -186,7 +192,7 @@ namespace RsTransferPort {
 
         private void OnPriorityClick(int priority) {
             if (isBatchMode) {
-                PortManager.Instance.BatchChangePriority(target.ChannelController, priority);
+                PortManager.Instance.BatchChangePriority(GetController(target), priority);
                 SetBatchRenameState(false);
             }
             else {
@@ -201,7 +207,7 @@ namespace RsTransferPort {
             if (target.BuildingType == BuildingType.Gas
                 || target.BuildingType == BuildingType.Liquid
                 || target.BuildingType == BuildingType.Solid) {
-                if (target.ChannelController is TransferConduitChannel conduitChannel) {
+                if (GetController(target) is TransferConduitChannel conduitChannel) {
                     priorityBar.gameObject.SetActiveNR(true);
 
                     //重置优先度
@@ -289,45 +295,45 @@ namespace RsTransferPort {
             worldInfoPool.RecordStart();
 
             foreach (SingleChannelController controller in controllers) {
-                RsHierarchyReferences row = rowPool2.GetFreeElement(controller, listContainer, true);
+                var localController = controller;
+                RsHierarchyReferences row = rowPool2.GetFreeElement(localController, listContainer, true);
                 row.transform.SetAsLastSibling();
 
                 LocTextAdapter channelNameLocText = row.GetReference<LocTextAdapter>("ChannelName");
-                channelNameLocText.SetTextNoRepeat(controller.DisplayChannelName);
+                channelNameLocText.SetTextNoRepeat(localController.DisplayChannelName);
 
                 MultiToggle toggle = row.GetComponent<MultiToggle>();
-                toggle.ChangeState(target.HasChannel(controller) ? 1 : 0);
-                toggle.onClick =
-                    delegate {
-                        target.SetChannel(controller);
-                    };
+                toggle.ChangeState(target.HasChannel(localController) ? 1 : 0);
+                toggle.onClick = () => {
+                    target.SetChannel(localController);
+                };
                 GameObject globalIcon = row.GetReference("GlobalIcon");
-                globalIcon.SetActiveNR(controller.IsGlobal);
+                globalIcon.SetActiveNR(localController.IsGlobal);
 
                 LocTextAdapter num1 = row.GetReference<LocTextAdapter>("Num1");
                 num1.gameObject.SetActiveNR(true);
-                if (controller.BuildingType == BuildingType.Power) {
-                    num1.SetTextNoRepeat("N:" + controller.senders.Count);
+                if (localController.BuildingType == BuildingType.Power) {
+                    num1.SetTextNoRepeat("N:" + localController.senders.Count);
                 }
                 else {
-                    num1.SetTextNoRepeat("S:" + controller.senders.Count);
+                    num1.SetTextNoRepeat("S:" + localController.senders.Count);
                 }
 
                 LocTextAdapter num2 = row.GetReference<LocTextAdapter>("Num2");
-                if (controller.BuildingType == BuildingType.Power) {
+                if (localController.BuildingType == BuildingType.Power) {
                     num2.gameObject.SetActiveNR(false);
                 }
                 else {
                     num2.gameObject.SetActiveNR(true);
-                    num2.SetTextNoRepeat("R:" + controller.receivers.Count);
+                    num2.SetTextNoRepeat("R:" + localController.receivers.Count);
                 }
 
-                if (detailLevel == 1 && controller.BuildingType == BuildingType.Power && !controller.IsInvalid()) {
-                    RefreshPowerInfo(row, controller);
+                if (detailLevel == 1 && localController.BuildingType == BuildingType.Power && !localController.IsInvalid()) {
+                    RefreshPowerInfo(row, localController);
                 }
 
-                if (detailLevel == 1 && controller.IsGlobal && DlcManager.IsContentSubscribed(DlcManager.EXPANSION1_ID)) {
-                    RefreshWorldListInfo(row, controller);
+                if (detailLevel == 1 && localController.IsGlobal && DlcManager.IsContentSubscribed(DlcManager.EXPANSION1_ID)) {
+                    RefreshWorldListInfo(row, localController);
                 }
             }
 
@@ -407,6 +413,10 @@ namespace RsTransferPort {
                 (object)GameUtil.GetFormattedWattage(
                     circuitManager.GetMaxSafeWattageForCircuit(circuitID))));
             // label5.GetComponent<ToolTip>().toolTip = (string) UI.DETAILTABS.ENERGYGENERATOR.MAX_SAFE_WATTAGE_TOOLTIP;
+        }
+
+        private SingleChannelController GetController(PortItem item) {
+            return PortManager.Instance.GetChannelController(item);
         }
     }
 }

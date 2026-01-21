@@ -29,7 +29,7 @@ namespace RsLib.Components {
                     }
                 }
             }
-            Debug.LogError((object)string.Format("Could not find UI reference '{0}' or convert to specified type)", (object)name));
+            Debug.LogError($"Could not find UI reference '{name}' or convert to specified type)");
             return default;
         }
 
@@ -38,8 +38,8 @@ namespace RsLib.Components {
                 if (reference != null && reference.name == name)
                     return reference;
             }
-            Debug.LogWarning((object)"Couldn't find reference to object named {0} Make sure the name matches the field in the inspector.");
-            return (GameObject)null;
+            Debug.LogWarning($"Couldn't find reference to object named {name} Make sure the name matches the field in the inspector.");
+            return null;
         }
     }
 }

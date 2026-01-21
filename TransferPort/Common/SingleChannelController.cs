@@ -33,28 +33,18 @@ namespace RsTransferPort {
         }
 
         public void Add(PortItem item) {
+            if (item == null) { return; }
 
-            if (item == null) {
-                Debug.LogErrorFormat("SingleChannelController buildingType:{0} Add null", BuildingType);
-                return;
-            }
-
-            if (item.InOutType == InOutType.Receiver)
-                receivers.Add(item);
-            else
-                senders.Add(item);
+            if (item.InOutType == InOutType.Receiver) { receivers.Add(item); }
+            else { senders.Add(item); }
             all.Add(item);
             OnAdd(item);
         }
 
         public void Remove(PortItem item) {
-            if (item == null) {
-                return;
-            }
-            if (item.InOutType == InOutType.Receiver)
-                receivers.Remove(item);
-            else
-                senders.Remove(item);
+            if (item == null) { return; }
+            if (item.InOutType == InOutType.Receiver) { receivers.Remove(item); }
+            else { senders.Remove(item); }
             all.Remove(item);
             OnRemove(item);
         }
@@ -89,6 +79,7 @@ namespace RsTransferPort {
             return string.IsNullOrEmpty(ChannelName);
         }
 
+        public bool IsNeedClean => 0 == Total && !IsInvalid();
 
         public int CompareTo(SingleChannelController other) {
             if (ReferenceEquals(this, other)) return 0;

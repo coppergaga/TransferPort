@@ -6,10 +6,6 @@ namespace RsTransferPort {
     public class PortManager : SingleManager<PortManager> {
         public const int GLOBAL_CHANNEL_WORLD_ID = -1;
 
-        private readonly Dictionary<PortItem, PortChannelKey> allPort = new Dictionary<PortItem, PortChannelKey>();
-
-        private readonly HashSet<SingleChannelController> allChannel = new HashSet<SingleChannelController>();
-
         private readonly Dictionary<BuildingType, Dictionary<PortChannelKey, SingleChannelController>> classifyChannels
             = new Dictionary<BuildingType, Dictionary<PortChannelKey, SingleChannelController>>() {
                 [BuildingType.Gas] = new Dictionary<PortChannelKey, SingleChannelController>(),
@@ -27,65 +23,42 @@ namespace RsTransferPort {
         /// </summary>
         // public bool EnableGlobalChannel { get; private set; }
 
-        private int GetWorldIdAG(PortItem portChannelItem) {
-            return portChannelItem.IsGlobal ? GLOBAL_CHANNEL_WORLD_ID : portChannelItem.GetMyWorldId();
-        }
+        public void Add(PortItem item) {
+            var buildingType = item.BuildingType;
+            var channelName = item.ChannelName;
+            var worldID = item.WorldIdAG;
 
-        public void Add(PortItem portChannelItem) {
-            if (Contains(portChannelItem)) {
-                //throw new Exception("Repeat addition PortChannelItem");
-                return;
-            }
-
-            PortChannelKey channelKey =
-                new PortChannelKey(portChannelItem.ChannelName, portChannelItem.WorldIdAG, portChannelItem.BuildingType);
-
-            allPort.Add(portChannelItem, channelKey);
-            var channels = classifyChannels[channelKey.buildingType];
+            var channelKey = item.ChannelKey;
+            var channels = classifyChannels[buildingType];
             if (!channels.TryGetValue(channelKey, out SingleChannelController sc)) {
-                sc = CreateSingleChannelController(channelKey.buildingType, channelKey.name, channelKey.worldId);
+                sc = CreateSingleChannelController(buildingType, channelName, worldID);
                 sc.OnSpawn();
                 channels.Add(channelKey, sc);
-                allChannel.Add(sc);
             }
 
-            if (!sc.Contains(portChannelItem)) {
-                //这里进行添加
-                sc.Add(portChannelItem);
-                portChannelItem.EnterChannelController(sc);
+            if (!sc.Contains(item)) {
+                sc.Add(item);
+                item.EnterChannelController(sc);
             }
 
             //检查是否已经有空频道，无则创建
-            PortChannelKey nullChannelKey = new PortChannelKey("", channelKey.worldId, channelKey.buildingType);
+            PortChannelKey nullChannelKey = new PortChannelKey("", worldID, buildingType);
             if (!channels.ContainsKey(nullChannelKey)) {
-                channels.Add(nullChannelKey, CreateSingleChannelController(channelKey.buildingType, "", channelKey.worldId));
+                channels.Add(nullChannelKey, CreateSingleChannelController(buildingType, "", worldID));
             }
-
         }
 
-        public bool Contains(PortItem portChannelItem) {
-            return allPort.ContainsKey(portChannelItem);
-        }
-
-        public void Remove(PortItem portChannelItem) {
-            if (!Contains(portChannelItem))
-                return;
-
-            PortChannelKey channelKey = allPort[portChannelItem];
-
-            var channels = classifyChannels[channelKey.buildingType];
-
+        public void Remove(PortItem item) {
+            var channelKey = item.ChannelKey;
+            var channels = classifyChannels[item.BuildingType];
             if (channels.TryGetValue(channelKey, out SingleChannelController sc)) {
-                sc.Remove(portChannelItem);
-                portChannelItem.ExitChannelController(sc);
-                if (!String.IsNullOrEmpty(sc.ChannelName) && sc.Total == 0) {
+                sc.Remove(item);
+                item.ExitChannelController(sc);
+                if (sc.IsNeedClean) {
                     sc.OnCleanUp();
                     channels.Remove(channelKey);
-                    allChannel.Remove(sc);
                 }
             }
-
-            allPort.Remove(portChannelItem);
         }
 
         public void TriggerChannelChange(PortItem target) {
@@ -97,8 +70,8 @@ namespace RsTransferPort {
                 return;
             }
 
-            foreach (PortItem channel in controller.all.ToList()) {
-                channel.CheckSetChannelNameAndGlobal(newName, global, channel.Priority);
+            foreach (PortItem item in controller.all.ToList()) {
+                item.CheckSetChannelNameAndGlobal(newName, global, item.Priority);
             }
         }
 
@@ -107,8 +80,8 @@ namespace RsTransferPort {
                 return;
             }
 
-            foreach (PortItem channel in controller.all.ToList()) {
-                channel.CheckSetPriority(priority);
+            foreach (PortItem item in controller.all.ToList()) {
+                item.CheckSetPriority(priority);
             }
         }
 
@@ -138,8 +111,8 @@ namespace RsTransferPort {
 
             if (sort && list.Count > 0) {
                 list.Sort();
-                if (!String.IsNullOrEmpty(list[0].ChannelName)) {
-                    int index = list.FindIndex((sc) => String.IsNullOrEmpty(sc.ChannelName));
+                if (!list[0].IsInvalid()) {
+                    int index = list.FindIndex((sc) => sc.IsInvalid());
                     if (index != -1) {
                         (list[index], list[0]) = (list[0], list[index]);
                     }
@@ -153,20 +126,25 @@ namespace RsTransferPort {
         }
 
         public ICollection<SingleChannelController> GetChannels() {
-            return allChannel;
+            var ret = new List<SingleChannelController>();
+            foreach (var channel in classifyChannels.Values) {
+                ret.AddRange(channel.Values);
+            }
+            return ret;
         }
 
         public ICollection<PortItem> GetAllPort() {
-            return allPort.Keys;
+            List<PortItem> ret = new List<PortItem>();
+            foreach (var channel in classifyChannels.Values) {
+                foreach (var controller in channel.Values) {
+                    ret.AddRange(controller.all);
+                }
+            }
+            return ret;
         }
 
         public SingleChannelController GetChannelController(PortItem item) {
-            if (!allPort.TryGetValue(item, out PortChannelKey channelKey)) {
-                return null;
-            }
-
-            BuildingType buildingType = channelKey.buildingType;
-            classifyChannels[buildingType].TryGetValue(channelKey, out SingleChannelController controller);
+            classifyChannels[item.BuildingType].TryGetValue(item.ChannelKey, out SingleChannelController controller);
             return controller;
         }
 
@@ -188,8 +166,6 @@ namespace RsTransferPort {
                 Game.Instance.liquidConduitFlow.RemoveConduitUpdater(LiquidConduitUpdate);
                 Game.Instance.solidConduitFlow.RemoveConduitUpdater(SolidConduitUpdate);
             }
-            // channels.Clear();
-            // objectChannelKey.Clear();
         }
 
         private void GasConduitUpdate(float dt) {
