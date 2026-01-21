@@ -100,11 +100,6 @@ namespace RsTransferPort {
         }
         public static GameObject Prefab => RsResources.Load<GameObject>("ui/port_overlay_diagram");
 
-
-        // [SerializeField] private MultiToggle centralConnectionToggle;
-        // [SerializeField] private MultiToggle nearbyConnectionToggle;
-        // [SerializeField] private MultiToggle noneConnectionToggle;
-
         [SerializeField] private RsMultiToggleGroupCom lineToggleGroup;
 
         [SerializeField] private RsMultiToggleGroupCom typeToggleGroup;

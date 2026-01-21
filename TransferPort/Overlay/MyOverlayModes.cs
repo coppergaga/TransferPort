@@ -121,7 +121,7 @@ namespace RsTransferPort {
             private readonly GameObject lineCenterParent;
             private readonly LineList<GameObject> filterChannels = new LineList<GameObject>();
             private readonly RsHashUIPool<RsHierarchyReferences> namePool;
-            private readonly RsHashUIPool<LineArrow> lineArrowPool;
+            private readonly UIPool<LineArrow> lineArrowPool;
             private readonly UIPool<LineCenterImage> lineCenterImagePool;
             private readonly RsHashUIPool<PriorityImage> priorityPool;
             private readonly int objectTargetLayer;
@@ -140,7 +140,7 @@ namespace RsTransferPort {
                 LineArrow arrowPrefab = TransferPortMod.BodyAsset.lineArrow;
 
                 namePool = new RsHashUIPool<RsHierarchyReferences>(TransferPortMod.BodyAsset.portChannelName);
-                lineArrowPool = new RsHashUIPool<LineArrow>(arrowPrefab);
+                lineArrowPool = new UIPool<LineArrow>(arrowPrefab);
                 priorityPool = new RsHashUIPool<PriorityImage>(RsResources.Load<PriorityImage>("prefabs/priority_image"));
                 lineCenterImagePool = new UIPool<LineCenterImage>(TransferPortMod.BodyAsset.lineCenterImage);
 
@@ -222,7 +222,6 @@ namespace RsTransferPort {
                 SelectTool.Instance.ClearLayerMask();
                 GridCompositor.Instance.ToggleMinor(false);
                 PortManager.Instance.OnChannelChange -= OnChannelChange;
-                base.Disable();
             }
 
             public void OnChannelChange(PortItem channel) {
@@ -311,92 +310,76 @@ namespace RsTransferPort {
             }
 
             private void FilterOneTypeChannel(int activeWorldId, BuildingType buildingType) {
-                if (NeedShowBuildingType(buildingType)) {
-                    var channels = PortManager.Instance.GetChannels(buildingType);
-                    foreach (var channel in channels)
-                        if (NeedShowChannel(channel)) {
-                            filterChannels.NextLine();
-                            foreach (PortItem obj in channel.all) {
-                                if (obj.GetMyWorldId() == activeWorldId) filterChannels.Add(obj.gameObject);
-                            }
+                if (!NeedShowBuildingType(buildingType)) {
+                    return;
+                }
+                var channels = PortManager.Instance.GetChannels(buildingType);
+                foreach (var channel in channels) {
+                    if (!NeedShowChannel(channel)) {
+                        continue;
+                    }
+                    filterChannels.NextLine();
+                    foreach (PortItem obj in channel.all) {
+                        if (obj.GetMyWorldId() == activeWorldId) { filterChannels.Add(obj.gameObject); }
+                    }
 
-                            filterChannels.PreviousLineIfEmpty();
-                        }
+                    filterChannels.PreviousLineIfEmpty();
                 }
             }
 
             private bool NeedShowBuildingType(BuildingType buildingType) {
                 if (enableShowOneChannel) {
-                    return showOneChannelKey.buildingType == buildingType;
+                    return showOneChannelKey.IsSame(buildingType);
                 }
-                else {
-                    if (OpBuildingType == BuildingType.None) {
-                        return true;
-                    }
-
-                    return OpBuildingType == buildingType;
+                if (OpBuildingType == BuildingType.None) {
+                    return true;
                 }
+                return OpBuildingType == buildingType;
             }
 
             private bool NeedShowChannel(SingleChannelController controller) {
                 if (enableShowOneChannel) {
-                    return showOneChannelKey.worldId == controller.WorldIdAG &&
-                           showOneChannelKey.name == controller.ChannelName;
+                    return showOneChannelKey.IsSame(controller.WorldIdAG) &&
+                           showOneChannelKey.IsSame(controller.ChannelName);
                 }
-                if (OpShowOnlyGlobalChannel) {
-                    if (!controller.IsGlobal) {
-                        return false;
-                    }
+                if (OpShowOnlyGlobalChannel && !controller.IsGlobal) {
+                    return false;
                 }
-
-                if (OpShowOnlyNullChannel) {
-                    if (!controller.IsInvalid()) {
-                        return false;
-                    }
+                if (OpShowOnlyNullChannel && !controller.IsInvalid()) {
+                    return false;
                 }
-
                 return true;
             }
 
             private void UpdateLabel() {
                 namePool.RecordStart();
-                foreach (var channel in filterChannels) UpdateLabelFromChannel(channel);
+                foreach (var channel in filterChannels) { UpdateLabelFromChannel(channel); }
                 namePool.ClearNoRecordElement();
+            }
+
+            private Color IndexColor() {
+                colorIndex %= ColorsList.Length;
+                Color color = ColorsList[colorIndex];
+                colorIndex++;
+                return color;
             }
 
             private void UpdateArrow() {
                 lineCenterImagePool.ClearAll();
-                lineArrowPool.RecordStart();
+                lineArrowPool.ClearAll();
                 foreach (IList<GameObject> channelObjects in filterChannels) {
-                    if (channelObjects.Count == 0) {
-                        continue;
-                    }
-
-                    PortItem component = channelObjects[0].GetComponent<PortItem>();
-
-                    if (string.IsNullOrEmpty(component.ChannelName)) {
-                        continue;
-                    }
-
-                    Color color;
+                    if (channelObjects.Count == 0) { continue; }
+                    PortItem item = channelObjects[0].GetComponent<PortItem>();
+                    if (string.IsNullOrEmpty(item.ChannelName)) { continue; }
                     //选取颜色
-                    if (userIndexColor) {
-                        colorIndex = colorIndex % ColorsList.Length;
-                        color = ColorsList[colorIndex];
-                        colorIndex++;
-                    }
-                    else {
-                        color = BuildingTypeColorMap[component.BuildingType];
-                    }
-
+                    Color color = userIndexColor ? IndexColor() : BuildingTypeColorMap[item.BuildingType];
                     if (OpWiredPreviewMode == WiredPreviewMode.Center) {
-                        UpdateCenterPreview(channelObjects, component.BuildingType, component.ChannelName, color);
+                        UpdateCenterPreview(channelObjects, item.BuildingType, item.ChannelName, color);
                     }
                     else if (OpWiredPreviewMode == WiredPreviewMode.Nearby) {
-                        UpdateNearbyPreview(channelObjects, component.BuildingType, component.ChannelName, color);
+                        UpdateNearbyPreview(channelObjects, item.BuildingType, item.ChannelName, color);
                     }
                 }
-                lineArrowPool.ClearNoRecordElement();
             }
 
             private void UpdateLabelFromChannel(ICollection<GameObject> items) {
@@ -422,10 +405,12 @@ namespace RsTransferPort {
                 RsUtil.NearestSort(items);
 
                 for (var i = 0; i < items.Count - 1; i++) {
-                    LineArrow lineArrow = lineArrowPool.GetFreeElement(items[i], arrowParent, true);
+                    LineArrow lineArrow = lineArrowPool.GetFreeElement(arrowParent, true);
                     lineArrow.transform.SetAsLastSibling();
-                    lineArrow.SetTwoPoint((Vector2)items[i].transform.position + new Vector2(0, 0.5f),
-                        (Vector2)items[i + 1].transform.position + new Vector2(0, 0.5f));
+                    lineArrow.SetTwoPoint(
+                        items[i].transform.position + RsUtil.ArrowV3Offset,
+                        items[i+1].transform.position + RsUtil.ArrowV3Offset
+                    );
                     lineArrow.EnableAnim = !OpDisableLineAnim;
                     lineArrow.SetColor(color);
                 }
@@ -439,15 +424,15 @@ namespace RsTransferPort {
                 var center = items.Center();
                 center.y += 0.5f;
 
-                foreach (var item in items) {
-                    var transferPortChannel = item.GetComponent<PortItem>();
-                    var endPos = item.transform.position;
-                    if (transferPortChannel == null) continue;
+                foreach (var go in items) {
+                    var portItem = go.GetComponent<PortItem>();
+                    var endPos = go.transform.position;
+                    if (portItem == null) continue;
 
-                    LineArrow lineArrow = lineArrowPool.GetFreeElement(item, arrowParent, true);
+                    LineArrow lineArrow = lineArrowPool.GetFreeElement(arrowParent, true);
                     lineArrow.transform.SetAsLastSibling();
                     endPos.y += 0.5f;
-                    if (transferPortChannel.InOutType == InOutType.Receiver)
+                    if (portItem.InOutType == InOutType.Receiver)
                         lineArrow.SetTwoPoint(center, endPos);
                     else
                         lineArrow.SetTwoPoint(endPos, center);
@@ -455,7 +440,7 @@ namespace RsTransferPort {
                     lineArrow.EnableAnim = !OpDisableLineAnim;
 
                     if (OpShowPriorityInfo && Converter.IsUsePriority(_buildingType)) {
-                        int priority = Mathf.Clamp(transferPortChannel.Priority, 1, 9);
+                        int priority = Mathf.Clamp(portItem.Priority, 1, 9);
                         lineArrow.SetColor(PriorityColorsList[priority - 1]);
                     }
                     else {
