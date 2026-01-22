@@ -13,12 +13,12 @@ namespace RsTransferPort {
         public int Total => all.Count;
         public int WorldIdAG { get; } // -1表示全球 
 
-        public bool IsGlobal => WorldIdAG == -1;
+        public bool IsGlobal => WorldIdAG == PortManager.GLOBAL_CHANNEL_WORLD_ID;
 
         public string DisplayChannelName {
             get {
                 if (IsInvalid()) {
-                    return STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL.ToString();
+                    return (string)STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL;
                 }
 
                 return ChannelName;

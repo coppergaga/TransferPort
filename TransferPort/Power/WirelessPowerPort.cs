@@ -5,10 +5,9 @@
         ICircuitConnected {
         [MyCmpGet] public PortItem channelItem;
 
-        public object VirtualCircuitKey { get; private set; }
-
         public bool IsVirtual { get; private set; }
         public int PowerCell => GetNetworkCell();
+        public object VirtualCircuitKey { get; private set; }
 
         public IUtilityNetworkMgr GetNetworkManager() {
             return Game.Instance.electricalConduitSystem;
@@ -36,8 +35,8 @@
         }
 
         protected override void OnDisconnect(int cell1, int cell2) {
-            SingleChannelController channelController = VirtualCircuitKey as SingleChannelController;
-            if (channelController == null || channelController.IsInvalid()) {
+            if (!(VirtualCircuitKey is SingleChannelController channelController)
+                || channelController.IsInvalid()) {
                 return;
             }
             var manager = GetNetworkManager();

@@ -47,9 +47,9 @@ namespace RsTransferPort {
                 buildingDef.LogicOutputPorts = new List<LogicPorts.Port> {
                     LogicPorts.Port.OutputPort(
                         RadiantParticlesTransferSender.PORT_ID, new CellOffset(0, 0),
-                        STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERSENDER.LOGIC_PORT.ToString(),
-                        STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERSENDER.LOGIC_PORT_ACTIVE.ToString(),
-                        STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERSENDER.LOGIC_PORT_INACTIVE.ToString()
+                        (string)STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERSENDER.LOGIC_PORT,
+                        (string)STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERSENDER.LOGIC_PORT_ACTIVE,
+                        (string)STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERSENDER.LOGIC_PORT_INACTIVE
                     )
                 };
             }
@@ -59,9 +59,9 @@ namespace RsTransferPort {
                 buildingDef.LogicInputPorts = new List<LogicPorts.Port> {
                     LogicPorts.Port.InputPort(
                         LogicOperationalController.PORT_ID, new CellOffset(0, 0),
-                        STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERRECEIVER.LOGIC_PORT.ToString(),
-                        STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERRECEIVER.LOGIC_PORT_ACTIVE.ToString(),
-                        STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERRECEIVER.LOGIC_PORT_INACTIVE.ToString()
+                        (string)STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERRECEIVER.LOGIC_PORT,
+                        (string)STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERRECEIVER.LOGIC_PORT_ACTIVE,
+                        (string)STRINGS.BUILDINGS.PREFABS.RSRADIANTPARTICLESTRANSFERRECEIVER.LOGIC_PORT_INACTIVE
                     )
                 };
             }

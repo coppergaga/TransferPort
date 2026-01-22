@@ -51,7 +51,7 @@ namespace RsTransferPort {
                 var wn = sizeDelta.x / iW; //单元的数量
                 uvRect.width = wn;
                 if (enableAnim) {
-                    uvRect.x = (uvRect.x - Time.unscaledDeltaTime * 2) % 1;
+                    uvRect.x = (uvRect.x - Time.unscaledDeltaTime * 1.0f) % 1;
                 }
                 else {
                     uvRect.x = 0;

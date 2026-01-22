@@ -1,9 +1,12 @@
-﻿using STRINGS;
+﻿using RsLib;
+using STRINGS;
 using System.Collections.Generic;
-using RsLib;
 using UnityEngine;
 
 namespace RsTransferPort {
+    /// <summary>
+    /// 辐射端口侧边方向选择面板
+    /// </summary>
     public class MyHighEnergyParticleDirectionSideScreen : RsSideScreenContent {
         private IMyHighEnergyParticleDirection target;
 
@@ -11,7 +14,7 @@ namespace RsTransferPort {
         [RsSideScreen.CopyField] private KButton activeButton;
         [RsSideScreen.CopyField] public LocText directionLabel;
 
-        private string[] directionStrings = new string[8]
+        private readonly string[] directionStrings = new string[8]
         {
             (string) UI.UISIDESCREENS.HIGHENERGYPARTICLEDIRECTIONSIDESCREEN.DIRECTION_N,
             (string) UI.UISIDESCREENS.HIGHENERGYPARTICLEDIRECTIONSIDESCREEN.DIRECTION_NW,
@@ -27,21 +30,25 @@ namespace RsTransferPort {
 
         protected override void OnSpawn() {
             base.OnSpawn();
-            for (int index = 0; index < this.Buttons.Count; ++index) {
-                KButton button = this.Buttons[index];
-                button.onClick += (System.Action)(() => {
-                    int num = this.Buttons.IndexOf(button);
-                    if ((UnityEngine.Object)this.activeButton != (UnityEngine.Object)null)
-                        this.activeButton.isInteractable = true;
+            for (int index = 0; index < Buttons.Count; ++index) {
+                var button = Buttons[index];
+                int num = index;
+                button.onClick += () => {
+                    if (activeButton != null) { activeButton.isInteractable = true; }
                     button.isInteractable = false;
-                    this.activeButton = button;
-                    if (this.target == null)
-                        return;
-                    this.target.Direction = EightDirectionUtil.AngleToDirection(num * 45);
+                    activeButton = button;
+
+                    if (target == null) { return; }
+                    target.Direction = EightDirectionUtil.AngleToDirection(num * 45);
                     Game.Instance.ForceOverlayUpdate(true);
-                    this.Refresh();
-                });
+                    Refresh();
+                };
             }
+        }
+
+        protected override void OnDeactivate() {
+            base.OnDeactivate();
+            Buttons.ForEach(kbtn => { kbtn.ClearOnClick(); });
         }
 
         public override int GetSideScreenSortOrder() => 10;
@@ -51,27 +58,26 @@ namespace RsTransferPort {
         }
 
         public override void SetTarget(GameObject new_target) {
-            if (RsUtil.IsNullOrDestroyed(new_target)) {
+            if (Util.IsNullOrDestroyed(new_target)) {
                 return;
             }
             target = new_target.GetComponent<IMyHighEnergyParticleDirection>();
-            this.Refresh();
+            Refresh();
         }
 
         private void Refresh() {
-            int directionIndex = EightDirectionUtil.GetDirectionIndex(this.target.Direction);
-            if (directionIndex >= 0 && directionIndex < this.Buttons.Count) {
-                this.Buttons[directionIndex].SignalClick(KKeyCode.Mouse0);
+            int directionIndex = EightDirectionUtil.GetDirectionIndex(target.Direction);
+            if (directionIndex >= 0 && directionIndex < Buttons.Count) {
+                Buttons[directionIndex].SignalClick(KKeyCode.Mouse0);
             }
             else {
-                if ((bool)(UnityEngine.Object)this.activeButton)
-                    this.activeButton.isInteractable = true;
-                this.activeButton = (KButton)null;
+                if (!Util.IsNullOrDestroyed(activeButton)) { activeButton.isInteractable = true; }
+                activeButton = null;
             }
 
-            this.directionLabel.SetText(string.Format(
+            directionLabel.SetText(string.Format(
                 (string)UI.UISIDESCREENS.HIGHENERGYPARTICLEDIRECTIONSIDESCREEN.SELECTED_DIRECTION,
-                (object)this.directionStrings[directionIndex]));
+                directionStrings[directionIndex]));
         }
     }
 }

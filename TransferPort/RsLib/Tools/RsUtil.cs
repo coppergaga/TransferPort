@@ -160,12 +160,6 @@ namespace RsLib {
             go.SetActive(active);
         }
 
-        public static bool IsNullOrDestroyed(Object obj) {
-            if (obj == null)
-                return true;
-            return (obj as UnityEngine.Object) is object && obj as UnityEngine.Object == (UnityEngine.Object)null;
-        }
-
         /// <summary>
         ///     获取指定的class下的所有静态属性（深度遍历）
         /// </summary>

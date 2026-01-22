@@ -65,7 +65,7 @@ namespace RsLib {
             ResourcesKey resourcesKey = new ResourcesKey(path, tType);
 
             if (container.TryGetValue(resourcesKey, out Object obj)) {
-                if (!RsUtil.IsNullOrDestroyed(obj)) {
+                if (!Util.IsNullOrDestroyed(obj)) {
                     return (T)obj;
                 }
             }

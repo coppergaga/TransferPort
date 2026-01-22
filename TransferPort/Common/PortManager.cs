@@ -30,15 +30,16 @@ namespace RsTransferPort {
 
             var channelKey = item.ChannelKey;
             var channels = classifyChannels[buildingType];
-            if (!channels.TryGetValue(channelKey, out SingleChannelController sc)) {
-                sc = CreateSingleChannelController(buildingType, channelName, worldID);
-                sc.OnSpawn();
-                channels.Add(channelKey, sc);
+            if (!channels.TryGetValue(channelKey, out SingleChannelController controller)) {
+                controller = CreateSingleChannelController(buildingType, channelName, worldID);
+                controller.OnSpawn();
+                channels.Add(channelKey, controller);
             }
 
-            if (!sc.Contains(item)) {
-                sc.Add(item);
-                item.EnterChannelController(sc);
+            if (!controller.Contains(item)) {
+                //Debug.Log($"ggg===channel {controller.DisplayChannelName}:{controller.WorldIdAG} ADD item worldid={item.WorldIdAG} channelname={item.ChannelName} global={item.IsGlobal}");
+                controller.Add(item);
+                item.EnterChannelController(controller);
             }
 
             //检查是否已经有空频道，无则创建
@@ -51,11 +52,12 @@ namespace RsTransferPort {
         public void Remove(PortItem item) {
             var channelKey = item.ChannelKey;
             var channels = classifyChannels[item.BuildingType];
-            if (channels.TryGetValue(channelKey, out SingleChannelController sc)) {
-                sc.Remove(item);
-                item.ExitChannelController(sc);
-                if (sc.IsNeedClean) {
-                    sc.OnCleanUp();
+            if (channels.TryGetValue(channelKey, out SingleChannelController controller)) {
+                //Debug.Log($"ggg===channel {controller.DisplayChannelName}:{controller.WorldIdAG} REMOVE item channelname={item.ChannelName} worldid={item.WorldIdAG} global={item.IsGlobal}");
+                controller.Remove(item);
+                item.ExitChannelController(controller);
+                if (controller.IsNeedClean) {
+                    controller.OnCleanUp();
                     channels.Remove(channelKey);
                 }
             }
@@ -109,7 +111,7 @@ namespace RsTransferPort {
         public ICollection<SingleChannelController> GetChannels(BuildingType buildingType, int worldId, bool sort = false) {
             List<SingleChannelController> list = classifyChannels[buildingType].Values.Where((sc) => sc.WorldIdAG == worldId).ToList();
 
-            if (sort && list.Count > 0) {
+            if (sort && list.Count > 0) {   // 排序将空频道放到最前
                 list.Sort();
                 if (!list[0].IsInvalid()) {
                     int index = list.FindIndex((sc) => sc.IsInvalid());

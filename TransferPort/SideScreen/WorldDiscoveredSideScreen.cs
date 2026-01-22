@@ -8,65 +8,63 @@ namespace RsTransferPort {
     /// <see cref="LogicBroadcastChannelSideScreen"/>
     /// </summary>
     public class WorldDiscoveredSideScreen : RsSideScreenContent {
-        // private LogicClusterLocationSensor sensor;
-
         [RsSideScreen.CopyField, SerializeField] private GameObject rowPrefab;
         [RsSideScreen.CopyField, SerializeField] private GameObject listContainer;
         [RsSideScreen.CopyField, SerializeField] private LocText headerLabel;
 
         private Dictionary<AxialI, GameObject> worldRows = new Dictionary<AxialI, GameObject>();
 
-        public override bool IsValidForTarget(GameObject target) =>
-            (UnityEngine.Object)target.GetComponent<TransferPortCenter>() != (UnityEngine.Object)null;
+        public override bool IsValidForTarget(GameObject target) => !Util.IsNullOrDestroyed(target.GetComponent<TransferPortCenter>());
 
         public override void SetTarget(GameObject target) {
             base.SetTarget(target);
-            this.Build();
+            Build();
         }
 
         private void ClearRows() {
-            foreach (KeyValuePair<AxialI, GameObject> worldRow in this.worldRows)
+            foreach (KeyValuePair<AxialI, GameObject> worldRow in worldRows) {
                 Util.KDestroyGameObject(worldRow.Value);
-            this.worldRows.Clear();
+            }
+            worldRows.Clear();
         }
 
         private void Build() {
-            this.headerLabel.SetText(STRINGS.UI.SIDESCREEN.WORLDDISCOVEREDSIDESCREEN.HEADE);
-            this.ClearRows();
+            headerLabel.SetText(STRINGS.UI.SIDESCREEN.WORLDDISCOVEREDSIDESCREEN.HEADE);
+            ClearRows();
             foreach (WorldContainer worldContainer in (IEnumerable<WorldContainer>)ClusterManager.Instance
                 .WorldContainers) {
 
                 if (!worldContainer.IsModuleInterior && !worldContainer.IsStartWorld) {
-                    GameObject gameObject = Util.KInstantiateUI(this.rowPrefab, this.listContainer);
+                    GameObject gameObject = Util.KInstantiateUI(rowPrefab, listContainer);
                     gameObject.gameObject.name = worldContainer.GetProperName();
                     AxialI myWorldLocation = worldContainer.GetMyWorldLocation();
-                    Debug.Assert(!this.worldRows.ContainsKey(myWorldLocation),
-                        (object)(
-                            "Adding two worlds/POI with the same cluster location to ClusterLocationFilterSideScreen UI: " +
-                            worldContainer.GetProperName()));
-                    this.worldRows.Add(myWorldLocation, gameObject);
+                    Debug.Assert(
+                        !worldRows.ContainsKey(myWorldLocation),
+                        "Adding two worlds/POI with the same cluster location to ClusterLocationFilterSideScreen UI: " +
+                        worldContainer.GetProperName()
+                    );
+                    worldRows.Add(myWorldLocation, gameObject);
                 }
             }
 
-            this.Refresh();
+            Refresh();
         }
 
         private void Refresh() {
-            foreach (KeyValuePair<AxialI, GameObject> worldRow in this.worldRows) {
+            foreach (KeyValuePair<AxialI, GameObject> worldRow in worldRows) {
                 KeyValuePair<AxialI, GameObject> kvp = worldRow;
                 ClusterGridEntity cmp = ClusterGrid.Instance.cellContents[kvp.Key][0];
                 WorldContainer worldContainer = cmp.GetComponent<WorldContainer>();
                 kvp.Value.GetComponent<HierarchyReferences>().GetReference<LocText>("Label")
                     .SetText(cmp.GetProperName());
                 kvp.Value.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").sprite =
-                    Def.GetUISprite((object)cmp).first;
+                    Def.GetUISprite(cmp).first;
                 kvp.Value.GetComponent<HierarchyReferences>().GetReference<Image>("Icon").color =
-                    Def.GetUISprite((object)cmp).second;
-                kvp.Value.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("Toggle").onClick =
-                    (System.Action)(() => {
-                        ToggleWorldDiscovered(worldContainer);
-                        this.Refresh();
-                    });
+                    Def.GetUISprite(cmp).second;
+                kvp.Value.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("Toggle").onClick = () => {
+                    ToggleWorldDiscovered(worldContainer);
+                    Refresh();
+                };
                 kvp.Value.GetComponent<HierarchyReferences>().GetReference<MultiToggle>("Toggle")
                     .ChangeState(worldContainer.IsDiscovered ? 1 : 0);
                 kvp.Value.SetActive(ClusterGrid.Instance.GetCellRevealLevel(kvp.Key) == ClusterRevealLevel.Visible);

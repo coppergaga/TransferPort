@@ -27,7 +27,7 @@ namespace RsTransferPort {
             get => m_supplyState;
             set {
                 m_supplyState = value % 3;
-                if (!RsUtil.IsNullOrDestroyed(supplyToggle)) {
+                if (!Util.IsNullOrDestroyed(supplyToggle)) {
                     supplyToggle.ChangeState(m_supplyState);
                     supplyToggle.FindOrAddComponent<ToolTip>().toolTip =
                         Strings.Get("STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.SUPPLY_STATE_" + m_temperatureState);
@@ -43,7 +43,7 @@ namespace RsTransferPort {
             get => m_temperatureState;
             set {
                 m_temperatureState = value % 3;
-                if (!RsUtil.IsNullOrDestroyed(supplyToggle)) {
+                if (!Util.IsNullOrDestroyed(supplyToggle)) {
                     temperatureToggle.ChangeState(m_temperatureState);
                     temperatureToggle.FindOrAddComponent<ToolTip>().toolTip =
                         Strings.Get("STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.TEMPERATURE_STATE_" + m_temperatureState);

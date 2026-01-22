@@ -194,8 +194,6 @@ namespace RsLib {
         /// <summary>
         ///     new -> source
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
         public static Dictionary<string, string> GetCopyFieldDict(Type type) {
             var fields = type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             Dictionary<string, string> dic = new Dictionary<string, string>();

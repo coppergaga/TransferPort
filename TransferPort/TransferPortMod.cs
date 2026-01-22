@@ -112,12 +112,12 @@ namespace RsTransferPort {
             RsOverlay.Initialize(mod, harmony)
                 .AddOverlayMode((screen) => new MyOverlayModes.PortChannel(screen.powerLabelParent))
                 .AddOverlayMenuToggleInfo(() => new RsOverlay.RsOverlayToggleInfo(
-                    STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON.ToString(),
+                    (string)STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON,
                     MyOverlayModes.PortChannel.Icon,
                     MyOverlayModes.PortChannel.ID, "",
                     Action.NumActions,
-                    STRINGS.UI.TOOLTIPS.PORTCHANNELMODE_OVERLAY_STRING.ToString(),
-                    STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON.ToString()
+                    (string)STRINGS.UI.TOOLTIPS.PORTCHANNELMODE_OVERLAY_STRING,
+                    (string)STRINGS.UI.OVERLAYS.PORTCHANNELMODE.BUTTON
                 ))
                 .AddOverlayLegendInfo(() =>
                     new OverlayLegend.OverlayInfo() {

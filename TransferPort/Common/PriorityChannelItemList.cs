@@ -72,8 +72,9 @@ namespace RsTransferPort {
                 }
             }
 
-            PriorityChannelItemInfo info = new PriorityChannelItemInfo();
-            info.priority = priority;
+            PriorityChannelItemInfo info = new PriorityChannelItemInfo {
+                priority = priority
+            };
             priorityList.Add(info);
             return info;
         }
