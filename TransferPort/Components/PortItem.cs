@@ -65,13 +65,13 @@ namespace RsTransferPort {
             get => priority;
         }
 
-        public PortChannelKey ChannelKey => new PortChannelKey(ChannelName, WorldIdAG, buildingType);
+        public PortChannelKey ChannelKey => new PortChannelKey(ChannelName, WorldIdAG, BuildingType);
 
         public int WorldIdAG => IsGlobal ? PortManager.GLOBAL_CHANNEL_WORLD_ID : this.GetMyWorldId();
 
         public string DisplayChannelName {
             get => string.IsNullOrEmpty(channelName)
-                ? STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL.ToString()
+                ? (string)STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL
                 : channelName;
         }
 
@@ -135,11 +135,10 @@ namespace RsTransferPort {
 
 
         protected void OnCopySettings(object data) {
-            if (data is GameObject source && source != gameObject) {
-                PortItem sourceChannelItem = source.GetComponent<PortItem>();
-                if (sourceChannelItem != null) {
-                    CheckSetChannelNameAndGlobal(sourceChannelItem.ChannelName, sourceChannelItem.isGlobal, sourceChannelItem.priority);
-                }
+            if (data is GameObject go && go != gameObject
+                && go.GetComponent<PortItem>() is PortItem sourceItem
+                && !Util.IsNullOrDestroyed(sourceItem)) {
+                CheckSetChannelNameAndGlobal(sourceItem.ChannelName, sourceItem.IsGlobal, sourceItem.Priority);
             }
         }
 
@@ -158,49 +157,32 @@ namespace RsTransferPort {
         }
 
         public void CheckSetChannelNameAndGlobal(string newName, bool global, int newPriority) {
-            bool triggerAddOrRemove = false;
-            bool triggerChannelChange = false;
-            bool triggerPriorityChange = false;
             int oldPriority = priority;
+            bool isGlobalModeChange = isGlobal != global;
+            bool isChannelNameChange = newName?.Trim() is string nn && !string.Equals(channelName, nn);
+            bool isPriorityChange = newPriority != priority;
 
-            if (isGlobal != global) {
-                isGlobal = global;
-                triggerAddOrRemove = true;
-                triggerChannelChange = true;
-            }
-
-            if (newName != null) {
-                newName = newName.Trim();
-                if (!string.Equals(channelName, newName)) {
-                    triggerAddOrRemove = true;
-                    triggerChannelChange = true;
-                }
-            }
-
-            if (newPriority != priority) {
-                priority = newPriority;
-                triggerChannelChange = true;
-                triggerPriorityChange = true;
-            }
-
-            if (triggerAddOrRemove) {
+            if (isGlobalModeChange || isChannelNameChange) {
                 // first remove item, then channelName = new name, last add item
                 // because we get channel controller by the combined name, worldID and buildingType
                 PortManager.Instance.Remove(this);
+                isGlobal = global;
                 channelName = newName;
+                priority = newPriority;     // important!!! ensure data sync
                 PortManager.Instance.Add(this);
                 UpdateConnectionStatusItem();
+            } else {
+                priority = newPriority;     // important!!! ensure data sync
             }
 
-            if (triggerChannelChange) {
+            if (isGlobalModeChange || isChannelNameChange || isPriorityChange) {
                 PortManager.Instance.TriggerChannelChange(this);
             }
 
-            if (!triggerAddOrRemove && triggerPriorityChange) {
+            if (!isGlobalModeChange && !isChannelNameChange && isPriorityChange) {
                 OnPriorityChange?.Invoke(this, priority, oldPriority);
             }
         }
-
 
         public void EnterChannelController(SingleChannelController controller) {
             if (kSelectable != null && DlcManager.IsExpansion1Active()) {
@@ -226,6 +208,5 @@ namespace RsTransferPort {
             }
             return false;
         }
-
     }
 }
