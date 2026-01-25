@@ -70,9 +70,9 @@ namespace RsTransferPort {
         }
 
         public virtual void OnCleanUp() {
-            senders = null;
-            receivers = null;
-            all = null;
+            senders.Clear(); senders = null;
+            receivers.Clear(); receivers = null;
+            all.Clear(); all = null;
         }
 
         public bool IsInvalid() {

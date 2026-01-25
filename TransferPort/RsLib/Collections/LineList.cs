@@ -8,7 +8,7 @@ namespace RsLib.Collections {
 
         protected List<List<T>> list = new List<List<T>>();
 
-        protected List<T> currentLine => list[idx];
+        protected List<T> CurrentLine => list[idx];
 
         public IEnumerator<List<T>> GetEnumerator() {
             return list.GetEnumerator();
@@ -28,25 +28,18 @@ namespace RsLib.Collections {
         }
 
         public void Add(T t) {
-            if (idx == -1) throw new Exception("There are currently no rows, call the Next method first.");
-            currentLine.Add(t);
-            // onAdd?.Invoke(t);
+            //if (idx == -1) throw new Exception("There are currently no rows, call the Next method first.");
+            if (-1 == idx) { NextLine(); }
+            CurrentLine.Add(t);
         }
 
         public void Clear() {
             if (idx == -1) return;
-
-            for (var i = 0; i <= idx; i++) {
-                // if (onRemove != null)
-                // {
-                //     foreach (T x1 in list[i])
-                //         onRemove(x1);
-                // }
+            for (int i = 0; i <= idx; i++) {
                 list[i].Clear();
             }
-
+            list.Clear();
             idx = -1;
         }
     }
-
 }

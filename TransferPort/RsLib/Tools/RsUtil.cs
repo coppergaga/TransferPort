@@ -66,11 +66,33 @@ namespace RsLib {
             }
         }
 
+        public static void NearestSort<T>(IList<T> points, Func<T, GameObject> getGo) {
+            int len = points.Count;
+            if (len < 2) { return; }
+            int sp = NearestGo(null, points, 0, getGo);
+            (points[0], points[sp]) = (points[sp], points[0]);
+            for (int i = 1; i < len; i++) {
+                int p = NearestGo(getGo(points[i - 1]), points, i, getGo);
+                (points[i], points[p]) = (points[p], points[i]);
+            }
+        }
+
+        public static int NearestGo<T>(GameObject target, IList<T> points, int startIndex, Func<T, GameObject> getGo) {
+            int nearestIdx = startIndex;
+            float minDistanceSq = float.MaxValue;
+            Vector3 tarPos = Util.IsNullOrDestroyed(target) ? Vector3.zero : target.transform.position;
+            for (int i=0; i<points.Count; ++i) {
+                var curGo = getGo(points[i]);
+                if (Util.IsNullOrDestroyed(curGo)) continue;
+                float distSq = (curGo.transform.position - tarPos).sqrMagnitude;
+                if (distSq < minDistanceSq) { minDistanceSq = distSq; nearestIdx = i; }
+            }
+            return nearestIdx;
+        }
+
         public static void NearestSort(IList<GameObject> points) {
             int len = points.Count;
-            if (len < 2) {
-                return;
-            }
+            if (len < 2) { return; }
             //先获取最近零点
             int sp = NearestGo(null, points, 0);
             //交换

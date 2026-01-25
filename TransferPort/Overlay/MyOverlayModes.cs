@@ -119,7 +119,7 @@ namespace RsTransferPort {
             private readonly GameObject arrowParent;
             private readonly GameObject priorityParent;
             private readonly GameObject lineCenterParent;
-            private readonly LineList<GameObject> filterChannels = new LineList<GameObject>();
+            private readonly LineList<PortItem> filterChannels = new LineList<PortItem>();
             private readonly RsHashUIPool<RsHierarchyReferences> namePool;
             private readonly UIPool<LineArrow> lineArrowPool;
             private readonly UIPool<LineCenterImage> lineCenterImagePool;
@@ -269,30 +269,26 @@ namespace RsTransferPort {
 
             public void UpdateSort() {
                 layoutTargets.StartRecord();
-                foreach (List<GameObject> channel in filterChannels) {
-                    foreach (GameObject go in channel) {
-                        layoutTargets.Add(go);
-                    }
+                foreach (var items in filterChannels) {
+                    foreach (var item in items) { layoutTargets.Add(item.gameObject); }
                 }
-
                 layoutTargets.EndAndContrast();
             }
 
             public void UpdatePriority() {
                 priorityPool.RecordStart();
-
-                if (OpShowPriorityInfo) {
-                    foreach (List<GameObject> channel in filterChannels) {
-                        foreach (GameObject gameObject in channel) {
-                            PortItem portChannel = gameObject.GetComponent<PortItem>();
-                            int priority = portChannel.Priority;
-                            if (Converter.IsUsePriority(portChannel.BuildingType)) {
-                                Vector3 position = gameObject.transform.position + new Vector3(0, 0.5f, 0);
-                                PriorityImage pi = priorityPool.GetFreeElement(gameObject, priorityParent, true);
-                                pi.Priority = priority;
-                                pi.transform.position = position;
-                            }
+                if (!OpShowPriorityInfo) {
+                    priorityPool.ClearNoRecordElement(); return;
+                }
+                foreach (var items in filterChannels) {
+                    foreach (var item in items) {
+                        if (!Converter.IsUsePriority(item.BuildingType)) {
+                            continue;
                         }
+                        Vector3 position = item.transform.position + new Vector3(0, 0.5f, 0);
+                        PriorityImage pi = priorityPool.GetFreeElement(item, priorityParent, true);
+                        pi.Priority = item.Priority;
+                        pi.transform.position = position;
                     }
                 }
                 priorityPool.ClearNoRecordElement();
@@ -310,19 +306,14 @@ namespace RsTransferPort {
             }
 
             private void FilterOneTypeChannel(int activeWorldId, BuildingType buildingType) {
-                if (!NeedShowBuildingType(buildingType)) {
-                    return;
-                }
+                if (!NeedShowBuildingType(buildingType)) { return; }
                 var channels = PortManager.Instance.GetChannels(buildingType);
                 foreach (var channel in channels) {
-                    if (!NeedShowChannel(channel)) {
-                        continue;
-                    }
+                    if (!NeedShowChannel(channel)) { continue; }
                     filterChannels.NextLine();
-                    foreach (PortItem obj in channel.all) {
-                        if (obj.GetMyWorldId() == activeWorldId) { filterChannels.Add(obj.gameObject); }
+                    foreach (PortItem item in channel.all) {
+                        if (item.GetMyWorldId() == activeWorldId) { filterChannels.Add(item); }
                     }
-
                     filterChannels.PreviousLineIfEmpty();
                 }
             }
@@ -353,7 +344,7 @@ namespace RsTransferPort {
 
             private void UpdateLabel() {
                 namePool.RecordStart();
-                foreach (var channel in filterChannels) { UpdateLabelFromChannel(channel); }
+                foreach (var items in filterChannels) { UpdateLabelFromChannel(items); }
                 namePool.ClearNoRecordElement();
             }
 
@@ -367,42 +358,36 @@ namespace RsTransferPort {
             private void UpdateArrow() {
                 lineCenterImagePool.ClearAll();
                 lineArrowPool.ClearAll();
-                foreach (IList<GameObject> channelObjects in filterChannels) {
-                    if (channelObjects.Count == 0) { continue; }
-                    PortItem item = channelObjects[0].GetComponent<PortItem>();
+                foreach (var items in filterChannels) {
+                    if (items.Count == 0) { continue; }
+                    var item = items[0];
                     if (string.IsNullOrEmpty(item.ChannelName)) { continue; }
                     //选取颜色
                     Color color = userIndexColor ? IndexColor() : BuildingTypeColorMap[item.BuildingType];
                     if (OpWiredPreviewMode == WiredPreviewMode.Center) {
-                        UpdateCenterPreview(channelObjects, item.BuildingType, item.ChannelName, color);
+                        UpdateCenterPreview(items, color);
                     }
                     else if (OpWiredPreviewMode == WiredPreviewMode.Nearby) {
-                        UpdateNearbyPreview(channelObjects, item.BuildingType, item.ChannelName, color);
+                        UpdateNearbyPreview(items, color);
                     }
                 }
             }
 
-            private void UpdateLabelFromChannel(ICollection<GameObject> items) {
+            private void UpdateLabelFromChannel(IList<PortItem> items) {
                 foreach (var item in items) {
-                    var transferPortChannel = item.GetComponent<PortItem>();
-                    if (transferPortChannel == null) continue;
-
-
-                    if (namePool.GetFreeElement(item, out RsHierarchyReferences label, channelNameParent, true))
+                    if (namePool.GetFreeElement(item, out RsHierarchyReferences label, channelNameParent, true)) {
                         label.transform.SetPositionXY(item.transform.position);
+                    }
 
-                    // label.GetReference("Icon").SetActiveNR(transferPortChannel.IsGlobal);
-                    label.GetReference("IconRoot").SetActiveNR(transferPortChannel.IsGlobal);
-                    label.GetReference<LocTextAdapter>("Name").SetTextNoRepeat(transferPortChannel.DisplayChannelName);
-
-                    // label.transform.SetAsLastSibling();
+                    label.GetReference("IconRoot").SetActiveNR(item.IsGlobal);
+                    label.GetReference<LocTextAdapter>("Name").SetTextNoRepeat(item.DisplayChannelName);
                 }
             }
 
-            private void UpdateNearbyPreview(IList<GameObject> items, BuildingType _buildingType, string channelName, Color color) {
+            private void UpdateNearbyPreview(List<PortItem> items, Color color) {
                 if (items.Count == 0) return;
 
-                RsUtil.NearestSort(items);
+                RsUtil.NearestSort(items, i => i.gameObject);
 
                 for (var i = 0; i < items.Count - 1; i++) {
                     LineArrow lineArrow = lineArrowPool.GetFreeElement(arrowParent, true);
@@ -416,31 +401,27 @@ namespace RsTransferPort {
                 }
             }
 
-            private void UpdateCenterPreview(IList<GameObject> items, BuildingType _buildingType, string channelName, Color color) {
-                if (items.Count < 2) {
-                    return;
-                }
+            private void UpdateCenterPreview(List<PortItem> items, Color color) {
+                if (items.Count < 2) { return; }
 
-                var center = items.Center();
+                var center = items.ConvertAll(i => i.gameObject).Center();
                 center.y += 0.5f;
 
-                foreach (var go in items) {
-                    var portItem = go.GetComponent<PortItem>();
-                    var endPos = go.transform.position;
-                    if (portItem == null) continue;
+                foreach (var item in items) {
+                    var endPos = item.transform.position;
 
                     LineArrow lineArrow = lineArrowPool.GetFreeElement(arrowParent, true);
                     lineArrow.transform.SetAsLastSibling();
                     endPos.y += 0.5f;
-                    if (portItem.InOutType == InOutType.Receiver)
+                    if (item.InOutType == InOutType.Receiver)
                         lineArrow.SetTwoPoint(center, endPos);
                     else
                         lineArrow.SetTwoPoint(endPos, center);
 
                     lineArrow.EnableAnim = !OpDisableLineAnim;
 
-                    if (OpShowPriorityInfo && Converter.IsUsePriority(_buildingType)) {
-                        int priority = Mathf.Clamp(portItem.Priority, 1, 9);
+                    if (OpShowPriorityInfo && Converter.IsUsePriority(item.BuildingType)) {
+                        int priority = Mathf.Clamp(item.Priority, 1, 9);
                         lineArrow.SetColor(PriorityColorsList[priority - 1]);
                     }
                     else {
@@ -450,7 +431,7 @@ namespace RsTransferPort {
                 //绘制中心点
                 LineCenterImage centerImage = lineCenterImagePool.GetFreeElement(lineCenterParent, true);
                 centerImage.transform.SetAsLastSibling();
-                centerImage.SetImage(_buildingType);
+                centerImage.SetImage(items[0].BuildingType);
                 centerImage.SetColor(color);
                 centerImage.transform.position = center;
             }
