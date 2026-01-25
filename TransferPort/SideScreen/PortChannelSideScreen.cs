@@ -207,7 +207,7 @@ namespace RsTransferPort {
         }
 
         public override bool IsValidForTarget(GameObject target) {
-            return target.GetComponent<PortItem>() != null;
+            return !Util.IsNullOrDestroyed(target.GetComponent<PortItem>());
         }
 
         public override void SetTarget(GameObject new_target) {

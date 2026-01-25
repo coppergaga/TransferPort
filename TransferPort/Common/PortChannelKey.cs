@@ -33,7 +33,7 @@ namespace RsTransferPort {
         }
 
         public override string ToString() {
-            return RsObjectDebug.BuildAllField(this);
+            return $"PortChannelKey name={name} worldID={worldId} buildingType={buildingType}";
         }
 
         public static bool operator ==(PortChannelKey a, PortChannelKey b) => Equals(a, b);

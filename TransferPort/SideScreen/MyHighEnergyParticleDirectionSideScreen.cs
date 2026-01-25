@@ -8,7 +8,7 @@ namespace RsTransferPort {
     /// 辐射端口侧边方向选择面板
     /// </summary>
     public class MyHighEnergyParticleDirectionSideScreen : RsSideScreenContent {
-        private IMyHighEnergyParticleDirection target;
+        private IMyHighEnergyParticleDirection curTarget;
 
         [RsSideScreen.CopyField] public List<KButton> Buttons;
         [RsSideScreen.CopyField] private KButton activeButton;
@@ -38,8 +38,8 @@ namespace RsTransferPort {
                     button.isInteractable = false;
                     activeButton = button;
 
-                    if (target == null) { return; }
-                    target.Direction = EightDirectionUtil.AngleToDirection(num * 45);
+                    if (Util.IsNullOrDestroyed(curTarget)) { return; }
+                    curTarget.Direction = EightDirectionUtil.AngleToDirection(num * 45);
                     Game.Instance.ForceOverlayUpdate(true);
                     Refresh();
                 };
@@ -54,19 +54,19 @@ namespace RsTransferPort {
         public override int GetSideScreenSortOrder() => 10;
 
         public override bool IsValidForTarget(GameObject target) {
-            return target.GetComponent<IMyHighEnergyParticleDirection>() != null;
+            return !Util.IsNullOrDestroyed(target.GetComponent<IMyHighEnergyParticleDirection>());
         }
 
         public override void SetTarget(GameObject new_target) {
             if (Util.IsNullOrDestroyed(new_target)) {
                 return;
             }
-            target = new_target.GetComponent<IMyHighEnergyParticleDirection>();
+            curTarget = new_target.GetComponent<IMyHighEnergyParticleDirection>();
             Refresh();
         }
 
         private void Refresh() {
-            int directionIndex = EightDirectionUtil.GetDirectionIndex(target.Direction);
+            int directionIndex = EightDirectionUtil.GetDirectionIndex(curTarget.Direction);
             if (directionIndex >= 0 && directionIndex < Buttons.Count) {
                 Buttons[directionIndex].SignalClick(KKeyCode.Mouse0);
             }
