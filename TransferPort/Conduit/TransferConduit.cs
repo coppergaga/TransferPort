@@ -2,20 +2,20 @@
 namespace RsTransferPort {
     public class TransferConduit : KMonoBehaviour {
         [MyCmpGet] public Building building;
-        [MyCmpGet] public PortItem channelItem;
+        [MyCmpGet] public PortItem item;
 
-        /// <summary>
-        ///     管道类型
-        /// </summary>
-        public ConduitType conduitType = ConduitType.None;
-
-        public InOutType inOutType;
-
-        protected override void OnCleanUp() {
+        protected override void OnSpawn() {
+            base.OnSpawn();
+            item.HandleReturnInt = GetCell;
         }
 
-        public int GetCell() {
-            if (inOutType == InOutType.Receiver) return building.GetUtilityOutputCell();
+        protected override void OnCleanUp() {
+            item.HandleReturnInt = null;
+            base.OnCleanUp();
+        }
+
+        private int GetCell() {
+            if (item.InOutType == InOutType.Receiver) return building.GetUtilityOutputCell();
             return building.GetUtilityInputCell();
         }
     }

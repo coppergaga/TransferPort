@@ -1,11 +1,11 @@
 ﻿
 namespace RsTransferPort {
     public class WirelessLogicPortChannel : SingleChannelController {
-        protected override void OnAdd(PortItem port) {
+        protected override void OnAdd(PortItem item) {
             if (IsInvalid()) { return; }
 
-            if (port.InOutType == InOutType.Sender) {
-                port.Subscribe((int)GameHashes.LogicEvent, OnInputLogicEvent);
+            if (item.InOutType == InOutType.Sender) {
+                item.Subscribe((int)GameHashes.LogicEvent, OnInputLogicEvent);
             }
             SyncSignal();
         }
@@ -20,7 +20,7 @@ namespace RsTransferPort {
             }
 
             if (port.InOutType == InOutType.Receiver) {
-                port.GetComponent<WirelessLogicPort>().SendSignal(0);
+                port.HandleInParamInt(0);
             }
             SyncSignal();
         }
@@ -36,21 +36,15 @@ namespace RsTransferPort {
             //开始同步信号
             if (receivers.Count == 0) return;
             var signal = GetSignal();
-            foreach (PortItem receiver in receivers) receiver.GetComponent<WirelessLogicPort>().SendSignal(signal);
+            foreach (PortItem receiver in receivers) receiver.HandleInParamInt(signal);
         }
 
         /// <summary>
         ///     通过计算所有输入端的信号状态，返回当前通道的信号状态
         /// </summary>
-        /// <returns></returns>
         public int GetSignal() {
             int signal = 0;
-
-            foreach (PortItem sender in senders) {
-                int inputSignal = sender.GetComponent<WirelessLogicPort>().GetInputSignal();
-                signal |= inputSignal;
-            }
-
+            foreach (PortItem sender in senders) { signal |= sender.HandleReturnInt(); }
             return signal;
         }
 

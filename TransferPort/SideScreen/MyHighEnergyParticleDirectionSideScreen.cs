@@ -48,7 +48,7 @@ namespace RsTransferPort {
 
         protected override void OnDeactivate() {
             base.OnDeactivate();
-            Buttons.ForEach(kbtn => { kbtn.ClearOnClick(); });
+            foreach (var button in Buttons) { button.ClearOnClick(); }
         }
 
         public override int GetSideScreenSortOrder() => 10;

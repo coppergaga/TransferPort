@@ -41,7 +41,7 @@ namespace RsLib {
 
             static Images() {
                 foreach (Sprite sprite in Resources.FindObjectsOfTypeAll<Sprite>()) {
-                    string name = sprite?.name;
+                    var name = sprite?.name;
                     if (!string.IsNullOrEmpty(name) && !SPRITES.ContainsKey(name))
                         SPRITES.Add(name, sprite);
                 }
@@ -64,9 +64,7 @@ namespace RsLib {
             }
 
             public static Sprite GetSpriteByName(string name) {
-                Sprite sprite;
-                if (!SPRITES.TryGetValue(name, out sprite))
-                    sprite = null;
+                if (!SPRITES.TryGetValue(name, out Sprite sprite)) { sprite = null; }
                 return sprite;
             }
         }
@@ -288,8 +286,5 @@ namespace RsLib {
             }
 
         }
-
-
-
     }
 }

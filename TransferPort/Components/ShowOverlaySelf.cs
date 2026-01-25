@@ -14,9 +14,13 @@
 
         private void OnRefreshUserMenu(object data) =>
             Game.Instance.userMenu.AddButton(this.gameObject,
-                new KIconButtonMenu.ButtonInfo("show_overlay_self_icon", RsTransferPort.STRINGS.UI.USERMENU.SHOWOVERLAYSELF_BUTTON.NAME, new System.Action(this.ShowOverlay),
+                new KIconButtonMenu.ButtonInfo(
+                    "show_overlay_self_icon",
+                    RsTransferPort.STRINGS.UI.USERMENU.SHOWOVERLAYSELF_BUTTON.NAME,
+                    ShowOverlay,
                     Action.BuildingUtility1,
-                    tooltipText: RsTransferPort.STRINGS.UI.USERMENU.SHOWOVERLAYSELF_BUTTON.TOOLTIP));
+                    tooltipText: RsTransferPort.STRINGS.UI.USERMENU.SHOWOVERLAYSELF_BUTTON.TOOLTIP)
+                );
 
 
         public void ShowOverlay() {

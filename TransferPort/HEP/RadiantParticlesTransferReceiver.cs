@@ -2,106 +2,87 @@
 using UnityEngine;
 
 namespace RsTransferPort {
-    public class RadiantParticlesTransferReceiver :
-        StateMachineComponent<RadiantParticlesTransferReceiver.StatesInstance>,
-        IMyHighEnergyParticleDirection {
-
+    public class RadiantParticlesTransferReceiver : StateMachineComponent<RadiantParticlesTransferReceiver.StatesInstance>, IMyHighEnergyParticleDirection {
         // public static HashedString PORT_ID = "RadiantParticlesTransferReceiver";
-
-        [MyCmpReq]
-        private KSelectable selectable;
-        [MyCmpGet]
-        private HighEnergyParticlePort port;
-
-        [MyCmpGet]
-        private KBatchedAnimController anim;
-
-        [MyCmpReq]
-        private Operational operational;
-
-        [MyCmpReq]
-        private HighEnergyParticleStorage storage;
+        [MyCmpGet] private Operational operational;
+        [MyCmpReq] private KBatchedAnimController animController;
+        [MyCmpReq] private PortItem item;
+        [MyCmpGet] private HighEnergyParticleStorage hepStorage;
+        [MyCmpGet] private HighEnergyParticlePort hepPort;
+        [MyCmpGet] private Building building;
 
         [Serialize] private EightDirection _direction;
-
         private EightDirectionController directionController;
 
-        public float directorDelay = 0.5f;
+        public const float directorDelay = 0.5f;
 
         /// <summary>
         /// 是否可用传送
         /// </summary>
-        public bool Transmissible => operational != null && operational.IsOperational;
+        private int Transmissible() => RsLib.RsUtil.IntFrom(operational != null && operational.IsOperational);
 
         public EightDirection Direction {
             get => _direction;
             set {
                 _direction = value;
-
+                if (Util.IsNullOrDestroyed(directionController)) { return; }
                 directionController.SetRotation(45 * EightDirectionUtil.GetDirectionIndex(_direction));
-                directionController.controller.enabled = false;
-                directionController.controller.enabled = true;
+                if (Util.IsNullOrDestroyed(directionController.controller)) { return; }
+                directionController.controller.SetDirty();
             }
-        }
-
-
-        protected override void OnPrefabInit() {
-            base.OnPrefabInit();
         }
 
         protected override void OnSpawn() {
             base.OnSpawn();
             // Subscribe((int) GameHashes.OperationalChanged, OnOperationalChanged);
-            directionController = new EightDirectionController(GetComponent<KBatchedAnimController>(),
-                "redirector_target", "redirector_off", EightDirectionController.Offset.Infront);
-            this.Direction = this.Direction;
-            this.smi.StartSM();
+            directionController = new EightDirectionController(
+                animController, "redirector_target", "redirector_off", EightDirectionController.Offset.Infront
+            );
+            Direction = Direction;
+            item.HandleReturnInt = Transmissible;
+            item.HandleInParamFloat = StoreAndLaunch;
+            smi.StartSM();
         }
 
-
         protected override void OnCleanUp() {
+            item.HandleReturnInt = null;
+            item.HandleInParamFloat = null;
             base.OnCleanUp();
         }
 
-        public int GetInputSignal() {
-            return GetComponent<LogicPorts>().GetInputValue(LogicOperationalController.PORT_ID);
+        private void StoreAndLaunch(float amount) {
+            if (amount <= 0) { return; }
+            hepStorage.Store(amount);
         }
 
-
-        public float StoreAndLaunch(float amount) {
-            if (amount <= 0) {
-                return 0;
-            }
-            return storage.Store(amount);
-        }
-
-
-        private void LaunchParticle() {
-            if (storage.Particles < 0.100000001490116) {
-                storage.ConsumeAll();
-            }
-            else {
-                int particleOutputCell = GetComponent<Building>().GetHighEnergyParticleOutputCell();
-                GameObject gameObject = GameUtil.KInstantiate(global::Assets.GetPrefab((Tag)"HighEnergyParticle"),
-                    Grid.CellToPosCCC(particleOutputCell, Grid.SceneLayer.FXFront2), Grid.SceneLayer.FXFront2);
-                gameObject.SetActive(true);
-                if (!(gameObject != null))
-                    return;
-                HighEnergyParticle component = gameObject.GetComponent<HighEnergyParticle>();
-                component.payload = storage.ConsumeAll();
-                component.payload -= 0.1f;
-                component.capturedBy = port;
-                component.SetDirection(Direction);
-                directionController.PlayAnim("redirector_send");
-            }
-        }
-
-        public class StatesInstance : GameStateMachine<States, StatesInstance, RadiantParticlesTransferReceiver, object>.GameInstance {
+        public class StatesInstance : GameStateMachine<States, StatesInstance, RadiantParticlesTransferReceiver, StateMachine.BaseDef>.GameInstance {
             public StatesInstance(RadiantParticlesTransferReceiver smi) : base(smi) { }
+
+            public void LaunchParticle() {
+                if (master.hepStorage.Particles < 0.100000001490116) {
+                    master.hepStorage.ConsumeAll();
+                    return;
+                }
+                int particleOutputCell = master.building.GetHighEnergyParticleOutputCell();
+                GameObject go = GameUtil.KInstantiate(
+                    global::Assets.GetPrefab((Tag)"HighEnergyParticle"),
+                    Grid.CellToPosCCC(particleOutputCell, Grid.SceneLayer.FXFront2),
+                    Grid.SceneLayer.FXFront2
+                );
+                go.SetActive(true);
+
+                if (Util.IsNullOrDestroyed(go)) { return; }
+
+                HighEnergyParticle hep = go.GetComponent<HighEnergyParticle>();
+                hep.payload = master.hepStorage.ConsumeAll();
+                hep.payload -= 0.1f;
+                hep.capturedBy = master.hepPort;
+                hep.SetDirection(master.Direction);
+                master.directionController.PlayAnim("redirector_send");
+            }
         }
 
-        public class States : GameStateMachine<States, StatesInstance,
-                RadiantParticlesTransferReceiver> {
+        public class States : GameStateMachine<States, StatesInstance, RadiantParticlesTransferReceiver, StateMachine.BaseDef> {
             public State off;
             public State ready;
             public State launch;
@@ -115,13 +96,12 @@ namespace RsTransferPort {
                 ready.PlayAnim("on")
                     .Enter(smi => smi.master.directionController.PlayAnim("redirector_on", KAnim.PlayMode.Loop))
                     .TagTransition(GameTags.Operational, off, true)
-                    .UpdateTransition(launch, (smi, dt) => !smi.master.storage.IsEmpty(), UpdateRate.SIM_200ms);
+                    .UpdateTransition(launch, (smi, dt) => !smi.master.hepStorage.IsEmpty(), UpdateRate.SIM_200ms);
                 // .EventTransition(GameHashes.OnParticleStorageChanged, launch);
-
                 // launch_pre.PlayAnim("on").ScheduleGoTo(smi => smi.master.directorDelay, launch);
                 launch.PlayAnim("on")
-                    .Enter(smi => smi.master.LaunchParticle())
-                    .ScheduleGoTo(smi => smi.master.directorDelay, ready);
+                    .Enter(smi => smi.LaunchParticle())
+                    .ScheduleGoTo(smi => directorDelay, ready);
             }
         }
     }

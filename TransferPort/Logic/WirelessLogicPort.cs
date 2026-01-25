@@ -1,16 +1,27 @@
 ﻿
 namespace RsTransferPort {
     public class WirelessLogicPort : KMonoBehaviour {
-        [MyCmpGet] public PortItem channelItem;
-        public InOutType inOutType;
-        public HashedString portId;
+        [MyCmpGet] private LogicPorts logicPorts;
+        [MyCmpGet] private PortItem item;
 
-        public virtual int GetInputSignal() {
-            return GetComponent<LogicPorts>().GetInputValue(portId);
+        protected override void OnSpawn() {
+            base.OnSpawn();
+            item.HandleReturnInt = GetInputSignal;
+            item.HandleInParamInt = SendSignal;
         }
 
-        public virtual void SendSignal(int signal) {
-            GetComponent<LogicPorts>().SendSignal(portId, signal);
+        protected override void OnCleanUp() {
+            item.HandleReturnInt = null;
+            item.HandleInParamInt = null;
+            base.OnCleanUp();
+        }
+
+        private int GetInputSignal() {
+            return logicPorts.GetInputValue(WirelessLogicConfig.WirelessLogicPortID);
+        }
+
+        private void SendSignal(int signal) {
+            logicPorts.SendSignal(WirelessLogicConfig.WirelessLogicPortID, signal);
         }
     }
 }

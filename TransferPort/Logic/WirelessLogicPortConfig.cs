@@ -23,6 +23,7 @@ namespace RsTransferPort {
     }
 
     public abstract class WirelessLogicConfig : IBuildingConfig {
+        public static HashedString WirelessLogicPortID = new HashedString(PORT_ID);
         public const string PORT_ID = "MyPort";
 
         public abstract string id { get; }
@@ -67,9 +68,7 @@ namespace RsTransferPort {
             channel.BuildingType = BuildingType.Logic;
             channel.InOutType = InOutType;
 
-            var port = go.AddOrGet<WirelessLogicPort>();
-            port.inOutType = InOutType;
-            port.portId = PORT_ID;
+            go.AddOrGet<WirelessLogicPort>();
             go.AddOrGet<ShowOverlaySelf>();
         }
 

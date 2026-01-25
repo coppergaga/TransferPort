@@ -1,8 +1,8 @@
 ﻿
 namespace RsTransferPort {
     public class TransferConduitChannel : SingleChannelController {
-        public PriorityChannelItemList senderPriorityList = new PriorityChannelItemList();
-        public PriorityChannelItemList receiverPriorityList = new PriorityChannelItemList();
+        public readonly PriorityChannelItemList senderPriorityList = new PriorityChannelItemList();
+        public readonly PriorityChannelItemList receiverPriorityList = new PriorityChannelItemList();
         protected override void OnAdd(PortItem item) {
             if (item.InOutType == InOutType.Sender) {
                 senderPriorityList.AddChannelItem(item);
@@ -47,26 +47,21 @@ namespace RsTransferPort {
         private void ConduitUpdate1() {
             int cpReceiverEachCount = 0; //循环次数计算
             int rpIndex = 0; //接收端的优先级信息的索引
-            int senderPriorityIndex = 0;
+            //int senderIndex = 0;
             //设置一次只能传送一种液体
-            for (; senderPriorityIndex < senderPriorityList.Count; senderPriorityIndex++) {
-                // Debug.Log("prioritySenderInfo start===============");
-                var prioritySenderInfo = senderPriorityList[senderPriorityIndex];
-                // Debug.Log("prioritySenderInfo no null");
+            for (int senderIndex = 0; senderIndex < senderPriorityList.Count; senderIndex++) {
+                var prioritySenderInfo = senderPriorityList[senderIndex];
                 //纠正值
                 // prioritySenderInfo.PollIndexRedress();
-                for (var i = 0; i < prioritySenderInfo.items.Count; i++) {
+                for (int i = 0; i < prioritySenderInfo.items.Count; i++) {
                     //获取当前权重值的循环索引
-                    // Debug.Log("prioritySenderInfo.GetItemByPollIndex start===============");
                     prioritySenderInfo.PollIndexRedress();
-                    TransferConduit sender = prioritySenderInfo.GetItemByPollIndex().GetComponent<TransferConduit>();
-                    // Debug.Log("prioritySenderInfo.GetItemByPollIndex no null");
-                    int inputCell = sender.GetCell();
+                    int inputCell = prioritySenderInfo.GetItemByPollIndex().HandleReturnInt();
                     if (IsConduitEmpty(inputCell)) {
                         prioritySenderInfo.PollIndexUp();
                         continue;
                     }
-                    if (!ConduitUpdate2(inputCell, ref cpReceiverEachCount, senderPriorityIndex, ref rpIndex)) {
+                    if (!ConduitUpdate2(inputCell, ref cpReceiverEachCount, senderIndex, ref rpIndex)) {
                         //找不到就退出去
                         return;
                     }
@@ -75,16 +70,16 @@ namespace RsTransferPort {
         }
 
         /// <returns>有出口接收传送了</returns>
-        private bool ConduitUpdate2(int inputCell, ref int cpReceiverEachCount, int senderPriorityIndex, ref int rpIndex) {
+        private bool ConduitUpdate2(int inputCell, ref int cpReceiverEachCount, int senderIndex, ref int rpIndex) {
             for (; rpIndex < receiverPriorityList.Count; rpIndex++) {
                 PriorityChannelItemInfo priorityReceiverInfo = receiverPriorityList[rpIndex];
                 while (cpReceiverEachCount <= priorityReceiverInfo.items.Count) {
                     cpReceiverEachCount++;
                     priorityReceiverInfo.PollIndexRedress();
-                    int outputCell = priorityReceiverInfo.GetItemByPollIndex().GetComponent<TransferConduit>().GetCell();
+                    int outputCell = priorityReceiverInfo.GetItemByPollIndex().HandleReturnInt();
                     priorityReceiverInfo.PollIndexUp();
                     if (ConduitTransfer(inputCell, outputCell)) {
-                        senderPriorityList[senderPriorityIndex].PollIndexUp();
+                        senderPriorityList[senderIndex].PollIndexUp();
                         return true;
                     }
                 }

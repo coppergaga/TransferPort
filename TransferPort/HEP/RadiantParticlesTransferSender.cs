@@ -1,45 +1,30 @@
-﻿using KSerialization;
-
-namespace RsTransferPort {
-    public class RadiantParticlesTransferSender :
-        StateMachineComponent<RadiantParticlesTransferSender.StatesInstance> {
+﻿namespace RsTransferPort {
+    public class RadiantParticlesTransferSender : StateMachineComponent<RadiantParticlesTransferSender.StatesInstance> {
         public static HashedString PORT_ID = "RadiantParticlesTransferSender";
 
-        [MyCmpReq]
-        private KSelectable selectable;
-        [MyCmpReq]
-        public HighEnergyParticleStorage storage;
-        [MyCmpReq]
-        private HighEnergyParticlePort port;
-        [MyCmpReq]
-        private LogicPorts logicPorts;
-        [MyCmpReq]
-        private Operational operational;
-
-        [Serialize] private EightDirection _direction;
-
-        private EightDirectionController directionController;
-
-        public float directorDelay = 0.5f;
-
-        private bool hasLogicWire;
-
-        private static StatusItem infoStatusItem;
+        [MyCmpGet] private HighEnergyParticleStorage storage;
+        [MyCmpGet] private HighEnergyParticlePort port;
+        [MyCmpGet] private Operational operational;
+        [MyCmpGet] private KSelectable kSelectable;
+        [MyCmpGet] private LogicPorts logicPorts;
+        [MyCmpGet] private PortItem item;
 
         public static Operational.Flag receiverFlag = new Operational.Flag("ParticlesTransferSenderFlag", Operational.Flag.Type.Requirement);
 
-        private bool m_receiverAllow = false;
+        private const float directorDelay = 0.5f;
+        private static StatusItem infoStatusItem;
 
+        private bool m_receiverAllow = false;
         /// <summary>
         /// 接收端可用,受频道控制
         /// </summary>
-        public bool ReceiverAllow {
+        private bool ReceiverAllow {
             get => m_receiverAllow;
             set {
                 m_receiverAllow = value;
-                GetComponent<KSelectable>().ToggleStatusItem(infoStatusItem, !value);
+                kSelectable.ToggleStatusItem(infoStatusItem, !value);
                 operational.SetFlag(receiverFlag, value);
-                GetComponent<LogicPorts>().SendSignal(PORT_ID, value ? 1 : 0);
+                logicPorts.SendSignal(PORT_ID, value ? 1 : 0);
             }
         }
 
@@ -53,10 +38,23 @@ namespace RsTransferPort {
         protected override void OnSpawn() {
             base.OnSpawn();
             port.onParticleCaptureAllowed += OnParticleCaptureAllowed;
+            item.HandleReturnInt = HandleHasRadiation;
+            item.HandleReturnFloat = HandleConsumeAll;
+            item.HandleInParamInt = HandleReceiverAllow;
             smi.StartSM();
         }
 
+        protected override void OnCleanUp() {
+            item.HandleReturnInt = null;
+            item.HandleReturnFloat = null;
+            item.HandleInParamInt = null;
+            base.OnCleanUp();
+        }
+
         private bool OnParticleCaptureAllowed(HighEnergyParticle particle) => ReceiverAllow;
+        private int HandleHasRadiation() => RsLib.RsUtil.IntFrom(storage.HasRadiation());
+        private float HandleConsumeAll() => storage.ConsumeAll();
+        private void HandleReceiverAllow(int allow) => ReceiverAllow = RsLib.RsUtil.BoolFrom(allow);
 
         public class StatesInstance :
             GameStateMachine<States, StatesInstance, RadiantParticlesTransferSender, object>.GameInstance {
@@ -75,10 +73,13 @@ namespace RsTransferPort {
             public override void InitializeStates(out BaseState default_state) {
                 default_state = inoperational;
                 inoperational.PlayAnim("off").TagTransition(GameTags.Operational, ready);
-                ready.PlayAnim("on", KAnim.PlayMode.Loop).TagTransition(GameTags.Operational, inoperational, true)
+                ready.PlayAnim("on", KAnim.PlayMode.Loop)
+                    .TagTransition(GameTags.Operational, inoperational, true)
                     .EventTransition(GameHashes.OnParticleStorageChanged, redirect);
-                redirect.PlayAnim("working_pre").QueueAnim("working_loop").QueueAnim("working_pst")
-                    .ScheduleGoTo(smi => smi.master.directorDelay, ready);
+                redirect.PlayAnim("working_pre")
+                    .QueueAnim("working_loop")
+                    .QueueAnim("working_pst")
+                    .ScheduleGoTo(smi => directorDelay, ready);
             }
         }
     }

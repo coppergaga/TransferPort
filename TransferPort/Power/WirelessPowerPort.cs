@@ -12,9 +12,8 @@
         public IUtilityNetworkMgr GetNetworkManager() {
             return Game.Instance.electricalConduitSystem;
         }
-
-        protected override void OnPrefabInit() {
-            base.OnPrefabInit();
+        protected override void OnSpawn() {
+            base.OnSpawn();
             channelItem.OnEnterChannel += OnEnterChannel;
             channelItem.OnExitChannel += OnExitChannel;
         }

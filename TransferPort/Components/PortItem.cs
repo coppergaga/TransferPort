@@ -3,13 +3,16 @@ using KSerialization;
 using UnityEngine;
 
 namespace RsTransferPort {
-    [Obsolete("use PortItem instead")]
-    public class TransferPortChannel : PortItem { }
-
+    public interface ICustomLogicWrappable {
+        Func<int> HandleReturnInt { get; set; }
+        Func<float> HandleReturnFloat { get; set; }
+        Action<int> HandleInParamInt { get; set; }
+        Action<float> HandleInParamFloat { get; set; }
+    }
     /// <summary>
     /// 传送端口中 固/液/气/辐射/电力端口的ViewModel类
     /// </summary>
-    public class PortItem : KMonoBehaviour, ISaveLoadable {
+    public class PortItem : KMonoBehaviour, ISaveLoadable, ICustomLogicWrappable {
         public delegate void PriorityChangeDelegate(PortItem target, int newPriority, int oldPriority);
         /// <summary>
         /// 连接状态
@@ -28,7 +31,8 @@ namespace RsTransferPort {
 
         public static Operational.Flag ConnectionFlag = new Operational.Flag("PortChannelChange", Operational.Flag.Type.Requirement);
 
-        [MyCmpReq] private KSelectable kSelectable;
+        [MyCmpGet] private KSelectable kSelectable;
+        [MyCmpGet] private Operational operational;
 
         [Serialize] protected string channelName = "";
 
@@ -84,6 +88,10 @@ namespace RsTransferPort {
             get => buildingType;
             set => buildingType = value;
         }
+        public Func<int> HandleReturnInt { get; set; }
+        public Func<float> HandleReturnFloat { get; set; }
+        public Action<int> HandleInParamInt { get; set; }
+        public Action<float> HandleInParamFloat { get; set; }
 
         protected override void OnPrefabInit() {
             base.OnPrefabInit();
@@ -129,8 +137,8 @@ namespace RsTransferPort {
 
         protected void UpdateConnectionStatusItem() {
             bool b = string.IsNullOrEmpty(channelName);
-            GetComponent<KSelectable>().ToggleStatusItem(ConnectionStatusItem, b, this);
-            GetComponent<Operational>().SetFlag(ConnectionFlag, !b);
+            kSelectable.ToggleStatusItem(ConnectionStatusItem, b, this);
+            operational.SetFlag(ConnectionFlag, !b);
         }
 
 

@@ -23,7 +23,7 @@
             if (IsInvalid()) return;
             if (item.InOutType == InOutType.Sender) {
                 item.Unsubscribe((int)GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
-                item.GetComponent<RadiantParticlesTransferSender>().ReceiverAllow = false;
+                item.HandleInParamInt(RsLib.RsUtil.IntFrom(false));
             }
             else {
                 item.Unsubscribe((int)GameHashes.OperationalChanged, OnReceiverOperationalChange);
@@ -42,21 +42,21 @@
                 if (receiverIndexCount == receivers.Count) return;
 
                 senderIndex %= senders.Count;
-                var sender = senders[senderIndex].GetComponent<RadiantParticlesTransferSender>();
-                if (!sender.storage.HasRadiation()) {
+                var senderItem = senders[senderIndex];
+                if (!RsLib.RsUtil.BoolFrom(senderItem.HandleReturnInt())) {
                     senderIndex++;
                     continue;
                 }
 
                 if (receiverIndex >= receivers.Count) { receiverIndex = 0; }
                 while (receiverIndexCount < receivers.Count) {
-                    var receiver = receivers[receiverIndex].GetComponent<RadiantParticlesTransferReceiver>();
+                    var receiverItem = receivers[receiverIndex];
                     receiverIndex = ++receiverIndex % receivers.Count;
                     receiverIndexCount++;
-                    if (receiver.Transmissible) {
-                        float amount = sender.storage.ConsumeAll();
+                    if (RsLib.RsUtil.BoolFrom(receiverItem.HandleReturnInt())) {
+                        float amount = senderItem.HandleReturnFloat();
                         //这里需要计算入口到出口的距离，销毁一定量的粒子
-                        receiver.StoreAndLaunch(amount);
+                        receiverItem.HandleInParamFloat(amount);
                         senderIndex++;
                         break;
                     }
@@ -74,22 +74,14 @@
         public void SyncSignal() {
             var signal = HasOutletEnable();
             foreach (PortItem sender in senders) {
-                RadiantParticlesTransferSender particlesTransferSender =
-                    sender.GetComponent<RadiantParticlesTransferSender>();
-                if (particlesTransferSender != null) {
-                    particlesTransferSender.ReceiverAllow = signal;
-                }
+                sender.HandleInParamInt(RsLib.RsUtil.IntFrom(signal));
             }
         }
 
         private bool HasOutletEnable() {
-            foreach (PortItem receiver in receivers) {
-                RadiantParticlesTransferReceiver transferReceiver = receiver.GetComponent<RadiantParticlesTransferReceiver>();
-                if (transferReceiver != null && transferReceiver.Transmissible) {
-                    return true;
-                }
+            foreach (PortItem item in receivers) {
+                if (RsLib.RsUtil.BoolFrom(item.HandleReturnInt())) { return true; }
             }
-
             return false;
         }
     }

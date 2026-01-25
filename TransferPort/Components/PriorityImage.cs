@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using RsLib;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace RsTransferPort {
@@ -32,5 +33,17 @@ namespace RsTransferPort {
             image.SetNativeSize();
         }
 
+        public static void AddLoadPrefabTask() {
+            RsResources.AddLoadPrefabTask("prefabs/priority_image", (parent) => {
+                GameObject root = RsUIBuilder.UIGameObject("Priority", parent);
+                root.rectTransform().localScale = new Vector3(0.4f, 0.4f, 0.4f);
+                root.AddComponent<Image>();
+                root.AddComponent<PriorityImage>();
+                CanvasGroup canvasGroup = root.AddComponent<CanvasGroup>();
+                canvasGroup.interactable = false;
+                canvasGroup.blocksRaycasts = false;
+                return root;
+            });
+        }
     }
 }

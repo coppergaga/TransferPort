@@ -4,12 +4,14 @@ using System.IO;
 using System.Reflection;
 using KMod;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace RsLib {
     public static class RsUtil {
         public static Vector2 ArrowV2Offset = new Vector2(0, 0.5f);
         public static Vector3 ArrowV3Offset = new Vector3(0, 0.5f);
+
+        public static int IntFrom(bool b) => b ? 1 : -1;
+        public static bool BoolFrom(int i) => i > 0;
 
         public static string GetModPath(Assembly modDLL) {
             if (modDLL == null)

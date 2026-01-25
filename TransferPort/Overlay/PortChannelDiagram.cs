@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace RsTransferPort {
     public class PortChannelDiagram : MonoBehaviour {
-        public static void InitPrefab() {
+        public static void AddLoadPrefabTask() {
             RsResources.AddLoadPrefabTask("ui/port_overlay_diagram", (parent) => {
                 GameObject root = RsUIBuilder.UIGameObject(nameof(PortChannelDiagram), parent, false);
                 root.name = nameof(PortChannelDiagram);
