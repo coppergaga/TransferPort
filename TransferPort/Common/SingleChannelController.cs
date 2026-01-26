@@ -38,6 +38,7 @@ namespace RsTransferPort {
             if (item.InOutType == InOutType.Receiver) { receivers.Add(item); }
             else { senders.Add(item); }
             all.Add(item);
+            item.EnterChannelController(this);
             OnAdd(item);
         }
 
@@ -46,15 +47,13 @@ namespace RsTransferPort {
             if (item.InOutType == InOutType.Receiver) { receivers.Remove(item); }
             else { senders.Remove(item); }
             all.Remove(item);
+            item.ExitChannelController(this);
             OnRemove(item);
         }
 
-        protected virtual void OnAdd(PortItem item) {
-        }
+        protected virtual void OnAdd(PortItem item) { }
 
-        protected virtual void OnRemove(PortItem item) {
-
-        }
+        protected virtual void OnRemove(PortItem item) { }
 
         public virtual bool Contains(PortItem item) {
             return all.Contains(item);

@@ -62,14 +62,16 @@ namespace RsTransferPort {
                 return;
             }
             curTarget = new_target.GetComponent<IMyHighEnergyParticleDirection>();
+            int directionIndex = EightDirectionUtil.GetDirectionIndex(curTarget.Direction);
+            if (directionIndex >= 0 && directionIndex < Buttons.Count) {
+                Buttons[directionIndex].SignalClick(KKeyCode.Mouse0);
+            }
             Refresh();
         }
 
         private void Refresh() {
             int directionIndex = EightDirectionUtil.GetDirectionIndex(curTarget.Direction);
-            if (directionIndex >= 0 && directionIndex < Buttons.Count) {
-                Buttons[directionIndex].SignalClick(KKeyCode.Mouse0);
-            }
+            if (directionIndex >= 0 && directionIndex < Buttons.Count) { }
             else {
                 if (!Util.IsNullOrDestroyed(activeButton)) { activeButton.isInteractable = true; }
                 activeButton = null;

@@ -7,8 +7,7 @@ namespace RsTransferPort {
             if (item.InOutType == InOutType.Sender) {
                 item.Subscribe((int)GameHashes.LogicEvent, OnInputLogicEvent);
             }
-            UIScheduler.Instance.Schedule("WirelessLogicPortChannelOnAdd", 0f, (_) => { if (!Util.IsNullOrDestroyed(this)) { this.SyncSignal(); } });
-            //SyncSignal();
+            SyncSignal();
         }
 
         protected override void OnRemove(PortItem port) {

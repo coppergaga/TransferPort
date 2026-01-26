@@ -47,37 +47,23 @@ namespace RsTransferPort {
 
         [SerializeField] protected BuildingType buildingType;
 
-        /// <summary>
-        /// 会在OnSpawn周期在触发
-        /// </summary>
-        // public event Action<string> OnChannelNameChanged;
-
-        public event Action<string> OnChannelNameInitialized;
         public event Action<SingleChannelController> OnEnterChannel;
         public event Action<SingleChannelController> OnExitChannel;
         public event PriorityChangeDelegate OnPriorityChange;
 
-        public string ChannelName {
-            get => channelName ?? "";
-        }
+        public string ChannelName => channelName ?? "";
 
-        public bool IsGlobal {
-            get => isGlobal;
-        }
+        public bool IsGlobal => isGlobal;
 
-        public int Priority {
-            get => priority;
-        }
+        public int Priority => priority;
 
         public PortChannelKey ChannelKey => new PortChannelKey(ChannelName, WorldIdAG, BuildingType);
 
         public int WorldIdAG => IsGlobal ? PortManager.GLOBAL_CHANNEL_WORLD_ID : this.GetMyWorldId();
 
-        public string DisplayChannelName {
-            get => string.IsNullOrEmpty(channelName)
-                ? (string)STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL
-                : channelName;
-        }
+        public string DisplayChannelName => string.IsNullOrEmpty(channelName)
+            ? (string)STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL
+            : channelName;
 
         public InOutType InOutType {
             get => inOutType;
@@ -114,20 +100,13 @@ namespace RsTransferPort {
                     "global_connectivity_icon", StatusItem.IconType.Custom, NotificationType.Neutral, false,
                     OverlayModes.None.ID, false);
             }
-
         }
 
         protected override void OnSpawn() {
             base.OnSpawn();
-            if (channelName == null) {
-                channelName = "";
-            }
+            if (channelName == null) { channelName = ""; }
 
-            UpdateConnectionStatusItem();
-
-            PortManager.Instance.Add(this);
-            OnChannelNameInitialized?.Invoke(ChannelName);
-            PortManager.Instance.TriggerChannelChange(this);
+            UIScheduler.Instance.Schedule("PortItemOnSpawn", 0f, SyncToPortManager, this);
         }
 
         protected override void OnCleanUp() {
@@ -147,6 +126,14 @@ namespace RsTransferPort {
                 && go.GetComponent<PortItem>() is PortItem sourceItem
                 && !Util.IsNullOrDestroyed(sourceItem)) {
                 CheckSetChannelNameAndGlobal(sourceItem.ChannelName, sourceItem.IsGlobal, sourceItem.Priority);
+            }
+        }
+
+        private static void SyncToPortManager(object data) {
+            if (!Util.IsNullOrDestroyed(data) && data is PortItem self) {
+                self.UpdateConnectionStatusItem();
+                PortManager.Instance.Add(self);
+                PortManager.Instance.TriggerChannelChange(self);
             }
         }
 

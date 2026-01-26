@@ -14,6 +14,9 @@
 `MyOverlayModes`是传送体系视图, 这里负责展示各种模式下的流向连线
 
 # Update Notes
+## v1.8.2
+[v1.8.2][bugfix]
+- v1.8.1 bugfix优化版本
 ## v1.8.1
 [v1.8.0][temp bugfix]
 - 修复了加载存档时如果存在信号/辐射端口时的crash问题

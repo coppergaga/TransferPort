@@ -18,11 +18,6 @@ namespace RsTransferPort {
 
         public event Action<PortItem> OnChannelChange;
 
-        /// <summary>
-        /// 开启跨行星频道
-        /// </summary>
-        // public bool EnableGlobalChannel { get; private set; }
-
         public void Add(PortItem item) {
             var buildingType = item.BuildingType;
             var channelName = item.ChannelName;
@@ -39,7 +34,6 @@ namespace RsTransferPort {
             if (!controller.Contains(item)) {
                 //Debug.Log($"ggg===channel {controller.DisplayChannelName}:{controller.WorldIdAG} ADD item worldid={item.WorldIdAG} channelname={item.ChannelName} global={item.IsGlobal}");
                 controller.Add(item);
-                //item.EnterChannelController(controller);
             }
 
             //检查是否已经有空频道，无则创建
@@ -55,7 +49,6 @@ namespace RsTransferPort {
             if (channels.TryGetValue(channelKey, out SingleChannelController controller)) {
                 //Debug.Log($"ggg===channel {controller.DisplayChannelName}:{controller.WorldIdAG} REMOVE item channelname={item.ChannelName} worldid={item.WorldIdAG} global={item.IsGlobal}");
                 controller.Remove(item);
-                item.ExitChannelController(controller);
                 if (controller.IsNeedClean) {
                     controller.OnCleanUp();
                     channels.Remove(channelKey);
