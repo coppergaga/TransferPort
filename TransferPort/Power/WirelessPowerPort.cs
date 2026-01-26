@@ -3,7 +3,7 @@
         UtilityNetworkLink,
         IHaveUtilityNetworkMgr,
         ICircuitConnected {
-        [MyCmpGet] public PortItem channelItem;
+        [MyCmpReq] public PortItem channelItem;
 
         public bool IsVirtual { get; private set; }
         public int PowerCell => GetNetworkCell();
@@ -16,6 +16,12 @@
             base.OnSpawn();
             channelItem.OnEnterChannel += OnEnterChannel;
             channelItem.OnExitChannel += OnExitChannel;
+        }
+
+        protected override void OnCleanUp() {
+            channelItem.OnEnterChannel -= OnEnterChannel;
+            channelItem.OnExitChannel -= OnExitChannel;
+            base.OnCleanUp();
         }
 
         protected void OnEnterChannel(SingleChannelController channel) {

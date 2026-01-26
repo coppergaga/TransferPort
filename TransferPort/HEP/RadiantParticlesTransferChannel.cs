@@ -15,8 +15,8 @@
             else {
                 item.Subscribe((int)GameHashes.OperationalChanged, OnReceiverOperationalChange);
             }
-
-            SyncSignal();
+            UIScheduler.Instance.Schedule("RadiantParticlesTransferChannelOnAdd", 0f, (_) => { if (!Util.IsNullOrDestroyed(this)) { this.SyncSignal(); } });
+            //SyncSignal();
         }
 
         protected override void OnRemove(PortItem item) {

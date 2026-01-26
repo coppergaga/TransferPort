@@ -39,7 +39,7 @@ namespace RsTransferPort {
             if (!controller.Contains(item)) {
                 //Debug.Log($"ggg===channel {controller.DisplayChannelName}:{controller.WorldIdAG} ADD item worldid={item.WorldIdAG} channelname={item.ChannelName} global={item.IsGlobal}");
                 controller.Add(item);
-                item.EnterChannelController(controller);
+                //item.EnterChannelController(controller);
             }
 
             //检查是否已经有空频道，无则创建
