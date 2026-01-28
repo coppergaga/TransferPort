@@ -45,9 +45,14 @@
         }
 
         protected override void OnCleanUp() {
-            item.HandleReturnInt = null;
-            item.HandleReturnFloat = null;
-            item.HandleInParamInt = null;
+            if (!Util.IsNullOrDestroyed(port)) {
+                port.onParticleCaptureAllowed -= OnParticleCaptureAllowed;
+            }
+            if (!Util.IsNullOrDestroyed(item)) {
+                item.HandleReturnInt = null;
+                item.HandleReturnFloat = null;
+                item.HandleInParamInt = null;
+            }
             base.OnCleanUp();
         }
 

@@ -1,8 +1,8 @@
 ﻿
 namespace RsTransferPort {
     public class WirelessLogicPort : KMonoBehaviour {
-        [MyCmpReq] private LogicPorts logicPorts;
-        [MyCmpReq] private PortItem item;
+        [MyCmpGet] private LogicPorts logicPorts;
+        [MyCmpGet] private PortItem item;
 
         protected override void OnSpawn() {
             base.OnSpawn();
@@ -11,8 +11,10 @@ namespace RsTransferPort {
         }
 
         protected override void OnCleanUp() {
-            item.HandleReturnInt = null;
-            item.HandleInParamInt = null;
+            if (!Util.IsNullOrDestroyed(item)) {
+                item.HandleReturnInt = null;
+                item.HandleInParamInt = null;
+            }
             base.OnCleanUp();
         }
 

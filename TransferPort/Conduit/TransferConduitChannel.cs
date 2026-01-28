@@ -3,7 +3,8 @@ namespace RsTransferPort {
     public class TransferConduitChannel : SingleChannelController {
         public readonly PriorityChannelItemList senderPriorityList = new PriorityChannelItemList();
         public readonly PriorityChannelItemList receiverPriorityList = new PriorityChannelItemList();
-        protected override void OnAdd(PortItem item) {
+        protected override void OnAfterAdd(PortItem item) {
+            base.OnAfterAdd(item);
             if (item.InOutType == InOutType.Sender) {
                 senderPriorityList.AddChannelItem(item);
             }
@@ -12,7 +13,8 @@ namespace RsTransferPort {
             }
         }
 
-        protected override void OnRemove(PortItem item) {
+        protected override void OnPreRemove(PortItem item) {
+            base.OnPreRemove(item);
             if (item.InOutType == InOutType.Sender) {
                 senderPriorityList.RemoveChannelItem(item);
             }

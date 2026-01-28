@@ -7,7 +7,8 @@
         private int senderIndex;
         private int receiverIndex;
 
-        protected override void OnAdd(PortItem item) {
+        protected override void OnAfterAdd(PortItem item) {
+            base.OnAfterAdd(item);
             if (IsInvalid()) return;
             if (item.InOutType == InOutType.Sender) {
                 item.Subscribe((int)GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
@@ -18,16 +19,20 @@
             SyncSignal();
         }
 
-        protected override void OnRemove(PortItem item) {
+        protected override void OnPreRemove(PortItem item) {
+            base.OnPreRemove(item);
             if (IsInvalid()) return;
             if (item.InOutType == InOutType.Sender) {
                 item.Unsubscribe((int)GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
-                item.HandleInParamInt(RsLib.RsUtil.IntFrom(false));
+                item.HandleInParamInt?.Invoke(RsLib.RsUtil.IntFrom(false));
             }
             else {
                 item.Unsubscribe((int)GameHashes.OperationalChanged, OnReceiverOperationalChange);
             }
+        }
 
+        protected override void OnAfterRemove() {
+            base.OnAfterRemove();
             SyncSignal();
         }
 

@@ -10,7 +10,9 @@ namespace RsTransferPort {
         }
 
         protected override void OnCleanUp() {
-            item.HandleReturnInt = null;
+            if (!Util.IsNullOrDestroyed(item)) {
+                item.HandleReturnInt = null;
+            }
             base.OnCleanUp();
         }
 

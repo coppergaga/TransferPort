@@ -35,25 +35,31 @@ namespace RsTransferPort {
         public void Add(PortItem item) {
             if (item == null) { return; }
 
+            OnPreAdd(item);
             if (item.InOutType == InOutType.Receiver) { receivers.Add(item); }
             else { senders.Add(item); }
             all.Add(item);
+            OnAfterAdd(item);
             item.EnterChannelController(this);
-            OnAdd(item);
         }
 
         public void Remove(PortItem item) {
             if (item == null) { return; }
+            OnPreRemove(item);
             if (item.InOutType == InOutType.Receiver) { receivers.Remove(item); }
             else { senders.Remove(item); }
             all.Remove(item);
             item.ExitChannelController(this);
-            OnRemove(item);
+            OnAfterRemove();
         }
 
-        protected virtual void OnAdd(PortItem item) { }
-
-        protected virtual void OnRemove(PortItem item) { }
+        protected virtual void OnPreAdd(PortItem item) { }
+        protected virtual void OnAfterAdd(PortItem item) { }
+        protected virtual void OnPreRemove(PortItem item) { }
+        /// <summary>
+        /// when after the item had been removed, it will be collected by GC, so in this method you can't reach the item
+        /// </summary>
+        protected virtual void OnAfterRemove() { }
 
         public virtual bool Contains(PortItem item) {
             return all.Contains(item);

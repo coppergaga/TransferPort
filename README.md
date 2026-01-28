@@ -14,6 +14,10 @@
 `MyOverlayModes`是传送体系视图, 这里负责展示各种模式下的流向连线
 
 # Update Notes
+## v1.8.3
+[v1.8.3][bugfix]
+- 修复了在拆除辐射粒子发射端口时出现的crash
+- 修复了其他传送端口在拆除时可能发生的crash
 ## v1.8.2
 [v1.8.2][bugfix]
 - v1.8.1 bugfix优化版本

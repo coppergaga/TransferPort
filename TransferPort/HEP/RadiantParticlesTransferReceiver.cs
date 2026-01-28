@@ -5,8 +5,8 @@ namespace RsTransferPort {
     public class RadiantParticlesTransferReceiver : StateMachineComponent<RadiantParticlesTransferReceiver.StatesInstance>, IMyHighEnergyParticleDirection {
         // public static HashedString PORT_ID = "RadiantParticlesTransferReceiver";
         [MyCmpGet] private Operational operational;
-        [MyCmpReq] private KBatchedAnimController animController;
-        [MyCmpReq] private PortItem item;
+        [MyCmpGet] private KBatchedAnimController animController;
+        [MyCmpGet] private PortItem item;
         [MyCmpGet] private HighEnergyParticleStorage hepStorage;
         [MyCmpGet] private HighEnergyParticlePort hepPort;
         [MyCmpGet] private Building building;
@@ -45,8 +45,10 @@ namespace RsTransferPort {
         }
 
         protected override void OnCleanUp() {
-            item.HandleReturnInt = null;
-            item.HandleInParamFloat = null;
+            if (!Util.IsNullOrDestroyed(item)) {
+                item.HandleReturnInt = null;
+                item.HandleInParamFloat = null;
+            }
             base.OnCleanUp();
         }
 

@@ -1,7 +1,8 @@
 ﻿
 namespace RsTransferPort {
     public class WirelessLogicPortChannel : SingleChannelController {
-        protected override void OnAdd(PortItem item) {
+        protected override void OnAfterAdd(PortItem item) {
+            base.OnAfterAdd(item);
             if (IsInvalid()) { return; }
 
             if (item.InOutType == InOutType.Sender) {
@@ -10,18 +11,21 @@ namespace RsTransferPort {
             SyncSignal();
         }
 
-        protected override void OnRemove(PortItem port) {
-            if (IsInvalid()) {
-                return;
+        protected override void OnPreRemove(PortItem item) {
+            base.OnPreRemove(item);
+            if (IsInvalid()) { return; }
+
+            if (item.InOutType == InOutType.Sender) {
+                item.Unsubscribe((int)GameHashes.LogicEvent, OnInputLogicEvent);
             }
 
-            if (port.InOutType == InOutType.Sender) {
-                port.Unsubscribe((int)GameHashes.LogicEvent, OnInputLogicEvent);
+            if (item.InOutType == InOutType.Receiver) {
+                item.HandleInParamInt?.Invoke(0);
             }
+        }
 
-            if (port.InOutType == InOutType.Receiver) {
-                port.HandleInParamInt(0);
-            }
+        protected override void OnAfterRemove() {
+            base.OnAfterRemove();
             SyncSignal();
         }
 

@@ -3,7 +3,7 @@
         UtilityNetworkLink,
         IHaveUtilityNetworkMgr,
         ICircuitConnected {
-        [MyCmpReq] public PortItem channelItem;
+        [MyCmpGet] public PortItem item;
 
         public bool IsVirtual { get; private set; }
         public int PowerCell => GetNetworkCell();
@@ -14,13 +14,15 @@
         }
         protected override void OnSpawn() {
             base.OnSpawn();
-            channelItem.OnEnterChannel += OnEnterChannel;
-            channelItem.OnExitChannel += OnExitChannel;
+            item.OnEnterChannel += OnEnterChannel;
+            item.OnExitChannel += OnExitChannel;
         }
 
         protected override void OnCleanUp() {
-            channelItem.OnEnterChannel -= OnEnterChannel;
-            channelItem.OnExitChannel -= OnExitChannel;
+            if (!Util.IsNullOrDestroyed(item)) {
+                item.OnEnterChannel -= OnEnterChannel;
+                item.OnExitChannel -= OnExitChannel;
+            }
             base.OnCleanUp();
         }
 
