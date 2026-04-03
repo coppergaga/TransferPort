@@ -13,7 +13,7 @@ namespace RsLib.Adapter {
             }
 
             allowOverride = false;
-            font = TMP_FontAsset.defaultFontAsset;
+            font = TMP_Settings.defaultFontAsset;
             LoclTextAwake.Invoke(this, new object[0]);
         }
 

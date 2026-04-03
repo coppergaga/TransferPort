@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using MonoMod.Utils;
 using UnityEngine;
 
 namespace RsLib {
@@ -52,7 +51,9 @@ namespace RsLib {
 
         private static void SelectToolHoverTextCard_OnSpawn_Postfix(Dictionary<HashedString, Func<bool>> ___overlayFilterMap) {
             if (Instance.overlayFilterMap != null && Instance.overlayFilterMap.Count > 0) {
-                ___overlayFilterMap.AddRange(Instance.overlayFilterMap);
+                foreach (var map in Instance.overlayFilterMap) {
+                    ___overlayFilterMap.Add(map.Key, map.Value);
+                }
             }
         }
 
