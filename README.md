@@ -18,6 +18,7 @@
 [v1.8.4][crash fix]
 - 适配u58-720697游戏更新
 - 调整游戏依赖为Directory.Build.props文件
+- 升级.netframework版本4.7.2 -> 4.8.0
 ## v1.8.3
 [v1.8.3][bugfix]
 - 修复了在拆除辐射粒子发射端口时出现的crash
