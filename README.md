@@ -14,6 +14,9 @@
 `MyOverlayModes`是传送体系视图, 这里负责展示各种模式下的流向连线
 
 # Update Notes
+## v1.8.5
+[v1.8.5][normal update]
+- 调整进入预览视图后默认为不显示连线
 ## v1.8.4
 [v1.8.4][crash fix]
 - 适配u58-720697游戏更新

@@ -28,7 +28,7 @@ namespace RsTransferPort {
             /// </summary>
             private static bool m_showPriorityInfo;
             private static BuildingType m_buildingType;
-            private static WiredPreviewMode m_wiredPreviewMode = WiredPreviewMode.Center;
+            private static WiredPreviewMode m_wiredPreviewMode = WiredPreviewMode.None;
             private static PortChannelKey showOneChannelKey;
 
             public static bool OpShowOnlyNullChannel {
