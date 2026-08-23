@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RsTransferPort {
     public class SingleChannelController : IComparable<SingleChannelController> {
-        public BuildingType BuildingType { get; }
+        public BuildingType BuildingTypo { get; }
         public string ChannelName { get; }
 
         public List<PortItem> senders = new List<PortItem>();
@@ -26,7 +26,7 @@ namespace RsTransferPort {
         }
 
         public SingleChannelController(BuildingType buildingType, string channelName, int worldIdAG) {
-            BuildingType = buildingType;
+            BuildingTypo = buildingType;
             ChannelName = channelName;
             WorldIdAG = worldIdAG;
             OnInit();

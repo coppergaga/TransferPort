@@ -1,7 +1,6 @@
 ﻿namespace RsTransferPort {
     public class RadiantParticlesTransferChannel : SingleChannelController {
-        public RadiantParticlesTransferChannel(BuildingType buildingType, string channelName, int worldIdAG) : base(
-            buildingType, channelName, worldIdAG) {
+        public RadiantParticlesTransferChannel(BuildingType buildingType, string channelName, int worldIdAG) : base(buildingType, channelName, worldIdAG) {
         }
 
         private int senderIndex;

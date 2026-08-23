@@ -24,7 +24,7 @@ namespace RsTransferPort {
         }
 
         public IConduitFlow GetConduitManager() {
-            switch (BuildingType) {
+            switch (BuildingTypo) {
                 case BuildingType.Gas:
                     return Game.Instance.gasConduitFlow;
                 case BuildingType.Liquid:
@@ -42,58 +42,27 @@ namespace RsTransferPort {
             }
 
             if (senders.Count == 0 || receivers.Count == 0) return;
-            ConduitUpdate1();
+            SimConduitUpdate();
         }
 
 
-        private void ConduitUpdate1() {
-            int cpReceiverEachCount = 0; //循环次数计算
-            int rpIndex = 0; //接收端的优先级信息的索引
-            //int senderIndex = 0;
-            //设置一次只能传送一种液体
-            for (int senderIndex = 0; senderIndex < senderPriorityList.Count; senderIndex++) {
-                var prioritySenderInfo = senderPriorityList[senderIndex];
-                //纠正值
-                // prioritySenderInfo.PollIndexRedress();
-                for (int i = 0; i < prioritySenderInfo.items.Count; i++) {
-                    //获取当前权重值的循环索引
-                    prioritySenderInfo.PollIndexRedress();
-                    int inputCell = prioritySenderInfo.GetItemByPollIndex().HandleReturnInt();
-                    if (IsConduitEmpty(inputCell)) {
-                        prioritySenderInfo.PollIndexUp();
-                        continue;
-                    }
-                    if (!ConduitUpdate2(inputCell, ref cpReceiverEachCount, senderIndex, ref rpIndex)) {
-                        //找不到就退出去
-                        return;
-                    }
+        private void SimConduitUpdate() {
+            var senderItems = senderPriorityList.Items;
+            var receiverItems = receiverPriorityList.Items;
+            for (int i = 0, j = 0; i < senderItems.Count; i++) {
+                int inputCell = senderItems[i].HandleReturnInt();
+                if (IsConduitEmpty(inputCell)) { continue; }
+                while (j < receiverItems.Count) {
+                    int outputCell = receiverItems[j].HandleReturnInt();
+                    j++;
+                    if (ConduitTransfer(inputCell, outputCell)) { break; }
                 }
             }
-        }
-
-        /// <returns>有出口接收传送了</returns>
-        private bool ConduitUpdate2(int inputCell, ref int cpReceiverEachCount, int senderIndex, ref int rpIndex) {
-            for (; rpIndex < receiverPriorityList.Count; rpIndex++) {
-                PriorityChannelItemInfo priorityReceiverInfo = receiverPriorityList[rpIndex];
-                while (cpReceiverEachCount <= priorityReceiverInfo.items.Count) {
-                    cpReceiverEachCount++;
-                    priorityReceiverInfo.PollIndexRedress();
-                    int outputCell = priorityReceiverInfo.GetItemByPollIndex().HandleReturnInt();
-                    priorityReceiverInfo.PollIndexUp();
-                    if (ConduitTransfer(inputCell, outputCell)) {
-                        senderPriorityList[senderIndex].PollIndexUp();
-                        return true;
-                    }
-                }
-
-                cpReceiverEachCount = 0;
-            }
-            return false;
         }
 
         /// <returns>是否传送了</returns>
         private bool ConduitTransfer(int inputCell, int outputCell) {
-            if (BuildingType == BuildingType.Solid) {
+            if (BuildingTypo == BuildingType.Solid) {
                 SolidConduitFlow flow = (SolidConduitFlow)GetConduitManager();
                 if (flow.HasConduit(outputCell) && flow.IsConduitEmpty(outputCell)) {
                     var pickupable = flow.RemovePickupable(inputCell);
@@ -104,10 +73,8 @@ namespace RsTransferPort {
             else {
                 ConduitFlow flow = (ConduitFlow)GetConduitManager();
                 if (flow.HasConduit(outputCell) && flow.IsConduitEmpty(outputCell)) {
-                    var inputContents = flow.GetContents(inputCell);
-                    var useMass = flow.AddElement(outputCell, inputContents.element, inputContents.mass,
-                        inputContents.temperature,
-                        inputContents.diseaseIdx, inputContents.diseaseCount);
+                    var ic = flow.GetContents(inputCell);
+                    var useMass = flow.AddElement(outputCell, ic.element, ic.mass, ic.temperature, ic.diseaseIdx, ic.diseaseCount);
                     flow.RemoveElement(inputCell, useMass);
                     return true; //直接返回
                 }
@@ -120,19 +87,16 @@ namespace RsTransferPort {
         /// 输入端管道判断
         /// </summary>
         private bool IsConduitEmpty(int cell) {
-            if (BuildingType == BuildingType.Solid) {
+            if (BuildingTypo == BuildingType.Solid) {
                 SolidConduitFlow flow = (SolidConduitFlow)GetConduitManager();
                 return !flow.HasConduit(cell) || flow.IsConduitEmpty(cell);
             }
             else {
                 ConduitFlow flow = (ConduitFlow)GetConduitManager();
                 return !flow.HasConduit(cell) || flow.IsConduitEmpty(cell);
+                    
             }
         }
-
-        public void OnCleanup() {
-        }
-
 
         public TransferConduitChannel(BuildingType buildingType, string channelName, int worldIdAG) : base(buildingType, channelName, worldIdAG) {
         }

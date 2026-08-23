@@ -167,8 +167,8 @@ namespace RsTransferPort {
                     PriorityChannelItemInfo senderPriorityInfo = controller.senderPriorityList.GetByPriority(priority);
                     PriorityChannelItemInfo receiverPriorityInfo = controller.receiverPriorityList.GetByPriority(priority);
 
-                    int senderNum = senderPriorityInfo == null ? 0 : senderPriorityInfo.items.Count;
-                    int receiverNum = receiverPriorityInfo == null ? 0 : receiverPriorityInfo.items.Count;
+                    int senderNum = senderPriorityInfo == null ? 0 : senderPriorityInfo.Count;
+                    int receiverNum = receiverPriorityInfo == null ? 0 : receiverPriorityInfo.Count;
 
                     if (senderNum != 0 || receiverNum != 0) {
                         stringBuilder.AppendLine();
@@ -282,7 +282,7 @@ namespace RsTransferPort {
 
                 LocTextAdapter num1 = row.GetReference<LocTextAdapter>("Num1");
                 num1.gameObject.SetActiveNR(true);
-                if (localController.BuildingType == BuildingType.Power) {
+                if (localController.BuildingTypo == BuildingType.Power) {
                     num1.SetTextNoRepeat("N:" + localController.senders.Count);
                 }
                 else {
@@ -290,7 +290,7 @@ namespace RsTransferPort {
                 }
 
                 LocTextAdapter num2 = row.GetReference<LocTextAdapter>("Num2");
-                if (localController.BuildingType == BuildingType.Power) {
+                if (localController.BuildingTypo == BuildingType.Power) {
                     num2.gameObject.SetActiveNR(false);
                 }
                 else {
@@ -298,7 +298,7 @@ namespace RsTransferPort {
                     num2.SetTextNoRepeat("R:" + localController.receivers.Count);
                 }
 
-                if (detailLevel == 1 && localController.BuildingType == BuildingType.Power && !localController.IsInvalid()) {
+                if (detailLevel == 1 && localController.BuildingTypo == BuildingType.Power && !localController.IsInvalid()) {
                     RefreshPowerInfo(row, localController);
                 }
 
