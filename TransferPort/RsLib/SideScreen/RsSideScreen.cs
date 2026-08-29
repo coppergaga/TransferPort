@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace RsLib {
     public class RsSideScreen : RsModule<RsSideScreen> {
@@ -84,56 +83,37 @@ namespace RsLib {
         /// <typeparam name="TSourceScreen"></typeparam>
         /// <typeparam name="TNewScreen"></typeparam>
         /// <returns></returns>
-        public static TNewScreen CreateSideScreen<TSourceScreen, TNewScreen>(
-            IList<DetailsScreen.SideScreenRef> existing, GameObject parent)
-            where TSourceScreen : SideScreenContent
-            where TNewScreen : RsSideScreenContent {
-            return (TNewScreen)CreateSideScreen(existing, parent, typeof(TSourceScreen), typeof(TNewScreen));
-        }
-
         public static RsSideScreenContent CreateSideScreen(
             IList<DetailsScreen.SideScreenRef> existing, GameObject parent, Type sourceScreen, Type newScreen) {
             if (sourceScreen.IsAssignableFrom(typeof(SideScreenContent)))
-                throw new TypeLoadException(
-                    "参数sourceScreen不可用的，该类型必须继承" + typeof(SideScreenContent).FullName);
+                throw new TypeLoadException("参数sourceScreen不可用的，该类型必须继承" + typeof(SideScreenContent).FullName);
 
             if (newScreen.IsAssignableFrom(typeof(RsSideScreenContent)))
-                throw new TypeLoadException(
-                    "参数newScreen不可用的，该类型必须继承" + typeof(RsSideScreenContent).FullName);
+                throw new TypeLoadException("参数newScreen不可用的，该类型必须继承" + typeof(RsSideScreenContent).FullName);
 
-            foreach (var sideScreenRef in existing) {
-                if (sideScreenRef.screenPrefab.GetType() != sourceScreen) continue;
-
-                var screenPrefab = sideScreenRef.screenPrefab;
-                if (screenPrefab != null) {
-                    var sideScreenRef2 = new DetailsScreen.SideScreenRef();
-                    var newScreenInstance = CopySideScreen(screenPrefab, newScreen);
-                    sideScreenRef2.name = newScreenInstance.name;
-                    sideScreenRef2.screenPrefab = newScreenInstance;
-                    sideScreenRef2.screenInstance = newScreenInstance;
-                    var transform = newScreenInstance.gameObject.transform;
-                    transform.SetParent(parent.transform);
-                    transform.localScale = Vector3.one;
-                    existing.Insert(0, sideScreenRef2);
-                    return newScreenInstance;
-                }
+            DetailsScreen.SideScreenRef retScreenRef = null;
+            RsSideScreenContent ret = null;
+            bool isCopySuccess = false;
+            foreach (var existScreen in existing) {
+                if (existScreen.screenPrefab.GetType() != sourceScreen) { continue; }
+                if (existScreen.screenPrefab == null) { continue;  }
+                retScreenRef = new DetailsScreen.SideScreenRef();
+                ret = CopySideScreen(existScreen.screenPrefab.gameObject, parent, sourceScreen, newScreen);
+                retScreenRef.name = newScreen.Name;
+                retScreenRef.screenPrefab = ret;
+                retScreenRef.screenInstance = ret;
+                isCopySuccess = true;
+                break;
             }
-
-            return null;
+            if (isCopySuccess) {
+                existing.Insert(0, retScreenRef);
+            }
+            return ret;
         }
 
-
-        public static TNewScreen CreateSideScreen<TNewScreen>(
-            IList<DetailsScreen.SideScreenRef> existing, GameObject parent)
-            where TNewScreen : SideScreenContent {
-            return (TNewScreen)CreateSideScreen(existing, parent, typeof(TNewScreen));
-        }
-
-        public static SideScreenContent CreateSideScreen(
-            IList<DetailsScreen.SideScreenRef> existing, GameObject parent, Type newScreen) {
+        public static SideScreenContent CreateSideScreen(IList<DetailsScreen.SideScreenRef> existing, GameObject parent, Type newScreen) {
             if (newScreen.IsAssignableFrom(typeof(SideScreenContent)))
-                throw new TypeLoadException(
-                    "参数newScreen不可用的，该类型必须继承" + typeof(SideScreenContent).FullName);
+                throw new TypeLoadException("参数newScreen不可用的，该类型必须继承" + typeof(SideScreenContent).FullName);
 
             GameObject gameObject = new GameObject();
             gameObject.SetActive(true);
@@ -149,39 +129,38 @@ namespace RsLib {
             return sideScreenContent;
         }
 
-        private static RsSideScreenContent CopySideScreen(SideScreenContent sourceScreen, Type newScreen) {
-            var gameObject = Object.Instantiate(sourceScreen.gameObject, null, false);
-            gameObject.name = newScreen.Name;
-            var activeSelf = gameObject.activeSelf;
-            gameObject.SetActive(false);
-            var sourceScreen2 = (SideScreenContent)gameObject.GetComponent(sourceScreen.GetType());
-            var newScreen2 = (RsSideScreenContent)gameObject.AddComponent(newScreen);
+        private static RsSideScreenContent CopySideScreen(GameObject originalGo, GameObject parent, Type originalScreenType, Type newScreenType) {
+            var newGo = UnityEngine.Object.Instantiate(originalGo, parent.transform, false);
+            newGo.name = originalGo.name;
+            var activeSelf = newGo.activeSelf;
+            newGo.SetActive(false);
 
-            var copyFieldDict = GetCopyFieldDict(newScreen);
+            var originalScreenCmp = (SideScreenContent)newGo.GetComponent(originalScreenType);
+            var newScreenCmp = (RsSideScreenContent)newGo.AddComponent(newScreenType);
+
+            var copyFieldDict = GetCopyFieldDict(newScreenType);
 
             if (copyFieldDict != null && copyFieldDict.Count > 0)
                 foreach (var (newName, sourceName) in copyFieldDict) {
-                    var sourceField = sourceScreen.GetType().GetField(sourceName,
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    var newField = newScreen.GetField(newName,
-                        BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    if (sourceField == null) throw new Exception("not found sourceField, name: " + sourceName);
+                    var sourceField = originalScreenType.GetField(sourceName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                    var newField = newScreenType.GetField(newName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
+                    if (sourceField == null) throw new Exception("not found sourceField, name: " + sourceName);
                     if (newField == null) throw new Exception("not found newField, name: " + newName);
 
-                    newField.SetValue(newScreen2, sourceField.GetValue(sourceScreen2));
+                    newField.SetValue(newScreenCmp, sourceField.GetValue(originalScreenCmp));
                 }
 
-            newScreen2.CopyFieldAfter();
+            newScreenCmp.CopyFieldAfter();
 
-            Object.DestroyImmediate(sourceScreen2);
-            gameObject.SetActive(activeSelf);
-            return newScreen2;
+            UnityEngine.Object.DestroyImmediate(originalScreenCmp);
+            newGo.SetActive(activeSelf);
+            newGo.transform.localScale = Vector3.one;
+            return newScreenCmp;
         }
 
 
-        public static void AddSideScreen(
-            IList<DetailsScreen.SideScreenRef> existing, GameObject parent, SideScreenContent gameObject, bool isPrefab) {
+        public static void AddSideScreen(IList<DetailsScreen.SideScreenRef> existing, GameObject parent, SideScreenContent gameObject, bool isPrefab) {
             var sideScreenRef = new DetailsScreen.SideScreenRef();
             sideScreenRef.name = gameObject.name;
             sideScreenRef.screenPrefab = gameObject;
@@ -230,10 +209,7 @@ namespace RsLib {
         [AttributeUsage(AttributeTargets.Field)]
         public class CopyField : Attribute {
             public string alias;
-
-            public CopyField() {
-            }
-
+            public CopyField() { }
             public CopyField(string alias) {
                 this.alias = alias;
             }

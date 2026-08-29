@@ -31,8 +31,7 @@ namespace RsTransferPort {
         private void Build() {
             headerLabel.SetText(STRINGS.UI.SIDESCREEN.WORLDDISCOVEREDSIDESCREEN.HEADE);
             ClearRows();
-            foreach (WorldContainer worldContainer in (IEnumerable<WorldContainer>)ClusterManager.Instance
-                .WorldContainers) {
+            foreach (WorldContainer worldContainer in (IEnumerable<WorldContainer>)ClusterManager.Instance.WorldContainers) {
 
                 if (!worldContainer.IsModuleInterior && !worldContainer.IsStartWorld) {
                     GameObject gameObject = Util.KInstantiateUI(rowPrefab, listContainer);

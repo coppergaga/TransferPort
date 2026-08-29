@@ -36,10 +36,8 @@ namespace RsTransferPort {
                 .RegisterAddStrings(typeof(STRINGS.BUILDING));
 
             RsSideScreen.Initialize(mod, harmony)
-                // .CopyAndCreate<LogicBroadcastChannelSideScreen, TransferPortChannelSideScreen>()
                 .CopyAndCreate<ClusterLocationFilterSideScreen, WorldDiscoveredSideScreen>()
                 .CopyAndCreate<HighEnergyParticleDirectionSideScreen, MyHighEnergyParticleDirectionSideScreen>()
-                // .Add(() => ChannelNameSettingSideScreen.Prefab, true)
                 .Add(() => BodyAsset.portChannelSideScreen, true);
 
             RsOverlay.Initialize(mod, harmony)
