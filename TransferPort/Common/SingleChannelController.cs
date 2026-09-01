@@ -36,20 +36,20 @@ namespace RsTransferPort {
             if (item == null) { return; }
 
             OnPreAdd(item);
-            if (item.InOutType == InOutType.Receiver) { receivers.Add(item); }
+            if (item.InOutTypo == InOutType.Receiver) { receivers.Add(item); }
             else { senders.Add(item); }
             all.Add(item);
             OnAfterAdd(item);
-            item.EnterChannelController(this);
+            item.Trigger((int)MyGameHashes.OnPortItemEnterChannel, this);
         }
 
         public void Remove(PortItem item) {
             if (item == null) { return; }
             OnPreRemove(item);
-            if (item.InOutType == InOutType.Receiver) { receivers.Remove(item); }
+            if (item.InOutTypo == InOutType.Receiver) { receivers.Remove(item); }
             else { senders.Remove(item); }
             all.Remove(item);
-            item.ExitChannelController(this);
+            item.Trigger((int)MyGameHashes.OnPortItemExistChannel, this);
             OnAfterRemove();
         }
 

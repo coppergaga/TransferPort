@@ -5,7 +5,7 @@ namespace RsTransferPort {
         public readonly PriorityChannelItemList receiverPriorityList = new PriorityChannelItemList();
         protected override void OnAfterAdd(PortItem item) {
             base.OnAfterAdd(item);
-            if (item.InOutType == InOutType.Sender) {
+            if (item.InOutTypo == InOutType.Sender) {
                 senderPriorityList.AddChannelItem(item);
             }
             else {
@@ -15,7 +15,7 @@ namespace RsTransferPort {
 
         protected override void OnPreRemove(PortItem item) {
             base.OnPreRemove(item);
-            if (item.InOutType == InOutType.Sender) {
+            if (item.InOutTypo == InOutType.Sender) {
                 senderPriorityList.RemoveChannelItem(item);
             }
             else {
@@ -45,17 +45,17 @@ namespace RsTransferPort {
             SimConduitUpdate();
         }
 
-
         private void SimConduitUpdate() {
             var senderItems = senderPriorityList.Items;
             var receiverItems = receiverPriorityList.Items;
             for (int i = 0, j = 0; i < senderItems.Count; i++) {
-                int inputCell = senderItems[i].HandleReturnInt();
-                if (IsConduitEmpty(inputCell)) { continue; }
-                while (j < receiverItems.Count) {
-                    int outputCell = receiverItems[j].HandleReturnInt();
-                    j++;
-                    if (ConduitTransfer(inputCell, outputCell)) { break; }
+                if (senderItems[i].GG_TryGetCmpFast<TransferConduit>(out var sendertc) && !IsConduitEmpty(sendertc.ConduitIOCell)) {
+                    while (j < receiverItems.Count) {
+                        if (receiverItems[j].GG_TryGetCmpFast<TransferConduit>(out var receivertc)) {
+                            j++;
+                            if (ConduitTransfer(sendertc.ConduitIOCell, receivertc.ConduitIOCell)) { break; }
+                        }
+                    }
                 }
             }
         }
@@ -66,7 +66,7 @@ namespace RsTransferPort {
                 SolidConduitFlow flow = (SolidConduitFlow)GetConduitManager();
                 if (flow.HasConduit(outputCell) && flow.IsConduitEmpty(outputCell)) {
                     var pickupable = flow.RemovePickupable(inputCell);
-                    if (pickupable) flow.AddPickupable(outputCell, pickupable);
+                    if (pickupable) { flow.AddPickupable(outputCell, pickupable); }
                     return true; //直接返回
                 }
             }
@@ -95,6 +95,15 @@ namespace RsTransferPort {
                 ConduitFlow flow = (ConduitFlow)GetConduitManager();
                 return !flow.HasConduit(cell) || flow.IsConduitEmpty(cell);
                     
+            }
+        }
+
+        public void ItemPriorityChange(PortItem item, int newPriority, int oldPriority) {
+            if (item.InOutTypo == InOutType.Sender) {
+                senderPriorityList.ItemPriorityChange(item, newPriority, oldPriority);
+            }
+            else {
+                receiverPriorityList.ItemPriorityChange(item, newPriority, oldPriority);
             }
         }
 

@@ -14,19 +14,18 @@
         }
         protected override void OnSpawn() {
             base.OnSpawn();
-            item.OnEnterChannel += OnEnterChannel;
-            item.OnExitChannel += OnExitChannel;
+            Subscribe((int)MyGameHashes.OnPortItemEnterChannel, OnPortItemEnterChannelDelegate);
+            Subscribe((int)MyGameHashes.OnPortItemExistChannel, OnPortItemExistChannelDelegate);
         }
 
         protected override void OnCleanUp() {
-            if (!Util.IsNullOrDestroyed(item)) {
-                item.OnEnterChannel -= OnEnterChannel;
-                item.OnExitChannel -= OnExitChannel;
-            }
+            Unsubscribe((int)MyGameHashes.OnPortItemEnterChannel, OnPortItemEnterChannelDelegate);
+            Unsubscribe((int)MyGameHashes.OnPortItemExistChannel, OnPortItemExistChannelDelegate);
             base.OnCleanUp();
         }
 
-        protected void OnEnterChannel(SingleChannelController channel) {
+        protected void OnEnterChannel(object data) {
+            if (!(data is SingleChannelController channel)) { return; }
             Disconnect();
             if (!channel.IsInvalid()) {
                 VirtualCircuitKey = channel;
@@ -36,7 +35,7 @@
                 VirtualCircuitKey = null;
             }
         }
-        protected void OnExitChannel(SingleChannelController channel) {
+        protected void OnExitChannel(object data) {
             Disconnect();
             VirtualCircuitKey = null;
         }
@@ -62,5 +61,9 @@
             }
         }
 
+        private static readonly EventSystem.IntraObjectHandler<WirelessPowerPort> OnPortItemEnterChannelDelegate =
+            new EventSystem.IntraObjectHandler<WirelessPowerPort>(delegate (WirelessPowerPort cmp, object data) { cmp.OnEnterChannel(data); });
+        private static readonly EventSystem.IntraObjectHandler<WirelessPowerPort> OnPortItemExistChannelDelegate =
+            new EventSystem.IntraObjectHandler<WirelessPowerPort>(delegate (WirelessPowerPort cmp, object data) { cmp.OnExitChannel(data); });
     }
 }

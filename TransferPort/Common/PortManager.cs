@@ -19,7 +19,7 @@ namespace RsTransferPort {
         public event Action<PortItem> OnChannelChange;
 
         public void Add(PortItem item) {
-            var buildingType = item.BuildingType;
+            var buildingType = item.BuildingTypo;
             var channelName = item.ChannelName;
             var worldID = item.WorldIdAG;
 
@@ -45,7 +45,7 @@ namespace RsTransferPort {
 
         public void Remove(PortItem item) {
             var channelKey = item.ChannelKey;
-            var channels = classifyChannels[item.BuildingType];
+            var channels = classifyChannels[item.BuildingTypo];
             if (channels.TryGetValue(channelKey, out SingleChannelController controller)) {
                 //Debug.Log($"ggg===channel {controller.DisplayChannelName}:{controller.WorldIdAG} REMOVE item channelname={item.ChannelName} worldid={item.WorldIdAG} global={item.IsGlobal}");
                 controller.Remove(item);
@@ -53,6 +53,12 @@ namespace RsTransferPort {
                     controller.OnCleanUp();
                     channels.Remove(channelKey);
                 }
+            }
+        }
+
+        public void PriorityChange(PortItem item, int newPriority, int oldPriority) {
+            if (GetChannelController(item) is TransferConduitChannel tcc) {
+                tcc.ItemPriorityChange(item, newPriority, oldPriority);
             }
         }
 
@@ -139,7 +145,7 @@ namespace RsTransferPort {
         }
 
         public SingleChannelController GetChannelController(PortItem item) {
-            classifyChannels[item.BuildingType].TryGetValue(item.ChannelKey, out SingleChannelController controller);
+            classifyChannels[item.BuildingTypo].TryGetValue(item.ChannelKey, out SingleChannelController controller);
             return controller;
         }
 

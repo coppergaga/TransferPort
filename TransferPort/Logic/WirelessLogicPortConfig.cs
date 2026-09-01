@@ -24,7 +24,7 @@ namespace RsTransferPort {
 
     public abstract class WirelessLogicConfig : IBuildingConfig {
         public static HashedString WirelessLogicPortID = new HashedString(PORT_ID);
-        public const string PORT_ID = "MyPort";
+        public const string PORT_ID = "GgMyPort";
 
         public abstract string id { get; }
         public abstract string anim { get; }
@@ -65,8 +65,8 @@ namespace RsTransferPort {
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag) {
             go.AddOrGet<CopyBuildingSettings>().copyGroupTag = Tags.WirelessLogic;
             var channel = go.AddOrGet<PortItem>();
-            channel.BuildingType = BuildingType.Logic;
-            channel.InOutType = InOutType;
+            channel.BuildingTypo = BuildingType.Logic;
+            channel.InOutTypo = InOutType;
 
             go.AddOrGet<WirelessLogicPort>();
             go.AddOrGet<ShowOverlaySelf>();

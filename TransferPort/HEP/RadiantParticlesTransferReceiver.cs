@@ -6,7 +6,6 @@ namespace RsTransferPort {
         // public static HashedString PORT_ID = "RadiantParticlesTransferReceiver";
         [MyCmpGet] private Operational operational;
         [MyCmpGet] private KBatchedAnimController animController;
-        [MyCmpGet] private PortItem item;
         [MyCmpGet] private HighEnergyParticleStorage hepStorage;
         [MyCmpGet] private HighEnergyParticlePort hepPort;
         [MyCmpGet] private Building building;
@@ -19,7 +18,7 @@ namespace RsTransferPort {
         /// <summary>
         /// 是否可用传送
         /// </summary>
-        private int Transmissible() => RsLib.RsUtil.IntFrom(operational != null && operational.IsOperational);
+        public bool Transmissible() => operational != null && operational.IsOperational;
 
         public EightDirection Direction {
             get => _direction;
@@ -39,20 +38,10 @@ namespace RsTransferPort {
                 animController, "redirector_target", "redirector_off", EightDirectionController.Offset.Infront
             );
             Direction = Direction;
-            item.HandleReturnInt = Transmissible;
-            item.HandleInParamFloat = StoreAndLaunch;
             smi.StartSM();
         }
 
-        protected override void OnCleanUp() {
-            if (!Util.IsNullOrDestroyed(item)) {
-                item.HandleReturnInt = null;
-                item.HandleInParamFloat = null;
-            }
-            base.OnCleanUp();
-        }
-
-        private void StoreAndLaunch(float amount) {
+        public void StoreAndLaunch(float amount) {
             if (amount <= 0) { return; }
             hepStorage.Store(amount);
         }

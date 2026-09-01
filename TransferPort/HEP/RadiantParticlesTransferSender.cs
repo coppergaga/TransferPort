@@ -7,7 +7,6 @@
         [MyCmpGet] private Operational operational;
         [MyCmpGet] private KSelectable kSelectable;
         [MyCmpGet] private LogicPorts logicPorts;
-        [MyCmpGet] private PortItem item;
 
         public static Operational.Flag receiverFlag = new Operational.Flag("ParticlesTransferSenderFlag", Operational.Flag.Type.Requirement);
 
@@ -38,9 +37,6 @@
         protected override void OnSpawn() {
             base.OnSpawn();
             port.onParticleCaptureAllowed += OnParticleCaptureAllowed;
-            item.HandleReturnInt = HandleHasRadiation;
-            item.HandleReturnFloat = HandleConsumeAll;
-            item.HandleInParamInt = HandleReceiverAllow;
             smi.StartSM();
         }
 
@@ -48,18 +44,14 @@
             if (!Util.IsNullOrDestroyed(port)) {
                 port.onParticleCaptureAllowed -= OnParticleCaptureAllowed;
             }
-            if (!Util.IsNullOrDestroyed(item)) {
-                item.HandleReturnInt = null;
-                item.HandleReturnFloat = null;
-                item.HandleInParamInt = null;
-            }
             base.OnCleanUp();
         }
 
         private bool OnParticleCaptureAllowed(HighEnergyParticle particle) => ReceiverAllow;
-        private int HandleHasRadiation() => RsLib.RsUtil.IntFrom(storage.HasRadiation());
-        private float HandleConsumeAll() => storage.ConsumeAll();
-        private void HandleReceiverAllow(int allow) => ReceiverAllow = RsLib.RsUtil.BoolFrom(allow);
+
+        public bool HasRadiation() => storage.HasRadiation();
+        public float ConsumeAll() => storage.ConsumeAll();
+        public void ConfigReceiverAllow(bool allow) => ReceiverAllow = allow;
 
         public class StatesInstance :
             GameStateMachine<States, StatesInstance, RadiantParticlesTransferSender, object>.GameInstance {

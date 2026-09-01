@@ -1,5 +1,4 @@
 ﻿using System;
-using RsLib;
 
 namespace RsTransferPort {
     public readonly struct PortChannelKey : IEquatable<PortChannelKey> {

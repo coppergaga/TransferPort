@@ -148,10 +148,10 @@ namespace RsTransferPort {
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag) {
             go.AddOrGet<CopyBuildingSettings>().copyGroupTag = Tags.TransferConduit;
             var item = go.AddOrGet<PortItem>();
-            item.BuildingType = Converter.FromConduitType(conduitType);
-            item.InOutType = inOutType;
+            item.BuildingTypo = Converter.FromConduitType(conduitType);
+            item.InOutTypo = inOutType;
 
-            go.AddOrGet<TransferConduit>();
+            go.AddOrGet<TransferConduit>().InOutTypo = inOutType;
             go.AddOrGet<ShowOverlaySelf>();
         }
     }

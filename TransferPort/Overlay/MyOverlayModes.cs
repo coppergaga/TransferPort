@@ -282,7 +282,7 @@ namespace RsTransferPort {
                 }
                 foreach (var items in filterChannels) {
                     foreach (var item in items) {
-                        if (!Converter.IsUsePriority(item.BuildingType)) {
+                        if (!Converter.IsUsePriority(item.BuildingTypo)) {
                             continue;
                         }
                         Vector3 position = item.transform.position + new Vector3(0, 0.5f, 0);
@@ -363,7 +363,7 @@ namespace RsTransferPort {
                     var item = items[0];
                     if (string.IsNullOrEmpty(item.ChannelName)) { continue; }
                     //选取颜色
-                    Color color = userIndexColor ? IndexColor() : BuildingTypeColorMap[item.BuildingType];
+                    Color color = userIndexColor ? IndexColor() : BuildingTypeColorMap[item.BuildingTypo];
                     if (OpWiredPreviewMode == WiredPreviewMode.Center) {
                         UpdateCenterPreview(items, color);
                     }
@@ -413,14 +413,14 @@ namespace RsTransferPort {
                     LineArrow lineArrow = lineArrowPool.GetFreeElement(arrowParent, true);
                     lineArrow.transform.SetAsLastSibling();
                     endPos.y += 0.5f;
-                    if (item.InOutType == InOutType.Receiver)
+                    if (item.InOutTypo == InOutType.Receiver)
                         lineArrow.SetTwoPoint(center, endPos);
                     else
                         lineArrow.SetTwoPoint(endPos, center);
 
                     lineArrow.EnableAnim = !OpDisableLineAnim;
 
-                    if (OpShowPriorityInfo && Converter.IsUsePriority(item.BuildingType)) {
+                    if (OpShowPriorityInfo && Converter.IsUsePriority(item.BuildingTypo)) {
                         int priority = Mathf.Clamp(item.Priority, 1, 9);
                         lineArrow.SetColor(PriorityColorsList[priority - 1]);
                     }
@@ -431,7 +431,7 @@ namespace RsTransferPort {
                 //绘制中心点
                 LineCenterImage centerImage = lineCenterImagePool.GetFreeElement(lineCenterParent, true);
                 centerImage.transform.SetAsLastSibling();
-                centerImage.SetImage(items[0].BuildingType);
+                centerImage.SetImage(items[0].BuildingTypo);
                 centerImage.SetColor(color);
                 centerImage.transform.position = center;
             }

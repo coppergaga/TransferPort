@@ -9,7 +9,7 @@
         protected override void OnAfterAdd(PortItem item) {
             base.OnAfterAdd(item);
             if (IsInvalid()) return;
-            if (item.InOutType == InOutType.Sender) {
+            if (item.InOutTypo == InOutType.Sender) {
                 item.Subscribe((int)GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
             }
             else {
@@ -21,9 +21,11 @@
         protected override void OnPreRemove(PortItem item) {
             base.OnPreRemove(item);
             if (IsInvalid()) return;
-            if (item.InOutType == InOutType.Sender) {
+            if (item.InOutTypo == InOutType.Sender) {
                 item.Unsubscribe((int)GameHashes.OnParticleStorageChanged, OnParticleStorageChanged);
-                item.HandleInParamInt?.Invoke(RsLib.RsUtil.IntFrom(false));
+                if (item.GG_TryGetCmpFast<RadiantParticlesTransferSender>(out var rpts)) {
+                    rpts.ConfigReceiverAllow(false);
+                }
             }
             else {
                 item.Unsubscribe((int)GameHashes.OperationalChanged, OnReceiverOperationalChange);
@@ -45,21 +47,20 @@
                 if (receiverIndexCount == receivers.Count) return;
 
                 senderIndex %= senders.Count;
-                var senderItem = senders[senderIndex];
-                if (!RsLib.RsUtil.BoolFrom(senderItem.HandleReturnInt())) {
+                if (!senders[senderIndex].GG_TryGetCmpFast<RadiantParticlesTransferSender>(out var rpts) ||
+                    !rpts.HasRadiation()) {
                     senderIndex++;
                     continue;
                 }
-
                 if (receiverIndex >= receivers.Count) { receiverIndex = 0; }
                 while (receiverIndexCount < receivers.Count) {
                     var receiverItem = receivers[receiverIndex];
                     receiverIndex = ++receiverIndex % receivers.Count;
                     receiverIndexCount++;
-                    if (RsLib.RsUtil.BoolFrom(receiverItem.HandleReturnInt())) {
-                        float amount = senderItem.HandleReturnFloat();
+                    if (receiverItem.GG_TryGetCmpFast<RadiantParticlesTransferReceiver>(out var rptr) &&
+                        rptr.Transmissible()) {
                         //这里需要计算入口到出口的距离，销毁一定量的粒子
-                        receiverItem.HandleInParamFloat(amount);
+                        rptr.StoreAndLaunch(rpts.ConsumeAll());
                         senderIndex++;
                         break;
                     }
@@ -77,13 +78,18 @@
         public void SyncSignal() {
             var signal = HasOutletEnable();
             foreach (PortItem sender in senders) {
-                sender.HandleInParamInt(RsLib.RsUtil.IntFrom(signal));
+                if (sender.GG_TryGetCmpFast<RadiantParticlesTransferSender>(out var rpts)) {
+                    rpts.ConfigReceiverAllow(signal);
+                }
             }
         }
 
         private bool HasOutletEnable() {
             foreach (PortItem item in receivers) {
-                if (RsLib.RsUtil.BoolFrom(item.HandleReturnInt())) { return true; }
+                if (item.GG_TryGetCmpFast<RadiantParticlesTransferReceiver>(out var rptr) &&
+                    rptr.Transmissible()) {
+                    return true;
+                }
             }
             return false;
         }

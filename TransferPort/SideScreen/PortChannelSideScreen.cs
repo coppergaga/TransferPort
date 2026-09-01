@@ -150,7 +150,7 @@ namespace RsTransferPort {
                         candidateNameScreenPrefab,
                         STRINGS.UI.SIDESCREEN.RS_CANDIDATE_NAME.TITLE);
                 sideScreen.selected = ChangeName;
-                sideScreen.SwitchCandidate(target.BuildingType);
+                sideScreen.SwitchCandidate(target.BuildingTypo);
             }
             else {
                 DetailsScreen.Instance.ClearSecondarySideScreen();
@@ -158,7 +158,7 @@ namespace RsTransferPort {
         }
 
         private string OnPriorityBarHelp() {
-            if (Converter.IsUsePriority(target.BuildingType)
+            if (Converter.IsUsePriority(target.BuildingTypo)
                 && GetController(target) is TransferConduitChannel controller) {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.PRIORITY_TOOLTIP);
@@ -191,7 +191,7 @@ namespace RsTransferPort {
         }
         private void RefreshPriority() {
             if (Util.IsNullOrDestroyed(target)) { return; }
-            if (Converter.IsUsePriority(target.BuildingType)
+            if (Converter.IsUsePriority(target.BuildingTypo)
                 && GetController(target) is TransferConduitChannel controller) {
                 priorityBar.gameObject.SetActiveNR(true);
                 priorityBar.SetAllStateCache(0);                //重置优先度
@@ -256,7 +256,7 @@ namespace RsTransferPort {
             globalToggle.ChangeState(target.IsGlobal ? 1 : 0);
 
             ICollection<SingleChannelController> controllers =
-                PortManager.Instance.GetChannels(target.BuildingType, target.WorldIdAG, true);
+                PortManager.Instance.GetChannels(target.BuildingTypo, target.WorldIdAG, true);
 
             detailLevelToggle.gameObject.SetActiveNR(true);
 

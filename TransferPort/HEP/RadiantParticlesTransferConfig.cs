@@ -92,8 +92,8 @@ namespace RsTransferPort {
             }
 
             PortItem channel = go.AddOrGet<PortItem>();
-            channel.BuildingType = BuildingType.HEP;
-            channel.InOutType = inOutType;
+            channel.BuildingTypo = BuildingType.HEP;
+            channel.InOutTypo = inOutType;
         }
 
         public override void DoPostConfigureComplete(GameObject go) {

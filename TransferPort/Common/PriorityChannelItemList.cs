@@ -6,32 +6,19 @@ namespace RsTransferPort {
         private RsSortedList<PriorityChannelItemInfo> priorityList = new RsSortedList<PriorityChannelItemInfo>();
 
         public void AddChannelItem(PortItem item) {
-            AddChannelItem(item, true);
-        }
-
-        private void AddChannelItem(PortItem item, bool addEvent) {
             PriorityChannelItemInfo itemInfo = GetOrAddPriorityInfo(item.Priority);
             itemInfo.Add(item);
-            if (addEvent) {
-                item.OnPriorityChange += ItemOnOnPriorityChange;
-            }
         }
 
-        private void ItemOnOnPriorityChange(PortItem channel, int newPriority, int oldPriority) {
-            RemoveChannelItem(channel, false);
-            AddChannelItem(channel, false);
+        public void ItemPriorityChange(PortItem item, int newPriority, int oldPriority) {
+            RemoveChannelItem(item);
+            AddChannelItem(item);
         }
 
         public void RemoveChannelItem(PortItem item) {
-            RemoveChannelItem(item, true);
-        }
-
-        public void RemoveChannelItem(PortItem item, bool removeEvent) {
-            foreach (PriorityChannelItemInfo info in priorityList) {
+            for (int i = priorityList.Count - 1; i >= 0; i--) {
+                PriorityChannelItemInfo info = priorityList[i];
                 if (info.Remove(item)) {
-                    if (removeEvent) {
-                        item.OnPriorityChange -= ItemOnOnPriorityChange;
-                    }
                     if (info.Count == 0) {
                         priorityList.Remove(info);
                     }

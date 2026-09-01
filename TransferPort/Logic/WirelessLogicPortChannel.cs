@@ -5,9 +5,6 @@ namespace RsTransferPort {
             base.OnAfterAdd(item);
             if (IsInvalid()) { return; }
 
-            if (item.InOutType == InOutType.Sender) {
-                item.Subscribe((int)GameHashes.LogicEvent, OnInputLogicEvent);
-            }
             SyncSignal();
         }
 
@@ -15,21 +12,14 @@ namespace RsTransferPort {
             base.OnPreRemove(item);
             if (IsInvalid()) { return; }
 
-            if (item.InOutType == InOutType.Sender) {
-                item.Unsubscribe((int)GameHashes.LogicEvent, OnInputLogicEvent);
-            }
-
-            if (item.InOutType == InOutType.Receiver) {
-                item.HandleInParamInt?.Invoke(0);
+            if (item.InOutTypo == InOutType.Receiver &&
+                item.GG_TryGetCmpFast<WirelessLogicPort>(out var rwlp)) {
+                rwlp.SendSignal(0);
             }
         }
 
         protected override void OnAfterRemove() {
             base.OnAfterRemove();
-            SyncSignal();
-        }
-
-        public void OnInputLogicEvent(object data) {
             SyncSignal();
         }
 
@@ -39,17 +29,18 @@ namespace RsTransferPort {
         public void SyncSignal() {
             //开始同步信号
             if (receivers.Count == 0) return;
-            var signal = GetSignal();
-            foreach (PortItem receiver in receivers) { receiver.HandleInParamInt(signal); }
-        }
-
-        /// <summary>
-        ///     通过计算所有输入端的信号状态，返回当前通道的信号状态
-        /// </summary>
-        public int GetSignal() {
             int signal = 0;
-            foreach (PortItem sender in senders) { signal |= sender.HandleReturnInt(); }
-            return signal;
+            foreach (PortItem sender in senders) {
+                if (sender.GG_TryGetCmpFast<WirelessLogicPort>(out var swlp)) {
+                    signal |= swlp.GetInputSignal();
+                }
+                if (signal > 0) { break; }
+            }
+            foreach (PortItem receiver in receivers) {
+                if (receiver.GG_TryGetCmpFast<WirelessLogicPort>(out var rwlp)) {
+                    rwlp.SendSignal(signal);
+                }
+            }
         }
 
         public WirelessLogicPortChannel(BuildingType buildingType, string channelName, int worldIdAG) : base(buildingType, channelName, worldIdAG) {

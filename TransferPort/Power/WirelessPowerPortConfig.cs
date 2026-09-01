@@ -29,8 +29,8 @@ namespace RsTransferPort {
 
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag) {
             var item = go.AddOrGet<PortItem>();
-            item.BuildingType = BuildingType.Power;
-            item.InOutType = InOutType.None;
+            item.BuildingTypo = BuildingType.Power;
+            item.InOutTypo = InOutType.None;
             go.AddOrGet<CopyBuildingSettings>().copyGroupTag = Tags.WirelessPower;
             go.AddOrGet<WirelessPowerPort>();
             go.AddOrGet<ShowOverlaySelf>();

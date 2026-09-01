@@ -31,4 +31,9 @@
                 || buildingType == BuildingType.Solid;
         }
     }
+    
+    public enum MyGameHashes {
+        OnPortItemEnterChannel = 1110000999,
+        OnPortItemExistChannel = 1110001999
+    }
 }

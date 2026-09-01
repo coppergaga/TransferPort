@@ -1,19 +1,13 @@
-﻿using System;
-using KSerialization;
+﻿using KSerialization;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RsTransferPort {
-    public interface ICustomLogicWrappable {
-        Func<int> HandleReturnInt { get; set; }
-        Func<float> HandleReturnFloat { get; set; }
-        Action<int> HandleInParamInt { get; set; }
-        Action<float> HandleInParamFloat { get; set; }
-    }
     /// <summary>
     /// 传送端口中 固/液/气/辐射/电力端口的ViewModel类
     /// </summary>
-    public class PortItem : KMonoBehaviour, ISaveLoadable, ICustomLogicWrappable {
-        public delegate void PriorityChangeDelegate(PortItem target, int newPriority, int oldPriority);
+    public class PortItem : KMonoBehaviour, ISaveLoadable {
         /// <summary>
         /// 连接状态
         /// </summary>
@@ -47,17 +41,13 @@ namespace RsTransferPort {
 
         [SerializeField] protected BuildingType buildingType;
 
-        public event Action<SingleChannelController> OnEnterChannel;
-        public event Action<SingleChannelController> OnExitChannel;
-        public event PriorityChangeDelegate OnPriorityChange;
-
         public string ChannelName => channelName ?? "";
 
         public bool IsGlobal => isGlobal;
 
         public int Priority => priority;
 
-        public PortChannelKey ChannelKey => new PortChannelKey(ChannelName, WorldIdAG, BuildingType);
+        public PortChannelKey ChannelKey => new PortChannelKey(ChannelName, WorldIdAG, BuildingTypo);
 
         public int WorldIdAG => IsGlobal ? PortManager.GLOBAL_CHANNEL_WORLD_ID : this.GetMyWorldId();
 
@@ -65,23 +55,19 @@ namespace RsTransferPort {
             ? (string)STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.CHANNEL_NULL
             : channelName;
 
-        public InOutType InOutType {
+        public InOutType InOutTypo {
             get => inOutType;
             set => inOutType = value;
         }
 
-        public BuildingType BuildingType {
+        public BuildingType BuildingTypo {
             get => buildingType;
             set => buildingType = value;
         }
-        public Func<int> HandleReturnInt { get; set; }
-        public Func<float> HandleReturnFloat { get; set; }
-        public Action<int> HandleInParamInt { get; set; }
-        public Action<float> HandleInParamFloat { get; set; }
 
         protected override void OnPrefabInit() {
             base.OnPrefabInit();
-            Subscribe((int)GameHashes.CopySettings, OnCopySettings);
+            Subscribe((int)GameHashes.CopySettings, OnCopySettingsDelegate);
 
             if (ConnectionStatusItem == null) {
                 ConnectionStatusItem = new StatusItem("RsTransferPortChannelConnection", "BUILDING",
@@ -104,12 +90,16 @@ namespace RsTransferPort {
 
         protected override void OnSpawn() {
             base.OnSpawn();
+            Subscribe((int)MyGameHashes.OnPortItemEnterChannel, OnPortItemEnterChannelDelegate);
+
             if (channelName == null) { channelName = ""; }
 
             UIScheduler.Instance.Schedule("PortItemOnSpawn", 0f, SyncToPortManager, this);
         }
 
         protected override void OnCleanUp() {
+            Unsubscribe((int)GameHashes.CopySettings, OnCopySettingsDelegate);
+            Unsubscribe((int)MyGameHashes.OnPortItemEnterChannel, OnPortItemEnterChannelDelegate);
             PortManager.Instance.Remove(this);
             PortManager.Instance.TriggerChannelChange(this);
         }
@@ -175,20 +165,15 @@ namespace RsTransferPort {
             }
 
             if (!isGlobalModeChange && !isChannelNameChange && isPriorityChange) {
-                OnPriorityChange?.Invoke(this, priority, oldPriority);
+                PortManager.Instance.PriorityChange(this, priority, oldPriority);
             }
         }
 
-        public void EnterChannelController(SingleChannelController controller) {
+        public void OnEnterChannel(object data) {
             if (kSelectable != null && DlcManager.IsExpansion1Active()) {
                 kSelectable.ToggleStatusItem(PlanetaryIsolationStatusItem, !isGlobal);
                 kSelectable.ToggleStatusItem(GlobalConnectivityStatusItem, isGlobal);
             }
-            OnEnterChannel?.Invoke(controller);
-        }
-
-        public void ExitChannelController(SingleChannelController controller) {
-            OnExitChannel?.Invoke(controller);
         }
 
         public void SetChannel(object target) {
@@ -201,6 +186,24 @@ namespace RsTransferPort {
             if (target is SingleChannelController channel) {
                 return channel.Contains(this);
             }
+            return false;
+        }
+
+        private static readonly EventSystem.IntraObjectHandler<PortItem> OnCopySettingsDelegate =
+            new EventSystem.IntraObjectHandler<PortItem>(delegate (PortItem cmp, object data) { cmp.OnCopySettings(data); });
+        private static readonly EventSystem.IntraObjectHandler<PortItem> OnPortItemEnterChannelDelegate =
+            new EventSystem.IntraObjectHandler<PortItem>(delegate (PortItem cmp, object data) { cmp.OnEnterChannel(data); });
+
+        private readonly Dictionary<Type, Component> _cmpCacheDict = new Dictionary<Type, Component>();
+        public bool GG_TryGetCmpFast<T>(out T ret) where T : Component {
+            Type tt = typeof(T);
+            if (!_cmpCacheDict.TryGetValue(tt, out var cmp)) {
+                cmp = GetComponent<T>();
+                if (cmp != null) { _cmpCacheDict[tt] = cmp; }
+            }
+            ret = cmp as T;
+            if (ret != null) { return true; }
+            _cmpCacheDict.Remove(tt);
             return false;
         }
     }
