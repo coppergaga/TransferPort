@@ -1,13 +1,19 @@
 ﻿using System.Collections.Generic;
-using RsLib.Collections;
+using System.Linq;
 
 namespace RsTransferPort {
     public class PriorityChannelItemList {
-        private RsSortedList<PriorityChannelItemInfo> priorityList = new RsSortedList<PriorityChannelItemInfo>();
+        // 这里的下标代表了可选的优先级, 游戏中是1-9, 对应这里的0-8
+        private readonly List<PortItem>[] priorityList = new List<PortItem>[9];
+
+        public PriorityChannelItemList() {
+            for (int i = 0; i < 9; i++) {
+                priorityList[i] = new List<PortItem>();
+            }
+        }
 
         public void AddChannelItem(PortItem item) {
-            PriorityChannelItemInfo itemInfo = GetOrAddPriorityInfo(item.Priority);
-            itemInfo.Add(item);
+            priorityList[item.Priority - 1].Add(item);
         }
 
         public void ItemPriorityChange(PortItem item, int newPriority, int oldPriority) {
@@ -16,56 +22,31 @@ namespace RsTransferPort {
         }
 
         public void RemoveChannelItem(PortItem item) {
-            for (int i = priorityList.Count - 1; i >= 0; i--) {
-                PriorityChannelItemInfo info = priorityList[i];
-                if (info.Remove(item)) {
-                    if (info.Count == 0) {
-                        priorityList.Remove(info);
-                    }
+            for (int i = priorityList.Length - 1; i >= 0; i--) {
+                if (priorityList[i].Remove(item)) {
                     return;
                 }
             }
         }
 
-        private PriorityChannelItemInfo GetOrAddPriorityInfo(int priority) {
-            foreach (PriorityChannelItemInfo itemInfo in priorityList) {
-                if (itemInfo.Priority == priority) {
-                    return itemInfo;
-                }
-            }
-
-            PriorityChannelItemInfo info = new PriorityChannelItemInfo {
-                Priority = priority
-            };
-            priorityList.Add(info);
-            return info;
-        }
-
-        public PriorityChannelItemInfo GetByPriority(int priority) {
-            foreach (PriorityChannelItemInfo itemInfo in priorityList) {
-                if (itemInfo.Priority == priority) {
-                    return itemInfo;
-                }
-            }
-
-            return null;
+        public int GetItemCountByPriority(int priority) {
+            return priorityList[priority - 1].Count;
         }
 
         public int[] AllPriority() {
-            int[] priorities = new int[priorityList.Count];
-            for (var i = 0; i < priorityList.Count; i++) {
-                priorities[i] = priorityList[i].Priority;
+            HashSet<int> ret = new HashSet<int>();
+            for (var i = 0; i < priorityList.Length; i++) {
+                if (priorityList[i].Count > 0) { ret.Add(i + 1); }
             }
-
-            return priorities;
+            return ret.ToArray();
         }
 
         private readonly List<PortItem> _items = new List<PortItem>();
         public List<PortItem> Items {
             get {
                 _items.Clear();
-                for (int i = 0; i < priorityList.Count; i++) {
-                    _items.AddRange(priorityList[i].AllItems);
+                for (int i = priorityList.Length - 1; i >= 0; i--) {
+                    _items.AddRange(priorityList[i]);
                 }
                 return _items;
             }

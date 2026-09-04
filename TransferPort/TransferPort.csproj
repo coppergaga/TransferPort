@@ -43,7 +43,6 @@
     <Compile Include="Common\MyUtils.cs" />
     <Compile Include="Common\PortChannelKey.cs" />
     <Compile Include="Common\PortManager.cs" />
-    <Compile Include="Common\PriorityChannelItemInfo.cs" />
     <Compile Include="Common\PriorityChannelItemList.cs" />
     <Compile Include="Common\SampleLazy.cs" />
     <Compile Include="Common\SingleChannelController.cs" />

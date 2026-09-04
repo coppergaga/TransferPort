@@ -37,15 +37,13 @@ namespace RsTransferPort {
         }
 
         public void ConduitUpdate(float dt) {
-            if (IsInvalid()) {
-                return;
-            }
-
-            if (senders.Count == 0 || receivers.Count == 0) return;
+            if (IsInvalid()) { return; }
+            if (senders.Count == 0 || receivers.Count == 0) { return; }
             SimConduitUpdate();
         }
 
         private void SimConduitUpdate() {
+            // 这里做高优先级优先匹配的逻辑
             var senderItems = senderPriorityList.Items;
             var receiverItems = receiverPriorityList.Items;
             for (int i = 0, j = 0; i < senderItems.Count; i++) {

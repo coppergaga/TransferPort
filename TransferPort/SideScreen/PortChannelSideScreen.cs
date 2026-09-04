@@ -164,11 +164,8 @@ namespace RsTransferPort {
                 stringBuilder.Append(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.PRIORITY_TOOLTIP);
                 stringBuilder.AppendLine();
                 for (int priority = 9; priority >= 0; priority--) {
-                    PriorityChannelItemInfo senderPriorityInfo = controller.senderPriorityList.GetByPriority(priority);
-                    PriorityChannelItemInfo receiverPriorityInfo = controller.receiverPriorityList.GetByPriority(priority);
-
-                    int senderNum = senderPriorityInfo == null ? 0 : senderPriorityInfo.Count;
-                    int receiverNum = receiverPriorityInfo == null ? 0 : receiverPriorityInfo.Count;
+                    int senderNum = controller.senderPriorityList.GetItemCountByPriority(priority);
+                    int receiverNum = controller.receiverPriorityList.GetItemCountByPriority(priority);
 
                     if (senderNum != 0 || receiverNum != 0) {
                         stringBuilder.AppendLine();
