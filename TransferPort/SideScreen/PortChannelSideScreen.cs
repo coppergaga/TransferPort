@@ -163,13 +163,13 @@ namespace RsTransferPort {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.PRIORITY_TOOLTIP);
                 stringBuilder.AppendLine();
-                for (int priority = 9; priority >= 0; priority--) {
+                for (int priority = 9; priority > 0; priority--) {
                     int senderNum = controller.senderPriorityList.GetItemCountByPriority(priority);
-                    int receiverNum = controller.receiverPriorityList.GetItemCountByPriority(priority);
+                    int recverNum = controller.recverPriorityList.GetItemCountByPriority(priority);
 
-                    if (senderNum != 0 || receiverNum != 0) {
+                    if (senderNum != 0 || recverNum != 0) {
                         stringBuilder.AppendLine();
-                        stringBuilder.AppendFormat(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.PRIORITY_LINE_INFO, priority, senderNum, receiverNum);
+                        stringBuilder.AppendFormat(STRINGS.UI.SIDESCREEN.RS_PORT_CHANNEL.PRIORITY_LINE_INFO, priority, senderNum, recverNum);
                     }
                 }
                 return stringBuilder.ToString();
@@ -194,7 +194,7 @@ namespace RsTransferPort {
                 priorityBar.SetAllStateCache(0);                //重置优先度
                 //设置其它的优先度
                 priorityBar.SetStateCacheRange(controller.senderPriorityList.AllPriority(), 2);
-                priorityBar.SetStateCacheRange(controller.receiverPriorityList.AllPriority(), 2);
+                priorityBar.SetStateCacheRange(controller.recverPriorityList.AllPriority(), 2);
                 priorityBar.SetStateCache(target.Priority, 1);  //设置目标优先度
                 priorityBar.ApplyStateCache();                  //应用
             }
