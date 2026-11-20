@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using FMODUnity;
 using UnityEngine;
 
 namespace RsLib {
@@ -148,6 +149,7 @@ namespace RsLib {
         }
 
         public class OverlayScreenWrap {
+            public EventReference techViewSoundPath;
             public Canvas powerLabelParent;
             public LocText powerLabelPrefab;
             public BatteryUI batUIPrefab;
@@ -163,7 +165,7 @@ namespace RsLib {
             public Color32 circuitStrainingColour;
             public Color32 circuitOverloadingColour;
             public GameObject harvestableNotificationPrefab;
-            public GameObject diseaseOverlayPrefab;
+            //public GameObject diseaseOverlayPrefab;
             public GameObject suitOverlayPrefab;
             public TextStyleSetting TooltipHeader;
             public TextStyleSetting TooltipDescription;
